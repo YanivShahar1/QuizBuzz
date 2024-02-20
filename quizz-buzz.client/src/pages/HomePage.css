@@ -1,0 +1,47 @@
+/* HomePage.css */
+
+.homepage-container {
+    display: flex;
+    flex-direction: column; /* Adjust if needed */
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    padding: 2rem; /* Adjust padding according to your preference */
+    background-color: #b6ff00;
+
+
+}
+
+.enter-quiz-section {
+    flex-direction: column; /* Adjust if needed */
+    margin-bottom: 1rem;
+
+}
+
+.enter-quiz-input {
+    margin-right: 10rem;
+    margin-left: 10rem;
+    margin-bottom: 0.5rem;
+}
+
+
+.btn-enter-quiz {
+    font-size: 2rem;
+    background-color: #00ff21;
+    
+}
+
+.create-quiz-section {
+    flex-direction: column; /* Adjust if needed */
+    margin-bottom: 1rem;
+}
+
+.btn-create-quiz {
+    font-size: 2rem;
+    background-color: #00ff21;
+}
+
+.text-muted {
+    font-size: 0.9rem;
+    color: #555;
+}
