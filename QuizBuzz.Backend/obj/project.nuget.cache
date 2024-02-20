@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "vK+8gsgV7HAKoIAv7f6F5B5pG44bNXVqYupAPVhjF7BXwp1fUXZetdTdfZysKXig1L9cfjlMWTspW0sgls6adA==",
+  "dgSpecHash": "kvZ41ijfMt2aGQa+aDhBJKxbjGky1yPZbPFOw62ylmw6sXGi9C2Vb+zAoRkt/XywTimA/1T5scJAKrwu4GfRUQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Yaniv\\Desktop\\quiz-buzz.Backend\\QuizBuzz.Backend\\QuizBuzz.Backend.csproj",
+  "projectFilePath": "C:\\Users\\Yaniv\\Desktop\\QuizBuzz git\\QuizBuzz\\QuizBuzz.Backend\\QuizBuzz.Backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Yaniv\\.nuget\\packages\\awssdk.core\\3.7.302.12\\awssdk.core.3.7.302.12.nupkg.sha512",
     "C:\\Users\\Yaniv\\.nuget\\packages\\awssdk.dynamodbv2\\3.7.301.13\\awssdk.dynamodbv2.3.7.301.13.nupkg.sha512",

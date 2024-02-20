@@ -37,7 +37,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/Chat");
+app.MapHub<ChatHub>("/chat");
+app.MapHub<QuizHub>("/quizHub");
+
 app.UseCors("reactApp");
 
 app.Run();

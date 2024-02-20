@@ -40,3 +40,14 @@ C:\Users\Yaniv\Desktop\quiz-buzz.Backend\QuizBuzz.Backend\obj\Debug\net8.0\refin
 C:\Users\Yaniv\Desktop\quiz-buzz.Backend\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.pdb
 C:\Users\Yaniv\Desktop\quiz-buzz.Backend\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.genruntimeconfig.cache
 C:\Users\Yaniv\Desktop\quiz-buzz.Backend\QuizBuzz.Backend\obj\Debug\net8.0\ref\QuizBuzz.Backend.dll
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.csproj.AssemblyReference.cache
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.AssemblyInfoInputs.cache
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.AssemblyInfo.cs
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.csproj.CoreCompileInputs.cache
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.sourcelink.json
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.dll
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\refint\QuizBuzz.Backend.dll
+C:\Users\Yaniv\Desktop\QuizBuzz git\QuizBuzz\QuizBuzz.Backend\obj\Debug\net8.0\QuizBuzz.Backend.pdb

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QuizBuzz.Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5d1c07f09db4af6f08b94994fdd4208357b88710")]
 [assembly: System.Reflection.AssemblyProductAttribute("QuizBuzz.Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QuizBuzz.Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
