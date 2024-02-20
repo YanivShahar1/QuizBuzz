@@ -4,8 +4,7 @@ import AuthService from '../../services/AuthService';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css'; // Import CSS file
-import PasswordInput from '../../components/PasswordInput';
-
+import PasswordInput from '../../components/PasswordInput/PasswordInput';
 
 const Login = () => {
     const navigate = useNavigate();

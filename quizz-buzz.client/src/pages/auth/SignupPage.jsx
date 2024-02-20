@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import AuthService from '../../services/AuthService';
 import './SignupPage.css'; 
 import { useNavigate } from 'react-router-dom';
-import PasswordInput from '../../components/PasswordInput';
+import PasswordInput from '../../components/PasswordInput/PasswordInput';
 
 const SignupPage = () => {
     const navigate = useNavigate();
