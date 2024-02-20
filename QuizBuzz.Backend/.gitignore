@@ -1,0 +1,50 @@
+# Ignore Visual Studio files
+.vs/
+
+# Ignore bin and obj directories
+bin/
+obj/
+
+# Ignore user-specific files and directories
+*.user
+*.suo
+*.cache
+*.vspscc
+*_i.c
+*_p.c
+*.pidb
+*.log
+*.sln.docstates
+
+# Ignore NuGet package directory
+packages/
+
+# Ignore build artifacts and log files
+*.dll
+*.exe
+*.pdb
+*.log
+*.csv
+
+# Ignore ReSharper files
+_ReSharper.*
+
+# Ignore Rider files
+.idea/
+
+# Ignore Visual Studio Code files
+.vscode/
+
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore macOS file system metadata
+.DS_Store
+
+# Ignore Windows Thumbs.db files
+Thumbs.db
+
+# Ignore any other temporary or generated files
+*.tmp
+*.bak
+*.cache
