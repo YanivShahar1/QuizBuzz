@@ -1,0 +1,31 @@
+/* Reset default margin and padding */
+.body, h1, h2, h3, p, ul, ol {
+    margin: 10px;
+    padding: 10px;
+    height: 100%;
+    background-color:#ff0000;
+}
+
+/* Set a default font family and size */
+.body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    height: 100%;
+    background-color: #ff0000;
+}
+
+
+/* Main styles */
+.main {
+    display: flex;
+}
+
+
+/* Content area styles */
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+
