@@ -1,0 +1,11 @@
+/* Apply styles to the footer */
+.footer {
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f5f5f5; /* Set your desired background color */
+    text-align: center;
+    padding: 60px 60px; /* Adjust padding as needed */
+}
