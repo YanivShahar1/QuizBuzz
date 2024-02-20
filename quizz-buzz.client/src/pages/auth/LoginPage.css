@@ -1,0 +1,84 @@
+/* LoginPage.css */
+
+/* Container for the login page */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+    /* Title styling */
+    .login-container h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 24px;
+        text-align: center;
+    }
+
+/* Form styling */
+.login-form {
+    margin-bottom: 20px;
+}
+
+    /* Label styling */
+    .login-form label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    /* Input field styling */
+    .login-form input[type="text"],
+    .login-form input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+    /* Checkbox styling */
+    .login-form input[type="checkbox"] {
+        margin-right: 5px;
+    }
+
+/* Error message styling */
+.error-msg {
+    color: red;
+    margin-top: 10px;
+}
+
+/* Login button styling */
+.login-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+    .login-form button:hover {
+        background-color: #0056b3;
+    }
+
+/* Link styling */
+.login-form p {
+    margin-top: 15px;
+    text-align: center;
+}
+
+    .login-form p a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+        .login-form p a:hover {
+            text-decoration: underline;
+        }
