@@ -50,9 +50,11 @@ const AuthService = {
         if (cognitoUser) {
             cognitoUser.signOut();
             AuthService.triggerLoginStatusChange();
-            // Remove the username from session storage upon logout
-            sessionStorage.removeItem('username');
+           
         }
+
+         // Remove the username from session storage upon logout
+        sessionStorage.removeItem('username');
     },
     
     isAuthenticated: () => {
@@ -98,9 +100,11 @@ const AuthService = {
     },
 
     getSessionUsername: () => {
-        console.log(`getSesssionUsername username = ${sessionStorage.getItem('username') }`)
-        return sessionStorage.getItem('username');
+        const username = sessionStorage.getItem('username');
+        console.log(`getSessionUsername username = ${username}`);
+        return username ? username.toLowerCase() : null; // Return lowercase username or an empty string if it's null or undefined
     },
+    
 
     //getCurrentLogedInUserName: () => {
     //    const cognitoUser = userPool.getCurrentUser();
