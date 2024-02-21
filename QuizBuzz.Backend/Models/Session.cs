@@ -9,7 +9,6 @@ namespace QuizBuzz.Backend.Models
     {
         [DynamoDBHashKey]
         public string SessionID { get; set; } = string.Empty;
-
         public string AssociatedQuizID { get; set; } = string.Empty;
         public string SessionCode { get; set; } = string.Empty;
         public DateTime StartedAt { get; set; } = DateTime.UtcNow;
