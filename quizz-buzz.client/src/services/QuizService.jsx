@@ -3,6 +3,7 @@ const QuizService = {
     backendUrl : "https://localhost:7141/api/quiz/",
     submitQuiz: async (quizData) => {
         try {
+            console.log(`in submit quiz`);
             const response = await fetch(QuizService.backendUrl, {
                 method: 'POST',
                 headers: {
@@ -17,6 +18,7 @@ const QuizService = {
                 console.log("createdQuiz: ", createdQuiz.quizID)
                 return createdQuiz.quizID;
             } else {
+
                 const rawResponse = await response.text();
                 throw new Error(`Failed to submit quiz. Raw Response: ${rawResponse}`);
             }
@@ -40,8 +42,9 @@ const QuizService = {
                 // Handle the "Not Found" scenario
                 return null;
             }
-
-            if (!response.ok) {
+            
+            //204 - NoContent-> successfull delete
+            if (!response.ok && !response.status === 204) {
                 const errorMessage = `Error  delete quiz details: ${response.statusText}`;
                 throw new Error(errorMessage);
             }

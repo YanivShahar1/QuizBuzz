@@ -4,12 +4,13 @@ import QuizService from '../../services/QuizService';
 import { faTrashAlt, faEdit, faEye, faAngleDown, faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import { formatDate } from '../../utils/dateUtils';
 import CreateQuizButton from '../../components/Quiz/Buttons/CreateQuizButton';
-import QuizSignalRService from '../../services/signalR/QuizSignalRService';
 
 const QuizzesSection = ({ userName }) => {
+    console.log("in QuizzesSection  1");
     const [isLoading, setIsLoading] = useState(true);
     const [quizzes, setQuizzes] = useState([]);
     const [isCollapsed, setIsCollapsed] = useState(false);
+    console.log("in QuizzesSection  2");
 
     const toggleCollapse = () => {
         setIsCollapsed(!isCollapsed);
@@ -31,6 +32,7 @@ const QuizzesSection = ({ userName }) => {
         fetchUserQuizzes();
 
     }, [userName]);
+    console.log("in QuizzesSection  3");
 
     const handleDeleteQuiz = async (quizId) => {
         try {

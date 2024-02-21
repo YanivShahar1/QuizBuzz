@@ -77,6 +77,7 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
+                Debug.WriteLine($"CreateQuizAsync , newQuiz ,: {newQuiz}");
 
                 string quizId = await _quizService.SaveQuizAsync(newQuiz);
                 _logger.LogInformation($"Quiz created with ID: {quizId}");
@@ -96,6 +97,8 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
+                Debug.WriteLine($"DeleteQuizAsync , quizId ,: {quizId}");
+
                 // Call the service to delete the quiz
                 await _quizService.DeleteQuizAsync(quizId);
 
@@ -117,24 +120,34 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
+                Debug.WriteLine($"FGetQuizzesByHostUserIDAsync , username ,: {userName}");
+
                 // Call the service to get quizzes by user ID
                 var quizzes = await _quizService.GetQuizzesByHostUserIdAsync(userName);
+                Debug.WriteLine($"Fetched all quizzes");
 
                 if (quizzes == null || !quizzes.Any())
                 {
+                    Debug.WriteLine($"No quizzes for user {userName}");
+
                     // Return 404 Not Found if no quizzes found for the user
                     return NotFound($"No quizzes found for user with userName: {userName}");
                 }
+                Debug.WriteLine($"found quizzes : {quizzes } for user {userName}");
 
                 return Ok(quizzes);
             }
             catch (ArgumentException ex)
             {
+                Debug.WriteLine($"ArgumentException error {ex.Message}");
+
                 // Return 400 Bad Request for invalid user ID
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"Exception error {ex.Message}");
+
                 // Return 500 Internal Server Error for other exceptions
                 _logger.LogError(ex, $"Error fetching quizzes for user with ID {userName}: {ex.Message}");
                 return StatusCode(500, "Internal server error");

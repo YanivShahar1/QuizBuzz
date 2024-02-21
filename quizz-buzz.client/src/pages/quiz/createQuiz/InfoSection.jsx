@@ -1,60 +1,80 @@
-import React from 'react';
-import { Form, Row, Col } from 'react-bootstrap';
-import Select from 'react-select';
+import React, { useState } from 'react';
+import { Form, Col, Row } from 'react-bootstrap';
 
-const InfoSection = ({ quizInfo, handleQuizInfoChange, categories }) => {
+const InfoSection = ({ info, onInfoChange, categories }) => {
+  const [searchTerm, setSearchTerm] = useState('');
 
-    return (
-        <Form>
-            <Form.Group as={Row} controlId="formQuizTitle">
-                <Form.Label column sm="2">
-                    Title:
-                </Form.Label>
-                <Col sm="10">
-                    <Form.Control
-                        type="text"
-                        placeholder="Enter quiz title"
-                        name="title"
-                        value={quizInfo.title}
-                        onChange={(e) => handleQuizInfoChange('title', e.target.value)}
-                    />
-                </Col>
-            </Form.Group>
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
-            {/* Autocomplete Input for Category */}
-            <Form.Group controlId="formQuizCategory">
-                <Form.Label>Category:</Form.Label>
+  const filteredCategories = categories.filter((category) =>
+    category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-                <Select
-                    options={categories}
-                    value={categories.find(option => option.value === quizInfo.category)} // Find the matching option in the list
-                    name="category"
-                    onChange={(selectedOption) => handleQuizInfoChange('category', selectedOption.value)}                    isSearchable
-                    placeholder="Select or type to search..."
-                />
-            </Form.Group>
+  return (
+    <Form>
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formTitle">
+          <Form.Label>Title</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter title"
+            maxLength={50}
+            value={info.title}
+            onChange={(e) => onInfoChange({ ...info, title: e.target.value })}
+          />
+        </Form.Group>
+      </Row>
 
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formCategory">
+          <Form.Label>Category</Form.Label>
+          <Form.Control
+            as="select"
+            value={info.category}
+            onChange={(e) => onInfoChange({ ...info, category: e.target.value })}
+          >
+            <option value="">Select category</option>
+            {filteredCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </Form.Control>
+        </Form.Group>
+      </Row>
 
-            <Form.Group as={Row} controlId="formQuizDescription">
-                <Form.Label column sm="2">
-                    Description:
-                </Form.Label>
-                <Col sm="10">
-                    <Form.Control
-                        as="textarea"
-                        placeholder="Enter quiz description"
-                        name="description"
-                        value={quizInfo.description}
-                        onChange={(e) => handleQuizInfoChange('description', e.target.value)}
-                    />
-                </Col>
-            </Form.Group>
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formDescription">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            placeholder="Enter description"
+            maxLength={200} // Example max length, adjust as needed
+            value={info.description}
+            onChange={(e) => onInfoChange({ ...info, description: e.target.value })}
+          />
+        </Form.Group>
+      </Row>
 
-        </Form>
-    )
-}
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formPublic">
+          <Form.Check
+            type="checkbox"
+            label={
+              <>
+                Public <span className="text-info">(?)</span>
+              </>
+            }
+            checked={info.isPublic}
+            onChange={(e) => onInfoChange({ ...info, isPublic: e.target.checked })}
+          />
+        </Form.Group>
+      </Row>
+    </Form>
+  );
+};
 
 export default InfoSection;
-
-
-

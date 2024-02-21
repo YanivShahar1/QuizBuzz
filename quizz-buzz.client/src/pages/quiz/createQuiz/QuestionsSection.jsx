@@ -5,7 +5,7 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const QuestionsSection = ({ questions, setQuestions }) => {
-
+    console.log("in questionsSection 1");
     const toggleMultipleAnswers = (questionIndex) => {
         const updatedQuestions = [...questions];
         updatedQuestions[questionIndex].multipleAnswers = !updatedQuestions[questionIndex].multipleAnswers;
@@ -84,6 +84,7 @@ const QuestionsSection = ({ questions, setQuestions }) => {
             return updatedQuestions;
         });
     };
+    console.log("in questionsSection 2");
 
     return (
         <div>

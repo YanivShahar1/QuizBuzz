@@ -9,16 +9,37 @@ import { useNavigate } from 'react-router-dom';
 import AuthService from '../../../services/AuthService';    
 
 const CreateQuizPage = () => {
+    console.log(`in CreateQuizPage : 1`);
     const navigate = useNavigate();
-
+    const [quizInfoCollapsed, setQuizInfoCollapsed] = useState(true);
+    const [questionsCollapsed, setQuestionsCollapsed] = useState(true);
     const [ loading, setLoading ] = useState(false);
     const [error, setError] = useState(null);
+    console.log(`in CreateQuizPage : 2`);
+
+    const [quizInfo, setQuizInfo] = useState({
+        title: '',
+        category: '',
+        description: '',
+        isPublic: false,
+      });
+    
+    const handleInfoChange = (newInfo) => {
+        setQuizInfo(newInfo);
+    };
+    // const [categories, setCategories] = useState([]);
+    const mockCategories = ['General Knowledge', 'Science', 'History', 'Geography', 'Technology', 'Sports', 'Music', 'Movies', 'Literature', 'Mathematics'];
+    console.log(`in CreateQuizPage : 3`);
+
+    // useEffect(() => {
+    //     setCategories(mockCategories.map(category => ({ value: category, label: category })));
+    // }, [mockCategories]);
 
     const handleQuizSubmission = async () => {
         try {
             setLoading(true);
             const quizData = {
-                hostUserId: AuthService.getCurrentLogedInUserName(),
+                hostUserId: AuthService.getSessionUsername(),
                 title: quizInfo.title,
                 category: quizInfo.category,
                 description: quizInfo.description,
@@ -31,7 +52,7 @@ const CreateQuizPage = () => {
             };
 
             const romeQuizData = {
-                hostUserId: AuthService.getCurrentLogedInUserName(),
+                hostUserId: AuthService.getSessionUsername(),
                 title: "Rome Through the Ages Quiz",
                 category: "History",
                 description: "Test your knowledge of Rome's rich history and legacy",
@@ -116,50 +137,16 @@ const CreateQuizPage = () => {
         }
     };
 
-    const [quizInfoCollapsed, setQuizInfoCollapsed] = useState(true);
-    const [questionsCollapsed, setQuestionsCollapsed] = useState(true);
-
-    const [quizInfo, setQuizInfo] = useState({
-        title: '',
-        category: '',
-        description: '',
-    });
-
-    const [collapsedQuestions, setCollapsedQuestions] = useState([]);
-
-
-    const [categories, setCategories] = useState([]);
-    const mockCategories = ['General Knowledge', 'Science', 'History', 'Geography', 'Technology', 'Sports', 'Music', 'Movies', 'Literature', 'Mathematics'];
-
-    useEffect(() => {
-        setCategories(mockCategories.map(category => ({ value: category, label: category })));
-    }, []);
-
     const [questions, setQuestions] = useState([]);
 
-
-    const handleQuizInfoChange = (field, value) => {
-        console.log('Before state update:', quizInfo);
-        console.log('value', value);
-
-        setQuizInfo(prevState => {
-            const nextState = {
-                ...prevState,
-                [field]: typeof value === 'object' ? value.value : value,
-            };
-
-            console.log(`Updating ${field} with value:`, nextState[field]);
-            console.log('After state update:', nextState);
-
-            return nextState;
-        });
-    };
+    console.log(`in CreateQuizPage : 4`);
 
     const canSubmit = () => {
         return 1;
         //return questions.length > 0 && questions.every(question => question.correctAnswers.length > 0 && question.options.length >= 2);
     };
 
+    console.log(`in CreateQuizPage : 5`);
 
     return (
         <div className="container mt-5">
@@ -187,9 +174,9 @@ const CreateQuizPage = () => {
                     >
                         <div className="accordion-body">
                             <InfoSection
-                                quizInfo={quizInfo}
-                                handleQuizInfoChange={handleQuizInfoChange}
-                                categories={categories}
+                                info={quizInfo}
+                                onInfoChange={handleInfoChange}
+                                categories={mockCategories}
                             />
                         </div>
                     </div>
