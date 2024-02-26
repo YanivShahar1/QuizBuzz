@@ -91,6 +91,10 @@ const QuizService = {
 
     fetchUserQuizzes: async (userName) => {
         try {
+            // Validate userName
+            if (!userName || typeof userName !== 'string') {
+                throw new Error('Invalid username');
+            }
             // Convert username to lowercase because Cognito saves all users with lowercase
             const lowercaseUserName = userName.toLowerCase();
             const response = await fetch(`${QuizService.backendUrl}all/${lowercaseUserName}`, {
