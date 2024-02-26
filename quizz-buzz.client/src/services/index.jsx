@@ -1,8 +1,10 @@
-import * as quizService from './QuizService';
-import * as authService from './AuthService';
+import * as QuizService from './QuizService';
+import * as AuthService from './AuthService';
+import * as SessionService from './SessionService';
 
 export default {
-    quizService,
-    authService,
+    QuizService,
+    AuthService,
+    SessionService,
 };
 
