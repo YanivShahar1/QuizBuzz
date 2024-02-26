@@ -1,41 +1,46 @@
-import React, { useState } from 'react';
-import { Button, Col, Row, Form } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import SessionService from '../services/SessionService';
 
-const WaitingRoom = ({ joinChatRoom }) => {
-    const [userName, setUserName] = useState('');
-    const [chatRoom, setChatRoom] = useState('');
+const WaitingRoom = () => {
+    const { sessionId } = useParams();
+    const [students, setStudents] = useState([]);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        joinChatRoom(userName, chatRoom);
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                const sessionStudents = await SessionService.getSessionStudents(sessionId);
+                setStudents(sessionStudents);
+            } catch (error) {
+                console.error('Error fetching session students:', error);
+            }
+        };
+
+        fetchStudents();
+    }, [sessionId]);
+
+    const handleStartSession = async () => {
+        try {
+            await SessionService.startSession(sessionId);
+            // Redirect to the session page or any other page as needed
+            // navigate(`/session/${sessionId}`);
+        } catch (error) {
+            console.error('Error starting session:', error);
+        }
     };
 
     return (
-        <Form onSubmit={handleSubmit}>
-            <Row className="px-5 py-5">
-                <Col>
-                    <Form.Group>
-                        <Form.Control
-                            placeholder="Username"
-                            value={userName}
-                            onChange={(e) => setUserName(e.target.value)}
-                        />
-
-                        <Form.Control
-                            placeholder="Chat Room"
-                            value={chatRoom}
-                            onChange={(e) => setChatRoom(e.target.value)}
-                        />
-                    </Form.Group>
-                </Col>
-                <Col sm={12}>
-                    <hr />
-                    <Button variant="success" type="submit">
-                        Join
-                    </Button>
-                </Col>
-            </Row>
-        </Form>
+        <div>
+            <h2>Waiting Room</h2>
+            <h3>Session ID: {sessionId}</h3>
+            <h4>Students Joined:</h4>
+            <ul>
+                {students.map((student, index) => (
+                    <li key={index}>{student.username}</li>
+                ))}
+            </ul>
+            <button onClick={handleStartSession}>Start Session</button>
+        </div>
     );
 };
 

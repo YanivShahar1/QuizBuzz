@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import QuizzesSection from './QuizzesSection';
+import SessionStatisticsSection from './SessionStatisticsSection';
 import AuthService from '../../services/AuthService';
 import './DashboardPage.css';
 import React, { useState, useEffect } from 'react';
+
 
 const DashboardPage = () => {
     const [userName, setUserName] = useState(AuthService.getSessionUsername()); // Initialize userName with getSessionUsername
@@ -33,6 +35,7 @@ const DashboardPage = () => {
                 <div>
                     <h1>Welcome, {userName}!</h1>
                     <QuizzesSection userName={userName} />
+                    <SessionStatisticsSection userName={userName} />
                     {/* Include other sections here */}
                 </div>
             ) : (

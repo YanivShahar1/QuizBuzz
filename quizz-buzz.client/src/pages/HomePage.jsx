@@ -7,8 +7,7 @@ import { faPlusCircle, faPlay } from '@fortawesome/free-solid-svg-icons';
 import AuthService from '../services/AuthService';
 import QuizService from '../services/QuizService';
 import './HomePage.css';  // Import the CSS file
-import CreateQuizButton from '../components/Quiz/Buttons/CreateQuizButton';
-
+import CreateSessionButton from '../components/Session/Buttons/CreateSessionButton';
 
 const HomePage = () => {
     const [username, setUsername] = useState(AuthService.getSessionUsername());
@@ -89,13 +88,9 @@ const HomePage = () => {
             </div>
             <div className="create-quiz-section">
                 {username ? (
-                    <CreateQuizButton/>
+                    <CreateSessionButton/>
                 ) : (
                     <div>
-                        <button className="btn-create-quiz" disabled>
-                            <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
-                            Create Quiz
-                        </button>
                         <p className="text-muted">
                             Only logged-in users can create quizzes.
                             <Link to="/login"> Log In</Link> or <Link to="/signup">Sign Up</Link>

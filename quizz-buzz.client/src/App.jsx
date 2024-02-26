@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import QuizHistory from './components/Quiz/QuizHistory';
-import CreateQuizPage from './pages/quiz/createQuiz/CreateQuizPage';
 import QuizPage from './pages/quiz/QuizPage';
 import React, { useState } from 'react';
 
@@ -13,8 +12,9 @@ import SignupPage from './pages/auth/SignupPage';
 import QuizResultsPage from './pages/quiz/QuizResultsPage';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import CreateQuizPage from './pages/quiz/createQuiz/CreateQuizPage';
+import CreateSessionPage from './pages/session/createSession/CreateSessionPage';
 import { Button, Col, Row , Container} from 'react-bootstrap';
-
 
 //css 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -55,8 +55,10 @@ function App() {
             <Routes>
                <Route path="/" element={<HomePage />} />
                <Route path="/create-quiz" element={<CreateQuizPage />} />
+               <Route path="/create-session" element={<CreateSessionPage />} />
                <Route path="/quiz/:quizId" element={<QuizPage />} />
                <Route path="/quiz-results/:quizId" element={<QuizResultsPage />} />
+               <Route path="/waiting-room/:sessionId" element={<WaitingRoom />} />
                {/*<Route path="/user-profile" element={<UserProfilePage />} />*/}
                {/*<Route path="/settings" element={<SettingsPage />} />*/}
                <Route path="/dashboard" element={<DashboardPage />} />
