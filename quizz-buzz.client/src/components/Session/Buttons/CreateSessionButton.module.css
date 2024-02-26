@@ -1,0 +1,19 @@
+/* CreateQuizButton.module.css */
+
+.button {
+    /* Button styles */
+    background-color: #007bff; /* Primary color */
+    color: white;
+    padding: 12px 24px; /* Increased padding for better button size */
+    border: none;
+    border-radius: 5px;
+    font-size: 22px; /* Increased font size */
+    font-weight: bold; /* Bold font weight */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+    .button:hover {
+        background-color: #08055f; /* Darker shade of primary color on hover */
+    }
