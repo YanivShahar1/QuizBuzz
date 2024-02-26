@@ -143,5 +143,44 @@ namespace QuizBuzz.Backend.Services
                 return new List<string>();
             }
         }
+
+        public async Task AddUserToSessionAsync(string sessionId, string userId)
+        {
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                throw new ArgumentException("Session ID cannot be null or empty.", nameof(sessionId));
+            }
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
+            }
+
+            Debug.WriteLine($"Adding user with ID {userId} to session with ID: {sessionId}");
+
+            // Fetch the session from the database
+            Session session = await _dynamoDBDataManager.GetItemAsync<Session>(sessionId);
+
+            if (session != null)
+            {
+                // Add the user to the session
+                session.Participants.Add(userId);
+
+                // Update the session in the database
+                await _dynamoDBDataManager.SaveItemAsync(session);
+
+                // Invalidate the cache to reflect the updated session
+                string cacheKey = $"Session_{sessionId}";
+                _cache.Set(cacheKey, session, new MemoryCacheEntryOptions());
+
+                Debug.WriteLine($"User with ID {userId} added to session with ID: {sessionId}");
+                _logger.LogInformation($"User with ID {userId} added to session with ID: {sessionId}");
+            }
+            else
+            {
+                // Session not found
+                throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
+            }
+        }
     }
 }

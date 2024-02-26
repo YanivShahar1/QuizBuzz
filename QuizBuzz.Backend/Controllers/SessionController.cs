@@ -5,6 +5,7 @@ using QuizBuzz.Backend.Models;
 using QuizBuzz.Backend.Services;
 using Microsoft.Extensions.Logging;
 using QuizBuzz.Backend.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace QuizBuzz.Backend.Controllers
 {
@@ -14,11 +15,13 @@ namespace QuizBuzz.Backend.Controllers
     {
         private readonly ISessionService _sessionService;
         private readonly ILogger<SessionController> _logger;
+        private readonly IHubContext<SessionHub> _sessionHub;
 
-        public SessionController(ISessionService sessionService, ILogger<SessionController> logger)
+        public SessionController(ISessionService sessionService, ILogger<SessionController> logger, IHubContext<SessionHub> sessionHub)
         {
             _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _sessionHub = sessionHub ?? throw new ArgumentNullException(nameof(sessionHub));
         }
 
         [HttpPost]
@@ -95,7 +98,7 @@ namespace QuizBuzz.Backend.Controllers
             try
             {
                 // Validate the session and user
-                Session session = await _sessionService.GetSessionByIdAsync(sessionId);
+                Session? session = await _sessionService.GetSessionByIdAsync(sessionId);
                 if (session == null)
                 {
                     return NotFound("Session not found");
