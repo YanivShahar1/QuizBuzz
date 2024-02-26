@@ -12,8 +12,12 @@ namespace QuizBuzz.Backend.Models
         public string AssociatedQuizID { get; set; } = string.Empty;
         public string SessionCode { get; set; } = string.Empty;
         public DateTime StartedAt { get; set; } = DateTime.UtcNow;
-        public DateTime EndedAt { get; set; } = DateTime.MinValue; //  default value
-    }
+        public DateTime EndedAt { get; set; } = DateTime.MinValue;
 
+        public List<string> Participants { get; set; } = new List<string>();
+        public int MaxTimePerQuestion { get; set; }
+
+        public int MaxParticipants { get; set; }
+    }
 }
 

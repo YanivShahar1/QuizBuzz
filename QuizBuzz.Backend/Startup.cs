@@ -50,6 +50,7 @@ namespace QuizBuzz.Backend
             services.AddSingleton<IDynamoDBDataManager, DynamoDBDataManager>();
             services.AddSingleton<IMemoryCache, MemoryCache>();
             services.AddSingleton<IQuizService, QuizService>();
+            services.AddSingleton<ISessionService, SessionService>();
 
             services.AddControllers();
             services.AddSignalR();
@@ -74,7 +75,7 @@ namespace QuizBuzz.Backend
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<QuizHub>("/quizHub");
-                endpoints.MapHub<LeaderboardHub>("/leaderboardHub");
+                endpoints.MapHub<SessionHub>("/sessionHub");
                 endpoints.MapFallbackToFile("/index.html");
             });
         }
