@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace QuizBuzz.Backend.Hubs
 {
-    public class SessionHub : Hub
+    public class SessionHub : Hub, ISessionHub
     {
         public async Task SendSessionCreatedNotification(string sessionId, string username)
         {

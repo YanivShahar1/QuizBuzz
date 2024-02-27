@@ -182,5 +182,24 @@ namespace QuizBuzz.Backend.Services
                 throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
             }
         }
+
+
+        public async Task<IEnumerable<Session>> GetSessionsByUserIdAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
+            }
+
+            Debug.WriteLine($"Getting sessions for user with ID: {userId}");
+
+            // Fetch all sessions from the database
+            IEnumerable<Session> allSessions = await _dynamoDBDataManager.GetAllItemsAsync<Session>();
+
+            // Filter sessions based on the user ID
+            var sessionsForUser = allSessions.Where(session => session.Participants.Contains(userId));
+
+            return sessionsForUser;
+        }
     }
 }

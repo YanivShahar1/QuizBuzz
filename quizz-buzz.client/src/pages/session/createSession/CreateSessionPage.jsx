@@ -60,9 +60,10 @@ const CreateSessionPage = () => {
             // Create session object
             const newSession = {
                 name: sessionName,
-                quizId: selectedQuiz.quizID,
+                associatedQuizID: selectedQuiz.quizID,
                 maxTimePerQuestion: parseInt(maxTimePerQuestion),
                 maxParticipants: parseInt(maxParticipants),
+                hostUserId: userName,
                 // Add other session properties as needed
             };
 

@@ -14,14 +14,14 @@ namespace QuizBuzz.Backend.Controllers
     public class SessionController : ControllerBase
     {
         private readonly ISessionService _sessionService;
+        private readonly ISessionHub _sessionHub;
         private readonly ILogger<SessionController> _logger;
-        private readonly IHubContext<SessionHub> _sessionHub;
 
-        public SessionController(ISessionService sessionService, ILogger<SessionController> logger, IHubContext<SessionHub> sessionHub)
+        public SessionController(ISessionService sessionService, ILogger<SessionController> logger, ISessionHub sessionHub)
         {
             _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _sessionHub = sessionHub ?? throw new ArgumentNullException(nameof(sessionHub));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost]
@@ -118,6 +118,26 @@ namespace QuizBuzz.Backend.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("all/{userId}")]
+        public async Task<IActionResult> GetSessionsByUserId(string userId)
+        {
+            try
+            {
+                var sessions = await _sessionService.GetSessionsByUserIdAsync(userId);
+                if (sessions == null || !sessions.Any())
+                {
+                    return NotFound("No sessions found for the user");
+                }
+                return Ok(sessions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error fetching sessions for user {userId}: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
 
 
 
