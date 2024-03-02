@@ -1,0 +1,54 @@
+/* WaitingRoom.css */
+
+.waiting-room {
+    margin: 20px;
+    background-color:#45a049;
+
+  }
+  
+  .session-info {
+    background-color: aqua;
+
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .students-list {
+    background-color: blue;
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .students-list-item {
+    margin-bottom: 5px;
+  }
+
+  .session-label {
+    display: inline-block;
+    margin-right: 10px;
+  }
+
+  .copy-icon {
+    cursor: pointer;
+    /* Add any additional styles for the copy icon */
+}
+
+  .start-session-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .start-session-btn:hover {
+    background-color: #45a049;
+  }
+
+  
+  
