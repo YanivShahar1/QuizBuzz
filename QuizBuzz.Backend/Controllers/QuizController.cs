@@ -120,7 +120,7 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
-                Debug.WriteLine($"FGetQuizzesByHostUserIDAsync , username ,: {userName}");
+                Debug.WriteLine($"Controller GetQuizzesByHostUserIDAsync , username ,: {userName}");
 
                 // Call the service to get quizzes by user ID
                 var quizzes = await _quizService.GetQuizzesByHostUserIdAsync(userName);

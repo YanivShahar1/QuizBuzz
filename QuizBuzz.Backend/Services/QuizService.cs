@@ -117,7 +117,7 @@ namespace QuizBuzz.Backend.Services
                 throw new ArgumentException("Host user ID cannot be null or empty.", nameof(hostUserId));
             }
 
-            Debug.WriteLine($"Getting quizzes for host user with ID: {hostUserId}");
+            Debug.WriteLine($"Quiz service -> Getting quizzes for host user with ID: {hostUserId}");
 
             return await _dynamoDBDataManager.QueryItemsByIndexAsync<Quiz>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
         }
