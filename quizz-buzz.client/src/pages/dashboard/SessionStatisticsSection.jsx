@@ -9,7 +9,21 @@ const SessionStatisticsSection = ({ userName }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [sessions, setSessions] = useState([]);
     const [isCollapsed, setIsCollapsed] = useState(false);
-
+    useEffect(() => {
+        console.log('Sessions:');
+        sessions.forEach(session => {
+            console.log('Session ID:', session.sessionID);
+            console.log('Title:', session.title);
+            console.log('Date Created:', formatDate(session.createdAt));
+            console.log('Date Ended 1 :', formatDate(session.endedAt));
+            console.log('Date Ended 2 :', formatDate(new Date(session.endedAt)));
+            console.log('Date Started:', formatDate(session.startedAt));
+            console.log('Date min:', formatDate(new Date(0)));
+            console.log('Number of Participants:', session.participants.length);
+            console.log('-----------------------------');
+        });
+    }, [sessions]);
+    
     const toggleCollapse = () => {
         setIsCollapsed(!isCollapsed);
     };
@@ -21,6 +35,7 @@ const SessionStatisticsSection = ({ userName }) => {
                 console.log(`Fetching sessions for ${userName}...`);
                 const userSessions = await SessionService.fetchUserSessions(userName);
                 setSessions(userSessions);
+                
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error fetching sessions:', error);
@@ -73,9 +88,11 @@ const SessionStatisticsSection = ({ userName }) => {
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col" className="col-2">Title</th>
+                                            <th scope="col" className="col-2">Name</th>
                                             <th scope="col" className="col-2">Date Created</th>
-                                            <th scope="col" className="col-2">Number of Participants</th>
+                                            {sessions.some(session => session.startedAt !== Date.MinValue) && <th scope="col" className="col-2">Date Started</th>}
+                                            {sessions.some(session => session.endedAt !== Date.MinValue) && <th scope="col" className="col-2">Date Ended</th>}  
+                                            {sessions.some(session => session.participants.length) && <th scope="col" className="col-2">Number of Participants</th>}
                                             <th scope="col" className="col-2">Actions</th>
                                         </tr>
                                     </thead>
@@ -83,9 +100,11 @@ const SessionStatisticsSection = ({ userName }) => {
                                         {sessions.map((session, index) => (
                                             <tr key={session.sessionID}>
                                                 <th scope="row" className="col-1">{index + 1}</th>
-                                                <td className="col-1">{session.title}</td>
+                                                <td className="col-1">{session.name}</td>
                                                 <td className="col-1">{formatDate(session.createdAt)}</td>
-                                                <td className="col-1">{session.participants.length}</td>
+                                                {session.startedAt !== Date.MinValue && <td className="col-1">{formatDate(new Date(session.startedAt))}</td>}
+                                                {session.endedAt !== Date.MinValue && <td className="col-1">{formatDate(session.endedAt)}</td>}
+                                                {session.participants.length > 0 && <td className="col-1">{session.participants.length}</td>}
                                                 <td className="col-1">
                                                     <button onClick={() => handleDeleteSession(session.sessionID)} className="btn btn-danger mr-2">
                                                         <FontAwesomeIcon icon={faTrashAlt} title="Delete" />

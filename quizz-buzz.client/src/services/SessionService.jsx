@@ -1,6 +1,6 @@
 const SessionService = {
     backendUrl : "https://localhost:7141/api/session/",
-    createSession: async (sessionData) => {
+    submitSession: async (sessionData) => {
         try {
             const response = await fetch(SessionService.backendUrl, {
                 method: 'POST',
@@ -51,6 +51,34 @@ const SessionService = {
         }
     },
 
+    fetchSession: async (sessionId) => {
+        try {
+            const response = await fetch(`${SessionService.backendUrl}${sessionId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 404) {
+
+                console.log(`didnt found session with id ${sessionId}`);
+                return null; // Session not found
+            }
+
+            if (response.ok) {
+                const session = await response.json();
+                console.log("found session response is ok");
+                return session;
+            } else {
+                const errorMessage = `Failed to fetch session. Status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            throw new Error(`Error fetching session: ${error.message}`);
+        }
+    },
+
     fetchUserSessions: async (userName) => {
         try {
             const lowercaseUserName = userName.toLowerCase();
@@ -77,14 +105,43 @@ const SessionService = {
         }
     },
 
+    
+    joinSession: async (sessionId, userId) => {
+        try {
+            console.log(`user ${userId} want to join session ${sessionId}`);
+            const response = await fetch(`${SessionService.backendUrl}${sessionId}/join`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId }),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                return result;
+            } else if (response.status === 404) {
+                throw new Error("Session not found");
+            } else {
+                const errorMessage = `Failed to join session. Status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            throw new Error(`Error joining session: ${error.message}`);
+        }
+    },
+
+
     getSessionStudents: async (sessionId) => {
         try {
+            console.log(`getSessionStudents`);
             const response = await fetch(`${SessionService.backendUrl}${sessionId}/students`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
+            console.log(`responsestatus is : ${response.status}`);
 
             if (response.status === 404) {
                 return []; // No students found
