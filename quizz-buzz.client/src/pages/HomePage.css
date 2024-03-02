@@ -12,31 +12,31 @@
 
 }
 
-.enter-quiz-section {
+.enter-session-section {
     flex-direction: column; /* Adjust if needed */
     margin-bottom: 1rem;
 
 }
 
-.enter-quiz-input {
+.enter-session-input {
     margin-right: 10rem;
     margin-left: 10rem;
     margin-bottom: 0.5rem;
 }
 
 
-.btn-enter-quiz {
+.btn-enter-session {
     font-size: 2rem;
     background-color: #00ff21;
     
 }
 
-.create-quiz-section {
+.create-session-section {
     flex-direction: column; /* Adjust if needed */
     margin-bottom: 1rem;
 }
 
-.btn-create-quiz {
+.btn-create-session {
     font-size: 2rem;
     background-color: #00ff21;
 }

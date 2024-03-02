@@ -5,50 +5,50 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusCircle, faPlay } from '@fortawesome/free-solid-svg-icons';
 import AuthService from '../services/AuthService';
-import QuizService from '../services/QuizService';
 import './HomePage.css';  // Import the CSS file
 import CreateSessionButton from '../components/Session/Buttons/CreateSessionButton';
+import SessionService from '../services/SessionService';
 
 const HomePage = () => {
     const [username, setUsername] = useState(AuthService.getSessionUsername());
    
 
-    const [quizId, setQuizId] = useState('');
+    const [sessionId, setSessionId] = useState('');
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
 
-    const handleQuizIdChange = (event) => {
+    const handleSessionIdChange = (event) => {
         console.log(event.target.value);
 
-        setQuizId(event.target.value);
+        setSessionId(event.target.value);
         setErrorMessage(''); 
     };
 
-    const handleEnterQuizClick = async () => {
+    const handleEnterSessionClick = async () => {
         try {
-            console.log(`Checking if quiz with ID ${quizId} existssss...`);
+            console.log(`Checking if session with ID ${sessionId} existssss...`);
 
-            if (quizId.trim() === '') {
-                setErrorMessage('Quiz ID cannot be empty.');
+            if (sessionId.trim() === '') {
+                setErrorMessage('Session ID cannot be empty.');
                 return; 
             }
 
             // Use QuizService to check if the quiz exists
-            const quiz = await QuizService.fetchQuiz(quizId);
-            console.log("quiz:", quiz);
-            const exists = quiz != null;
+            const session = await SessionService.fetchSession(sessionId);
+            console.log("session:", session);
+            const exists = session != null;
 
             if (exists) {
                 // The quiz exists, navigate to it
-                console.log(`Navigating to quiz with ID ${quizId}`);
-                navigate(`/quiz/${quizId}`);
+                console.log(`Navigating to session with ID ${sessionId}`);
+                navigate(`/session/${sessionId}`);
             } else {
                 // The quiz does not exist
-                setErrorMessage(`Quiz with ID ${quizId} does not exist. Please enter a valid Quiz ID.`);
+                setErrorMessage(`Session with ID ${sessionId} does not exist. Please enter a valid Session ID.`);
             }
         } catch (error) {
-            console.error('Error in handleEnterQuizClick:', error);
-            setErrorMessage('Error checking quiz existence. Please try again.');
+            console.error('Error in handleEnterSessionClick:', error);
+            setErrorMessage('Error checking session existence. Please try again.');
         }
     };
 
@@ -69,30 +69,30 @@ const HomePage = () => {
 
     return (
         <div className="homepage-container">
-            <div className="enter-quiz-section">
-                <div className="enter-quiz-input">
+            <div className="enter-session-section">
+                <div className="enter-session-input">
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Enter Quiz ID"
-                        value={quizId}
-                        onChange={handleQuizIdChange}
+                        placeholder="Enter Session ID"
+                        value={sessionId}
+                        onChange={handleSessionIdChange}
                     />
                     {errorMessage && <p className="error-message">{errorMessage}</p>}
 
                 </div>
-                <button className="btn-enter-quiz" type="button" onClick={handleEnterQuizClick}>
+                <button className="btn-enter-session" type="button" onClick={handleEnterSessionClick}>
                     <FontAwesomeIcon icon={faPlay} className="mr-2" />
-                    Enter Quiz
+                    Enter Session
                 </button>
             </div>
-            <div className="create-quiz-section">
+            <div className="create-session-section">
                 {username ? (
                     <CreateSessionButton/>
                 ) : (
                     <div>
                         <p className="text-muted">
-                            Only logged-in users can create quizzes.
+                            Only logged-in users can create new session.
                             <Link to="/login"> Log In</Link> or <Link to="/signup">Sign Up</Link>
                         </p>
                     </div>

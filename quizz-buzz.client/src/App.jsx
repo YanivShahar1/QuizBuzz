@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
-import QuizHistory from './components/Quiz/QuizHistory';
 import QuizPage from './pages/quiz/QuizPage';
 import React, { useState } from 'react';
 
