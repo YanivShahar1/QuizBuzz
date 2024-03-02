@@ -14,7 +14,8 @@ namespace QuizBuzz.Backend.Models
         public string HostUserID { get; set; } = string.Empty;
         public string AssociatedQuizID { get; set; } = string.Empty;
         public string SessionCode { get; set; } = string.Empty;
-        public DateTime StartedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime StartedAt { get; set; } = DateTime.MinValue;
         public DateTime EndedAt { get; set; } = DateTime.MinValue;
 
         public List<string> Participants { get; set; } = new List<string>();

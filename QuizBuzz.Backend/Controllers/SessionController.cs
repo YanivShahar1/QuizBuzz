@@ -6,6 +6,7 @@ using QuizBuzz.Backend.Services;
 using Microsoft.Extensions.Logging;
 using QuizBuzz.Backend.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using System.Diagnostics;
 
 namespace QuizBuzz.Backend.Controllers
 {
@@ -29,11 +30,16 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
+                Debug.WriteLine("Creating session"); 
                 string sessionId = await _sessionService.CreateSessionAsync(newSession);
+                Debug.WriteLine($"sessionId: {sessionId}");
+
                 return CreatedAtAction(nameof(GetSessionById), new { sessionId = sessionId }, newSession);
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("error in Creating session");
+
                 _logger.LogError(ex, $"Error creating session: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
@@ -44,11 +50,17 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
+                Debug.WriteLine($"get session by sessionid : {sessionId}");
+
                 Session? session = await _sessionService.GetSessionByIdAsync(sessionId);
                 if (session == null)
                 {
+                    Debug.WriteLine($"no sessions foud for id : {sessionId}");
+
                     return NotFound();
                 }
+                Debug.WriteLine($"found session : {sessionId} with name : {session.Name}");
+                
                 return Ok(session);
             }
             catch (Exception ex)
@@ -78,11 +90,14 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
+                Debug.WriteLine($" get session participants:");
                 var participants = await _sessionService.GetSessionParticipantsAsync(sessionId);
                 if (participants == null)
                 {
+                    Debug.WriteLine("no participants yet!");
                     return NotFound();
                 }
+                Debug.WriteLine($"found {participants.Count()} participants ");
                 return Ok(participants);
             }
             catch (Exception ex)
@@ -98,17 +113,18 @@ namespace QuizBuzz.Backend.Controllers
             try
             {
                 // Validate the session and user
+                Debug.WriteLine($"user {userId} want to join session {sessionId}");
                 Session? session = await _sessionService.GetSessionByIdAsync(sessionId);
                 if (session == null)
                 {
+                    Debug.WriteLine($"didnt found any session with id {sessionId}");
                     return NotFound("Session not found");
                 }
-
+                Debug.WriteLine("found session, want to add user now ");
                 // Add user to session (update session object or add to participants list)
                 await _sessionService.AddUserToSessionAsync(sessionId, userId);
 
-                // Optionally, send a notification to other users
-                await _sessionHub.SendSessionUpdatedNotification(sessionId, userId);
+                await _sessionHub.SendUserJoinedNotification(sessionId, userId);
 
                 return Ok("User joined session successfully");
             }
@@ -122,12 +138,20 @@ namespace QuizBuzz.Backend.Controllers
         [HttpGet("all/{userId}")]
         public async Task<IActionResult> GetSessionsByUserId(string userId)
         {
+            Debug.WriteLine("GetSessionsByUserId:");
             try
             {
                 var sessions = await _sessionService.GetSessionsByUserIdAsync(userId);
                 if (sessions == null || !sessions.Any())
                 {
+                    Console.WriteLine("No sessions!:");
                     return NotFound("No sessions found for the user");
+                }
+                Console.WriteLine("Sessions:");
+                foreach (var session in sessions)
+                {
+                    Console.WriteLine($"Session ID: {session.SessionID}");
+                    // Add more properties if needed
                 }
                 return Ok(sessions);
             }

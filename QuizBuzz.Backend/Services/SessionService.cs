@@ -186,6 +186,8 @@ namespace QuizBuzz.Backend.Services
 
         public async Task<IEnumerable<Session>> GetSessionsByUserIdAsync(string userId)
         {
+            Debug.WriteLine($"1 service Getting sessions for user with ID: {userId}");
+
             if (string.IsNullOrEmpty(userId))
             {
                 throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
@@ -196,8 +198,10 @@ namespace QuizBuzz.Backend.Services
             // Fetch all sessions from the database
             IEnumerable<Session> allSessions = await _dynamoDBDataManager.GetAllItemsAsync<Session>();
 
+            Debug.WriteLine($"found {allSessions.Count()} sessions in general!");
             // Filter sessions based on the user ID
-            var sessionsForUser = allSessions.Where(session => session.Participants.Contains(userId));
+            var sessionsForUser = allSessions.Where(session => session.HostUserID == userId);
+            Debug.WriteLine($"found {sessionsForUser.Count()} sessions for {userId}!");
 
             return sessionsForUser;
         }
