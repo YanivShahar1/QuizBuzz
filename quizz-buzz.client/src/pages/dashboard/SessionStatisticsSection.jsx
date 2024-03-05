@@ -5,6 +5,7 @@ import SessionService from '../../services/SessionService';
 import { formatDate } from '../../utils/dateUtils';
 import CreateSessionButton from '../../components/Session/Buttons/CreateSessionButton';
 
+
 const SessionStatisticsSection = ({ userName }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [sessions, setSessions] = useState([]);
@@ -31,10 +32,18 @@ const SessionStatisticsSection = ({ userName }) => {
         setIsCollapsed(!isCollapsed);
     };
 
+
+    // Check if the session has started
+    const isSessionStarted = (session) => new Date(session.startedAt) < new Date();
+
+    // Check if the session has finished
+    const isSessionFinished = (session) => new Date(session.endedAt) < new Date();
+
     // Filter sessions into different categories
-    const finishedSessions = sessions.filter(session => session.endedAt !== null);
-    const notStartedSessions = sessions.filter(session => session.startedAt === null);
-    const runningSessions = sessions.filter(session => session.startedAt !== null && session.endedAt === null);
+    //TODO handle it better way
+    const finishedSessions = sessions.filter(session => isSessionFinished(session));
+    const notStartedSessions = sessions.filter(session => !isSessionStarted(session));
+    const runningSessions = sessions.filter(session => !isSessionFinished(session) && isSessionStarted(session));
 
     // Function to handle session deletion
     const handleDeleteSession = async (sessionId) => {
@@ -64,7 +73,10 @@ const SessionStatisticsSection = ({ userName }) => {
                 <FontAwesomeIcon icon={isCollapsed ? faAngleDown : faAngleUp} />
                 Sessions Statistics
             </h2>
-
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <div></div>
+                <CreateSessionButton />
+            </div>
             {/* Render tables if not collapsed */}
             {!isCollapsed && (
                 <div>
@@ -118,13 +130,39 @@ const SessionStatisticsSection = ({ userName }) => {
                     <div>
                         <h5>Not Started Sessions:</h5>
                         {notStartedSessions.length > 0 ? (
-                            <div>
-                                {/* Render table with Waiting Room link */}
+                            <div className="table-responsive">
+                                <table className="table table-striped">
+                                    {/* Table Headers */}
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col" className="col-2">Name</th>
+                                            <th scope="col" className="col-2">Date Created</th>
+                            <th scope="col" className="col-2">Actions</th>
+                        </tr>
+                        </thead>
+                        {/* Table Body */}
+                        <tbody>
+                            {notStartedSessions.map((session, index) => (
+                                <tr key={session.sessionID}>
+                                    <th scope="row" className="col-1">{index + 1}</th>
+                                    <td className="col-1">{session.name}</td>
+                                    <td className="col-1">{formatDate(session.createdAt)}</td>
+                                    <td className="col-1">
+                                        <a href={`session/${session.sessionID}`} className="btn btn-primary">
+                                            Enter Session
+                                        </a>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                             </div>
                         ) : (
-                            <p>No not started sessions available.</p>
+                            <></>
                         )}
                     </div>
+
 
                     {/* Running Sessions Table */}
                     <div>

@@ -39,8 +39,7 @@ const HomePage = () => {
             const exists = session != null;
 
             if (exists) {
-                // The quiz exists, navigate to it
-                console.log(`Navigating to session with ID ${sessionId}`);
+                // The session exists, navigate to the waiting room
                 navigate(`/session/${sessionId}`);
             } else {
                 // The quiz does not exist

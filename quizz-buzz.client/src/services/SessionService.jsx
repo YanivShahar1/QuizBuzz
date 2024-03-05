@@ -79,6 +79,7 @@ const SessionService = {
         }
     },
 
+    
     fetchUserSessions: async (userName) => {
         try {
             const lowercaseUserName = userName.toLowerCase();
@@ -106,19 +107,21 @@ const SessionService = {
     },
 
     
-    joinSession: async (sessionId, userId) => {
+    joinSession: async (sessionId, nickname) => {
         try {
-            console.log(`user ${userId} want to join session ${sessionId}`);
+            console.log(`user ${nickname} want to join session ${sessionId}`);
             const response = await fetch(`${SessionService.backendUrl}${sessionId}/join`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userId }),
+                body: JSON.stringify(nickname),
             });
+            console.log(`finish feth from backend : response status is ${response.status}`);
 
             if (response.ok) {
-                const result = await response.json();
+                const result = await response.text();
+                console.log(`result is : ${result}`);
                 return result;
             } else if (response.status === 404) {
                 throw new Error("Session not found");
@@ -132,23 +135,27 @@ const SessionService = {
     },
 
 
-    getSessionStudents: async (sessionId) => {
+    getParticipants: async (sessionId) => {
         try {
-            console.log(`getSessionStudents`);
-            const response = await fetch(`${SessionService.backendUrl}${sessionId}/students`, {
+            console.log(`getParticipants`);
+            const response = await fetch(`${SessionService.backendUrl}${sessionId}/participants`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
+
             console.log(`responsestatus is : ${response.status}`);
 
             if (response.status === 404) {
+                console.log("no students found !");
                 return []; // No students found
             }
 
             if (response.ok) {
                 const students = await response.json();
+                console.log(`students found : ${students}`);
+
                 return students;
             } else {
                 const errorMessage = `Failed to fetch session students. Status: ${response.status}`;
@@ -158,6 +165,13 @@ const SessionService = {
             throw new Error(`Error fetching session students: ${error.message}`);
         }
     },
+    isSessionStarted: (session) => {
+        if (!session) {
+            console.log("Session is null");
+            return false;
+        }
+        return new Date(session.startedAt) < new Date();
+    }
 };
 
 export default SessionService;

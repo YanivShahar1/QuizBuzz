@@ -14,40 +14,15 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import CreateQuizPage from './pages/quiz/createQuiz/CreateQuizPage';
 import CreateSessionPage from './pages/session/createSession/CreateSessionPage';
 import { Button, Col, Row , Container} from 'react-bootstrap';
+import SessionPage from './pages/session/SessionPage';
 
 //css 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { HubConnectionBuilder, LogLevel,HttpTransportType } from '@microsoft/signalr';
-import WaitingRoom from './components/WaitingRoom';
 
 function App() {
 
-    const[conn, setConnection] = useState();
-    const joinChatRoom = async (username, chatroom) => {
-        try {
-            //initiate a connection
-            const conn = new HubConnectionBuilder()
-                            .withUrl("https://localhost:7141/Chat")
-                            .configureLogging(LogLevel.Information)
-                            .build();
-            //set up a handler
-            conn.on("JoinSpecificChatRoom",(username, msg) => {
-                console.log("msg: ",username, msg);
-
-            } );
-
-            await conn.start();
-            await conn.invoke("JoinSpecificChatRoom", {username, chatroom});
-            setConnection(conn);
-
-
-
-        
-        }catch(e){
-            console.log(e);
-        }
-    }
+    
     return (
         <Router>
             <Header />
@@ -57,7 +32,7 @@ function App() {
                <Route path="/create-session" element={<CreateSessionPage />} />
                <Route path="/quiz/:quizId" element={<QuizPage />} />
                <Route path="/quiz-results/:quizId" element={<QuizResultsPage />} />
-               <Route path="/waiting-room/:sessionId" element={<WaitingRoom />} />
+               <Route path="/session/:sessionId" element={<SessionPage />} />
                {/*<Route path="/user-profile" element={<UserProfilePage />} />*/}
                {/*<Route path="/settings" element={<SettingsPage />} />*/}
                <Route path="/dashboard" element={<DashboardPage />} />

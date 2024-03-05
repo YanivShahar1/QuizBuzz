@@ -153,7 +153,7 @@ const CreateSessionPage = () => {
                 {/* <button type="submit">Submit Session</button> */}
                 {canSubmit() && (
                             <Button variant="success" className="mt-3" onClick={handleSubmitSession}>
-                                {loading ? 'Submitting...' : 'Submit Quiz'}
+                                {loading ? 'Submitting...' : 'Submit Session'}
                             </Button>
                         )}
             </form>
