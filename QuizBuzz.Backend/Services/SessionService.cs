@@ -144,27 +144,37 @@ namespace QuizBuzz.Backend.Services
             }
         }
 
-        public async Task AddUserToSessionAsync(string sessionId, string userId)
+        public async Task AddUserToSessionAsync(string sessionId, string userNickname)
         {
+           
             if (string.IsNullOrEmpty(sessionId))
             {
                 throw new ArgumentException("Session ID cannot be null or empty.", nameof(sessionId));
             }
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userNickname))
             {
-                throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
+                throw new ArgumentException("User Nickname cannot be null or empty.", nameof(userNickname));
             }
 
-            Debug.WriteLine($"Adding user with ID {userId} to session with ID: {sessionId}");
+            Debug.WriteLine($"Adding user with nickname {userNickname} to session with ID: {sessionId}");
 
             // Fetch the session from the database
             Session session = await _dynamoDBDataManager.GetItemAsync<Session>(sessionId);
 
             if (session != null)
             {
-                // Add the user to the session
-                session.Participants.Add(userId);
+                // Add the user to the session if it doesn't already exist
+                if (!session.Participants.Contains(userNickname))
+                {
+                    session.Participants.Add(userNickname);
+                }
+                else
+                {
+                    // Username already exists, handle the situation (e.g., throw an exception, notify the user, etc.)
+                    throw new Exception("Username already exists in the session.");
+                }
+
 
                 // Update the session in the database
                 await _dynamoDBDataManager.SaveItemAsync(session);
@@ -173,8 +183,8 @@ namespace QuizBuzz.Backend.Services
                 string cacheKey = $"Session_{sessionId}";
                 _cache.Set(cacheKey, session, new MemoryCacheEntryOptions());
 
-                Debug.WriteLine($"User with ID {userId} added to session with ID: {sessionId}");
-                _logger.LogInformation($"User with ID {userId} added to session with ID: {sessionId}");
+                Debug.WriteLine($"User with ID {userNickname} added to session with ID: {sessionId}");
+                _logger.LogInformation($"User with ID {userNickname} added to session with ID: {sessionId}");
             }
             else
             {

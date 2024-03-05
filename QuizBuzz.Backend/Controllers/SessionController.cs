@@ -15,13 +15,11 @@ namespace QuizBuzz.Backend.Controllers
     public class SessionController : ControllerBase
     {
         private readonly ISessionService _sessionService;
-        private readonly ISessionHub _sessionHub;
         private readonly ILogger<SessionController> _logger;
 
-        public SessionController(ISessionService sessionService, ILogger<SessionController> logger, ISessionHub sessionHub)
+        public SessionController(ISessionService sessionService, ILogger<SessionController> logger)
         {
             _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
-            _sessionHub = sessionHub ?? throw new ArgumentNullException(nameof(sessionHub));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -85,7 +83,7 @@ namespace QuizBuzz.Backend.Controllers
             }
         }
 
-        [HttpGet("{sessionId}/students", Name = "GetSessionStudents")]
+        [HttpGet("{sessionId}/participants", Name = "GetSessionParticipants")]
         public async Task<IActionResult> GetSessionParticipants(string sessionId)
         {
             try
@@ -108,12 +106,12 @@ namespace QuizBuzz.Backend.Controllers
         }
 
         [HttpPost("{sessionId}/join")]
-        public async Task<IActionResult> JoinSession(string sessionId, [FromBody] string userId)
+        public async Task<IActionResult> JoinSession(string sessionId, [FromBody] string nickname)
         {
             try
             {
                 // Validate the session and user
-                Debug.WriteLine($"user {userId} want to join session {sessionId}");
+                Debug.WriteLine($"user {nickname} want to join session {sessionId}");
                 Session? session = await _sessionService.GetSessionByIdAsync(sessionId);
                 if (session == null)
                 {
@@ -122,16 +120,15 @@ namespace QuizBuzz.Backend.Controllers
                 }
                 Debug.WriteLine("found session, want to add user now ");
                 // Add user to session (update session object or add to participants list)
-                await _sessionService.AddUserToSessionAsync(sessionId, userId);
-
-                await _sessionHub.SendUserJoinedNotification(sessionId, userId);
+                await _sessionService.AddUserToSessionAsync(sessionId, nickname);
 
                 return Ok("User joined session successfully");
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"Error joining session {sessionId}: {ex.Message}");
                 _logger.LogError(ex, $"Error joining session {sessionId}: {ex.Message}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return BadRequest($"Error joining session: {ex.Message}");
             }
         }
 

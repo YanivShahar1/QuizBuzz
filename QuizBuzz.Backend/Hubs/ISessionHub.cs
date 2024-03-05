@@ -10,6 +10,6 @@ namespace QuizBuzz.Backend.Hubs
 
         Task SendSessionDeletedNotification(string sessionId, string username);
 
-        Task SendUserJoinedNotification(string sessionId, string userId);
+        Task UserJoined(string sessionId, string userId);
     }
 }

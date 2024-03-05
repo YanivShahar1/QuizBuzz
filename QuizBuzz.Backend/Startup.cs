@@ -51,7 +51,6 @@ namespace QuizBuzz.Backend
             services.AddSingleton<IMemoryCache, MemoryCache>();
             services.AddSingleton<IQuizService, QuizService>();
             services.AddSingleton<ISessionService, SessionService>();
-            services.AddSingleton<ISessionHub, SessionHub>();
            
 
 

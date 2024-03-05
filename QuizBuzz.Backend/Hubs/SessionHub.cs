@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace QuizBuzz.Backend.Hubs
 {
-    public class SessionHub : Hub, ISessionHub
+    public class SessionHub : Hub
     {
         public async Task SendSessionCreatedNotification(string sessionId, string username)
         {
@@ -48,18 +48,35 @@ namespace QuizBuzz.Backend.Hubs
             }
         }
 
-        public async Task SendUserJoinedNotification(string sessionId, string userId)
+        public async Task UserJoined(string sessionId, string userId)
+        {
+            Debug.WriteLine($"Adding user {userId} to session group {sessionId}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
+            Debug.WriteLine($"User {userId} added to session group {sessionId}");
+
+            Debug.WriteLine($"Sending UserJoined message to session group {sessionId}");
+            await Clients.Group(sessionId).SendAsync("UserJoined", userId);
+            //await Clients.All.SendAsync("UserJoined", userId);
+            Debug.WriteLine($"UserJoined message sent to session group {sessionId}");
+
+            Debug.WriteLine($"User {userId} joined session {sessionId} successfully");
+        }
+
+
+        [HubMethodName("SessionStarted")]
+        public async Task SessionStarted(string sessionId)
         {
             try
             {
-                Debug.WriteLine($"Sending user joined notification for session {sessionId}, user {userId}");
-                await Clients.All.SendAsync("UserJoined", sessionId, userId);
+                Debug.WriteLine($"Sessionhub , session {sessionId} has started");
+
+                // Send the event to clients in the session group
+                await Clients.Group(sessionId).SendAsync("SessionStarted", sessionId);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"An error occurred while sending user joined notification: {ex.Message}");
+                Debug.WriteLine($"An error occurred while sending SessionStarted notification: {ex.Message}");
             }
         }
-
     }
 }
