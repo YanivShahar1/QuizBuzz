@@ -29,10 +29,7 @@ namespace QuizBuzz.Backend.Services
         {
             ArgumentNullException.ThrowIfNull(newSession);
             Debug.WriteLine($"Creating session: {newSession}");
-
-            newSession.SessionID = Guid.NewGuid().ToString(); // Generate a unique ID for the session
-            Debug.WriteLine($"Generated SessionID: {newSession.SessionID}");
-
+           
             // Additional validation or business logic if needed
             await _dynamoDBDataManager.SaveItemAsync(newSession);
             Debug.WriteLine($"Saved {newSession.SessionID} in DynamoDB database");
@@ -107,6 +104,26 @@ namespace QuizBuzz.Backend.Services
             Debug.WriteLine($"removed AllSessions and : Session_{sessionId} from cache");
 
             _logger.LogInformation($"Session with ID {sessionId} deleted from database. Cache invalidated.");
+        }
+
+        public async Task UpdateSessionAsync(Session updatedSession)
+        {
+            if (updatedSession == null)
+            {
+                throw new ArgumentNullException(nameof(updatedSession), "Updated session cannot be null");
+            }
+
+            Debug.WriteLine($"Updating session with ID: {updatedSession.SessionID}");
+
+            // Save the updated session back to the database
+            await _dynamoDBDataManager.SaveItemAsync(updatedSession);
+
+            // Invalidate the cache to reflect the updated session
+            string cacheKey = $"Session_{updatedSession.SessionID}";
+            _cache.Remove(cacheKey);
+
+            Debug.WriteLine($"Session with ID {updatedSession.SessionID} updated successfully.");
+            _logger.LogInformation($"Session with ID {updatedSession.SessionID} updated successfully.");
         }
 
         public async Task<IEnumerable<Session>> GetSessionsByHostUserIdAsync(string hostUserId)
@@ -214,6 +231,42 @@ namespace QuizBuzz.Backend.Services
             Debug.WriteLine($"found {sessionsForUser.Count()} sessions for {userId}!");
 
             return sessionsForUser;
+        }
+
+        public async Task SaveUserResponseAsync(string sessionId, UserResponse userResponse)
+        {
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                throw new ArgumentException("Session ID cannot be null or empty.", nameof(sessionId));
+            }
+
+            if (userResponse == null)
+            {
+                throw new ArgumentNullException(nameof(userResponse), "User response cannot be null.");
+            }
+
+            try
+            {
+                Debug.WriteLine($"Saving user response for session with ID: {sessionId}");
+
+                // Validate the user response if needed
+
+                // Save the user response to the data store
+                // You can use your data access layer or repository here
+                // For example, if you're using Entity Framework Core:
+                // dbContext.UserResponses.Add(userResponse);
+                // await dbContext.SaveChangesAsync();
+
+                // Additional validation or business logic if needed
+                await _dynamoDBDataManager.SaveItemAsync(userResponse);
+                Debug.WriteLine($"User  {userResponse.Nickname} response saved successfully for session with ID: {sessionId}");
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors or exceptions
+                Debug.WriteLine($"Error saving user response for session with ID {sessionId}: {ex.Message}");
+                throw;
+            }
         }
     }
 }

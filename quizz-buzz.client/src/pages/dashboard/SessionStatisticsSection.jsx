@@ -5,7 +5,6 @@ import SessionService from '../../services/SessionService';
 import { formatDate } from '../../utils/dateUtils';
 import CreateSessionButton from '../../components/Session/Buttons/CreateSessionButton';
 
-
 const SessionStatisticsSection = ({ userName }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [sessions, setSessions] = useState([]);
@@ -197,6 +196,9 @@ const SessionStatisticsSection = ({ userName }) => {
                                                     <button className="btn btn-success">
                                                         <FontAwesomeIcon icon={faEye} title="View Statistics" />
                                                     </button>
+                                                    <a href={`session/${session.sessionID}`} className="btn btn-primary">
+                                                        Enter Session
+                                                    </a>
                                                 </td>
                                             </tr>
                                         ))}

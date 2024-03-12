@@ -134,7 +134,6 @@ const SessionService = {
         }
     },
 
-
     getParticipants: async (sessionId) => {
         try {
             console.log(`getParticipants`);
@@ -165,13 +164,61 @@ const SessionService = {
             throw new Error(`Error fetching session students: ${error.message}`);
         }
     },
+
     isSessionStarted: (session) => {
         if (!session) {
             console.log("Session is null");
             return false;
         }
-        return new Date(session.startedAt) < new Date();
-    }
+        const res = new Date(session.startedAt) < new Date();
+        console.log(`session id ${session.sessionID} ${res ? "started" : "not started yet"}`);
+        return res;
+    },
+
+    startSession: async (sessionId) => {
+        try {
+            const response = await fetch(`${SessionService.backendUrl}${sessionId}/start`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (response.ok) {
+                console.log(`Session ${sessionId} started successfully.`);
+            } else if (response.status === 404) {
+                throw new Error("Session not found");
+            } else if (response.status === 409) {
+                throw new Error("Session has already started");
+            } else {
+                const errorMessage = `Failed to start session. Status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            throw new Error(`Error starting session: ${error.message}`);
+        }
+    },
+    
+    submitAnswer: async (userResponse) => {
+        try {
+            console.log("userResponse:", JSON.stringify(userResponse));
+            const response = await fetch(`${SessionService.backendUrl}${userResponse.SessionID}/submit-answer`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userResponse),
+            });
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                throw new Error(`Failed to submit answer. Status: ${response.status} text : ${errorMessage}
+                                \n error :${response.errorMessage}`);
+            }
+        } catch (error) {
+            throw new Error(`Error submitting answer:msg: ${error.message} errormsg: ${error.errorMessage}`);
+        }
+    },
+
 };
 
 export default SessionService;

@@ -7,47 +7,6 @@ namespace QuizBuzz.Backend.Hubs
 {
     public class SessionHub : Hub
     {
-        public async Task SendSessionCreatedNotification(string sessionId, string username)
-        {
-            try
-            {
-                Debug.WriteLine("in SendSessionCreatedNotification ");
-                await Clients.All.SendAsync("SessionCreated", sessionId, username);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"An error occurred while sending SessionCreated notification: {ex.Message}");
-            }
-        }
-
-        public async Task SendSessionUpdatedNotification(string sessionId, string username)
-        {
-            try
-            {
-                Debug.WriteLine("in SendSessionUpdatedNotification ");
-
-                await Clients.All.SendAsync("SessionUpdated", sessionId, username);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"An error occurred while sending SessionUpdated notification: {ex.Message}");
-            }
-        }
-
-        public async Task SendSessionDeletedNotification(string sessionId, string username)
-        {
-            try
-            {
-                Debug.WriteLine("in SendSessionDeletedNotification ");
-
-                await Clients.All.SendAsync("SessionDeleted", sessionId, username);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"An error occurred while sending SessionDeleted notification: {ex.Message}");
-            }
-        }
-
         public async Task UserJoined(string sessionId, string userId)
         {
             Debug.WriteLine($"Adding user {userId} to session group {sessionId}");
@@ -71,12 +30,38 @@ namespace QuizBuzz.Backend.Hubs
                 Debug.WriteLine($"Sessionhub , session {sessionId} has started");
 
                 // Send the event to clients in the session group
-                await Clients.Group(sessionId).SendAsync("SessionStarted", sessionId);
+                await Clients.Group(sessionId).SendAsync("SessionStarted");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"An error occurred while sending SessionStarted notification: {ex.Message}");
             }
         }
+
+        public async Task SendAnswer(string quizId, string questionId, string userId, string answer)
+        {
+            try
+            {
+                Debug.WriteLine($"Sending answer '{answer}' from user '{userId}' for question '{questionId}' in quiz '{quizId}'");
+                await Clients.All.SendAsync("AnswerReceived", quizId, questionId, userId, answer);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"An error occurred while sending answer: {ex.Message}");
+            }
+        }
+
+        public async Task EndQuiz(string quizId)
+        {
+            try
+            {
+                Debug.WriteLine($"Ending quiz '{quizId}'");
+                await Clients.All.SendAsync("QuizEnded", quizId);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"An error occurred while ending quiz: {ex.Message}");
+            }
+        } 
     }
 }
