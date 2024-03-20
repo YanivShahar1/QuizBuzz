@@ -14,7 +14,11 @@ namespace QuizBuzz.Backend.Models
 
         public int QuestionIndex { get; set; } = -1;
 
-        public List<int> SelectedOptions { get; set; } = new List<int>(); 
+        // Dictionary to store selected options for each question index
+        // Key: Question index
+        // Value: List of selected options for the corresponding question index
+        public Dictionary<int, List<int>> SelectedOptionsByQuestion { get; set; } = new Dictionary<int, List<int>>();
+
         public bool IsCorrect { get; set; }
 
         public long TimeTakenToAnswerMilliseconds { get; set; }

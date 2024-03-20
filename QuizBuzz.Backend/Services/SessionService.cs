@@ -242,12 +242,19 @@ namespace QuizBuzz.Backend.Services
                 // Check if the user has already submitted a response for the same question within the session
                 var existingResponse = await _dynamoDBDataManager.GetItemAsync<UserResponse>(sessionId, userResponse.Nickname);
 
+                if (existingResponse != null)
+                {
+                    Console.WriteLine("Existing Response:");
+                    Console.WriteLine(existingResponse.ToString()); // Assuming ToString() provides a meaningful representation
+                }
+
                 if (existingResponse != null && existingResponse.QuestionIndex == userResponse.QuestionIndex)
                 {
                     // Handle the situation where the user has already submitted a response for the same question
                     // For example, you could update the existing response or reject the new response
                     // In this example, let's throw an exception to indicate that the user has already submitted a response for this question
                     Debug.WriteLine($"User has already submitted a response for this question");
+
 
                     throw new InvalidOperationException("User has already submitted a response for this question.");
                 }
