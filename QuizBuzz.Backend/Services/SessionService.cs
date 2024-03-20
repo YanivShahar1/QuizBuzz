@@ -223,11 +223,16 @@ namespace QuizBuzz.Backend.Services
             return sessionsForUser;
         }
 
-        public async Task SaveQuestionResponseAsync(string sessionId, QuestionResponse questionResponse)
+        public async Task SaveQuestionResponseAsync(string sessionId, string nickname, QuestionResponse questionResponse)
         {
             if (string.IsNullOrEmpty(sessionId))
             {
                 throw new ArgumentException("Session ID cannot be null or empty.", nameof(sessionId));
+            }
+
+            if (string.IsNullOrEmpty(nickname))
+            {
+                throw new ArgumentException("Nickname cannot be null or empty.", nameof(nickname));
             }
 
             if (questionResponse == null)
@@ -239,13 +244,17 @@ namespace QuizBuzz.Backend.Services
             {
                 Debug.WriteLine($"Saving user response for session with ID: {sessionId}");
 
-                // Check if the user has already submitted a response for the same question within the session
-                var existingResponse = await _dynamoDBDataManager.GetItemAsync<SessionUserResponses>(sessionId, questionResponse.Nickname);
+                var sessionUserResponses = await _dynamoDBDataManager.GetItemAsync<SessionUserResponses>(sessionId, nickname);
 
-                if (existingResponse != null)
+                if (sessionUserResponses == null)
                 {
-                    Console.WriteLine("Existing Response:");
-                    Console.WriteLine(existingResponse.ToString()); // Assuming ToString() provides a meaningful representation
+                    Debug.WriteLine($"first response for nickname {nickname} in session {sessionId}");
+
+                }
+                if (sessionUserResponses != null)
+                {
+                    Console.WriteLine("Existing sessionUserResponses:");
+                    Console.WriteLine(sessionUserResponses.ToString()); 
                 }
 
                 if (existingResponse != null && existingResponse.QuestionIndex == questionResponse.QuestionIndex)
