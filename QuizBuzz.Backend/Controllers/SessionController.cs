@@ -208,16 +208,12 @@ namespace QuizBuzz.Backend.Controllers
         }
 
 
-        [HttpPost("{sessionId}/submit-answer")]
-        public async Task<IActionResult> SubmitAnswer(string sessionId, [FromBody] UserResponse userResponse)
+        [HttpPost("{sessionId}/{nickname}/submit-answer")]
+        public async Task<IActionResult> SubmitAnswer(string sessionId, string nickname, [FromBody] QuestionResponse questionResponse)
         {
-            // TODO: Implement server-side answer validation and separate correct answers.
-            // Update the logic to check answer correctness on the server side.
-            // Remove the responsibility from the client and adjust the UserResponse accordingly.
-
             try
             {
-                Debug.WriteLine($"in submit answer ! ");
+                Debug.WriteLine($"In submit answer!");
 
                 // Check if the session ID is provided
                 if (string.IsNullOrWhiteSpace(sessionId))
@@ -225,36 +221,46 @@ namespace QuizBuzz.Backend.Controllers
                     return BadRequest("Session ID is required");
                 }
 
-                // Check if the userResponse object is null
-                if (userResponse == null)
+                // Check if the nickname is provided
+                if (string.IsNullOrWhiteSpace(nickname))
                 {
-                    return BadRequest("User response object is required");
+                    return BadRequest("Nickname is required");
                 }
-                Debug.WriteLine($"Session ID: {sessionId} \nUser response: {JsonConvert.SerializeObject(userResponse)}");
+
+                // Check if the questionResponse object is null
+                if (questionResponse == null)
+                {
+                    return BadRequest("Question response object is required");
+                }
+
+                Debug.WriteLine($"Session ID: {sessionId}, Nickname: {nickname} \nQuestion response: {JsonConvert.SerializeObject(questionResponse)}");
+
                 // Perform additional validation as needed
-                // For example, check if questionId is provided
+                // For example, check if sessionId, nickname, questionIndex, and selectedOptions are provided
 
-                // Validate other fields as needed (e.g., selectedOptions, nickname)
+                // Validate other fields as needed
 
-                // Save the user response to the database
-                await _sessionService.SaveUserResponseAsync(sessionId, userResponse);
-                Debug.WriteLine($"saved user response successfully!");
+                // Save the question response to the database
+                await _sessionService.SaveQuestionResponseAsync(sessionId, nickname, questionResponse);
+                Debug.WriteLine($"Saved question response successfully!");
 
-                // Notify clients about the submitted user response   
-                await _hubContext.Clients.Group(sessionId).SendAsync("UserResponseSubmitted", userResponse);
-                Debug.WriteLine($"sent UserResponseSubmitted ! ");
+                // Notify clients about the submitted question response
+                await _hubContext.Clients.Group(sessionId).SendAsync("QuestionResponseSubmitted", questionResponse);
+                Debug.WriteLine($"Sent QuestionResponseSubmitted!");
 
-                return Ok("User response submitted successfully");
+                return Ok("Question response submitted successfully");
             }
             catch (Exception ex)
             {
                 // Log the error and return a 500 Internal Server Error response
                 // You can customize the error message based on the specific exception if needed
-                Debug.WriteLine($"Error: {ex.Message} ");
+                Debug.WriteLine($"Error: {ex.Message}");
 
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+
 
         [HttpGet("{sessionId}/results")]
         public async Task<IActionResult> GetSessionResults(string sessionId)

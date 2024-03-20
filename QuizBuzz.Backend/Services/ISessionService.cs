@@ -17,7 +17,7 @@ namespace QuizBuzz.Backend.Services
         Task AddUserToSessionAsync(string sessionId, string userId);
         Task<IEnumerable<Session>> GetSessionsByUserIdAsync(string userId);
 
-        Task SaveUserResponseAsync(string sessionId, UserResponse userResponse);
+        Task SaveQuestionResponseAsync(string sessionId, SessionUserResponses userResponse);
 
     }
 }

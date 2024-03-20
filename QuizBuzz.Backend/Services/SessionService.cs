@@ -223,16 +223,16 @@ namespace QuizBuzz.Backend.Services
             return sessionsForUser;
         }
 
-        public async Task SaveUserResponseAsync(string sessionId, UserResponse userResponse)
+        public async Task SaveQuestionResponseAsync(string sessionId, QuestionResponse questionResponse)
         {
             if (string.IsNullOrEmpty(sessionId))
             {
                 throw new ArgumentException("Session ID cannot be null or empty.", nameof(sessionId));
             }
 
-            if (userResponse == null)
+            if (questionResponse == null)
             {
-                throw new ArgumentNullException(nameof(userResponse), "User response cannot be null.");
+                throw new ArgumentNullException(nameof(questionResponse), "User response cannot be null.");
             }
 
             try
@@ -240,7 +240,7 @@ namespace QuizBuzz.Backend.Services
                 Debug.WriteLine($"Saving user response for session with ID: {sessionId}");
 
                 // Check if the user has already submitted a response for the same question within the session
-                var existingResponse = await _dynamoDBDataManager.GetItemAsync<UserResponse>(sessionId, userResponse.Nickname);
+                var existingResponse = await _dynamoDBDataManager.GetItemAsync<SessionUserResponses>(sessionId, questionResponse.Nickname);
 
                 if (existingResponse != null)
                 {
@@ -248,7 +248,7 @@ namespace QuizBuzz.Backend.Services
                     Console.WriteLine(existingResponse.ToString()); // Assuming ToString() provides a meaningful representation
                 }
 
-                if (existingResponse != null && existingResponse.QuestionIndex == userResponse.QuestionIndex)
+                if (existingResponse != null && existingResponse.QuestionIndex == questionResponse.QuestionIndex)
                 {
                     // Handle the situation where the user has already submitted a response for the same question
                     // For example, you could update the existing response or reject the new response
@@ -269,8 +269,8 @@ namespace QuizBuzz.Backend.Services
 
                 // Additional validation or business logic if needed
 
-                await _dynamoDBDataManager.SaveItemAsync(userResponse);
-                Debug.WriteLine($"User  {userResponse.Nickname} response saved successfully for session with ID: {sessionId}");
+                await _dynamoDBDataManager.SaveItemAsync(questionResponse);
+                Debug.WriteLine($"User  {questionResponse.Nickname} response saved successfully for session with ID: {sessionId}");
             }
             catch (Exception ex)
             {
