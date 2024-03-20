@@ -126,17 +126,6 @@ namespace QuizBuzz.Backend.Services
             _logger.LogInformation($"Session with ID {updatedSession.SessionID} updated successfully.");
         }
 
-        public async Task<IEnumerable<Session>> GetSessionsByHostUserIdAsync(string hostUserId)
-        {
-            if (string.IsNullOrEmpty(hostUserId))
-            {
-                throw new ArgumentException("Host user ID cannot be null or empty.", nameof(hostUserId));
-            }
-
-            Debug.WriteLine($"Getting sessions for host user with ID: {hostUserId}");
-
-            return await _dynamoDBDataManager.QueryItemsByIndexAsync<Session>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
-        }
 
         public async Task<IEnumerable<string>> GetSessionParticipantsAsync(string sessionId)
         {
@@ -160,6 +149,7 @@ namespace QuizBuzz.Backend.Services
                 return new List<string>();
             }
         }
+
 
         public async Task AddUserToSessionAsync(string sessionId, string userNickname)
         {
@@ -249,6 +239,19 @@ namespace QuizBuzz.Backend.Services
             {
                 Debug.WriteLine($"Saving user response for session with ID: {sessionId}");
 
+                // Check if the user has already submitted a response for the same question within the session
+                var existingResponse = await _dynamoDBDataManager.GetItemAsync<UserResponse>(sessionId, userResponse.Nickname);
+
+                if (existingResponse != null && existingResponse.QuestionIndex == userResponse.QuestionIndex)
+                {
+                    // Handle the situation where the user has already submitted a response for the same question
+                    // For example, you could update the existing response or reject the new response
+                    // In this example, let's throw an exception to indicate that the user has already submitted a response for this question
+                    Debug.WriteLine($"User has already submitted a response for this question");
+
+                    throw new InvalidOperationException("User has already submitted a response for this question.");
+                }
+
                 // Validate the user response if needed
 
                 // Save the user response to the data store
@@ -258,6 +261,7 @@ namespace QuizBuzz.Backend.Services
                 // await dbContext.SaveChangesAsync();
 
                 // Additional validation or business logic if needed
+
                 await _dynamoDBDataManager.SaveItemAsync(userResponse);
                 Debug.WriteLine($"User  {userResponse.Nickname} response saved successfully for session with ID: {sessionId}");
             }
@@ -267,6 +271,54 @@ namespace QuizBuzz.Backend.Services
                 Debug.WriteLine($"Error saving user response for session with ID {sessionId}: {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task<SessionResult> GetSessionResultsAsync(string sessionId)
+        {
+            try
+            {
+                Debug.WriteLine($"Fetching session results for session with ID: {sessionId}");
+
+                // Check if the session results are already cached
+                string cacheKey = $"Result_{sessionId}";
+                Debug.WriteLine($"Checking cache for session result with cache key: {cacheKey}");
+                var cachedResults = _cache.Get<SessionResult>(cacheKey);
+
+                if (cachedResults == null)
+                {
+                    Debug.WriteLine("Session results not found in cache. Aggregating session results...");
+                    // Session results not cached, aggregate them
+                    var sessionResult = await AggregateSessionResultsAsync(sessionId);
+
+                    // Save session result to cache
+                    _cache.Set(cacheKey, sessionResult);
+                    Debug.WriteLine("Session result saved to cache.");
+
+                    // Save session result to database (optional)
+                    await _dynamoDBDataManager.SaveItemAsync(sessionResult); 
+                    Debug.WriteLine("Session result saved to database.");
+
+                    return sessionResult;
+                }
+                else
+                {
+                    Debug.WriteLine("Session results found in cache. Returning cached results...");
+                    // Session results found in cache, return them
+                    return cachedResults;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors or exceptions
+                Debug.WriteLine($"Error fetching session results for session with ID {sessionId}: {ex.Message}");
+                throw; // Rethrow the exception for the controller to handle
+            }
+        }
+
+        private async Task<SessionResult> AggregateSessionResultsAsync(string sessionId)
+        {
+            // Perform the aggregation of session results here
+            // This method should return the aggregated session result
         }
     }
 }

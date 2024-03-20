@@ -119,6 +119,12 @@ namespace QuizBuzz.Backend.Services
 
             Debug.WriteLine($"Quiz service -> Getting quizzes for host user with ID: {hostUserId}");
 
+            var filterConditions = new Dictionary<string, string>
+                                    {
+                                        { HostUserIDAttributeName, hostUserId }
+                                    };
+
+            //return await _dynamoDBDataManager.QueryItemsAsync<Quiz>(HostUserIDIndexName, filterConditions);
             return await _dynamoDBDataManager.QueryItemsByIndexAsync<Quiz>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
         }
     }

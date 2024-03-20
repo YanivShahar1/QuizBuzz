@@ -92,8 +92,7 @@ const CreateSessionPage = () => {
             alert(`Session submitted successfully! Session ID: ${sessionId}`);
 
             // Redirect to the waiting room for the session
-            console.log(`navigating to waiting room /sessionId`);
-            navigate(`/waiting-room/${sessionId}`);
+            navigate(`/session/${sessionId}`);
         } catch (error) {
             setError(`error when submitting new session : error : ${error.response ? error.response.data : error.message}`);
         }

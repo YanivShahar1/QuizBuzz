@@ -9,7 +9,9 @@ namespace QuizBuzz.Backend.DataAccess
         Task SaveItemAsync<T>(T item);
         
         Task<T> GetItemAsync<T>(object hashKey);
-        
+
+        Task<T> GetItemAsync<T>(object hashKey, object rangeKey);
+
         Task DeleteItemAsync<T>(object hashKey);
         
         Task<bool> ItemExistsAsync<T>(string v, string quizId);
@@ -23,5 +25,6 @@ namespace QuizBuzz.Backend.DataAccess
         /// <param name="partitionValue">The value of the partition key to query.</param>
         /// <returns>A collection of items matching the query criteria.</returns>
         Task<IEnumerable<T>> QueryItemsByIndexAsync<T>(string indexName, string partitionKey, string partitionValue) where T : class;
+        Task<IEnumerable<T>> QueryItemsByKeysAsync<T>(string hashKey, string rangeKey, string hashKeyValue, string rangeKeyValue) where T : class;
     }
 }

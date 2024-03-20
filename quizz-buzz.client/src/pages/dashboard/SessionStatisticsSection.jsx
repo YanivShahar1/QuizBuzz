@@ -114,6 +114,9 @@ const SessionStatisticsSection = ({ userName }) => {
                                                     <button className="btn btn-success">
                                                         <FontAwesomeIcon icon={faEye} title="View Statistics" />
                                                     </button>
+                                                    <button onClick={() => handleDuplicateSession(session)} className="btn btn-secondary ml-2">
+                                                        Duplicate
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -199,6 +202,9 @@ const SessionStatisticsSection = ({ userName }) => {
                                                     <a href={`session/${session.sessionID}`} className="btn btn-primary">
                                                         Enter Session
                                                     </a>
+                                                    <button onClick={() => handleDuplicateSession(session)} className="btn btn-secondary ml-2">
+                                                        Duplicate
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}

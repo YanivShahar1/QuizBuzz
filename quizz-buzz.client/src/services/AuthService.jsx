@@ -101,7 +101,7 @@ const AuthService = {
 
     getSessionUsername: () => {
         const username = sessionStorage.getItem('username');
-        console.log(`getSessionUsername username = ${username}`);
+        // console.log(`getSessionUsername username = ${username}`);
         return username ? username.toLowerCase() : null; // Return lowercase username or an empty string if it's null or undefined
     },
     

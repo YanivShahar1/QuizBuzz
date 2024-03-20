@@ -11,7 +11,6 @@ namespace QuizBuzz.Backend.Services
         Task DeleteSessionAsync(string sessionId);
 
         Task UpdateSessionAsync(Session updatedSession);
-        Task<IEnumerable<Session>> GetSessionsByHostUserIdAsync(string userId);
 
         Task<IEnumerable<string>> GetSessionParticipantsAsync(string sessionId);
 

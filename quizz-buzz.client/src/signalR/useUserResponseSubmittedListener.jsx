@@ -10,7 +10,6 @@ const useUserResponseSubmittedListener = (connection, callback) => {
         };
 
         connection.on("UserResponseSubmitted", handleUserResponseSubmitted);
-
         return () => {
             connection.off("UserResponseSubmitted", handleUserResponseSubmitted);
         };

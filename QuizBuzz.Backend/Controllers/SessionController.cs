@@ -8,6 +8,7 @@ using QuizBuzz.Backend.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using Amazon.Runtime.Internal.Util;
 
 
 namespace QuizBuzz.Backend.Controllers
@@ -84,6 +85,7 @@ namespace QuizBuzz.Backend.Controllers
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"Error deleting session with ID {sessionId}: {ex.Message}");
                 _logger.LogError(ex, $"Error deleting session with ID {sessionId}: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
@@ -170,23 +172,28 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
+                Debug.WriteLine("Fetching the session from the database...");
                 // Fetch the session from the database
                 Session? session = await _sessionService.GetSessionByIdAsync(sessionId);
                 if (session == null)
                 {
+                    Debug.WriteLine("Session not found in the database.");
                     return NotFound("Session not found");
                 }
 
+                Debug.WriteLine($"Session found. Checking if the session has already started...");
                 // Check if the session has already started
                 if (session.StartedAt < DateTime.UtcNow)
                 {
-                    Debug.WriteLine($"session started already at {session.StartedAt} and current time is {DateTime.UtcNow}");
+                    Debug.WriteLine($"Session has already started at {session.StartedAt} and current time is {DateTime.UtcNow}");
                     return Conflict("Session has already started");
                 }
 
+                Debug.WriteLine("Updating the startedAt field with the current datetime...");
                 // Update the startedAt field with the current datetime
                 session.StartedAt = DateTime.UtcNow;
 
+                Debug.WriteLine("Saving the updated session in the database...");
                 // Save the updated session in the database
                 await _sessionService.UpdateSessionAsync(session);
 
@@ -194,10 +201,12 @@ namespace QuizBuzz.Backend.Controllers
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"An error occurred while starting session {sessionId}: {ex.Message}");
                 _logger.LogError(ex, $"Error starting session {sessionId}: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [HttpPost("{sessionId}/submit-answer")]
         public async Task<IActionResult> SubmitAnswer(string sessionId, [FromBody] UserResponse userResponse)
@@ -208,7 +217,6 @@ namespace QuizBuzz.Backend.Controllers
 
             try
             {
-
                 Debug.WriteLine($"in submit answer ! ");
 
                 // Check if the session ID is provided
@@ -232,7 +240,7 @@ namespace QuizBuzz.Backend.Controllers
                 await _sessionService.SaveUserResponseAsync(sessionId, userResponse);
                 Debug.WriteLine($"saved user response successfully!");
 
-                // Notify clients about the submitted user response
+                // Notify clients about the submitted user response   
                 await _hubContext.Clients.Group(sessionId).SendAsync("UserResponseSubmitted", userResponse);
                 Debug.WriteLine($"sent UserResponseSubmitted ! ");
 
@@ -247,6 +255,50 @@ namespace QuizBuzz.Backend.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("{sessionId}/results")]
+        public async Task<IActionResult> GetSessionResults(string sessionId)
+        {
+            try
+            {
+                Debug.WriteLine($"Fetching session results for session with ID: {sessionId}");
+
+                // Check if the session results are already cached
+                string cacheKey = $"Result_{sessionId}";
+                Debug.WriteLine($"Checking cache for session result with cache key: {cacheKey}");
+                var cachedResults = _cache.Get<SessionResult>(cacheKey);
+
+                if (cachedResults == null)
+                {
+                    Debug.WriteLine("Session results not found in cache. Aggregating session results...");
+                    // Session results not cached, aggregate them
+                    var sessionResult = await AggregateSessionResults(sessionId);
+
+                    // Save session result to cache
+                    _cache.Set(cacheKey, sessionResult);
+                    Debug.WriteLine("Session result saved to cache.");
+
+                    // Save session result to database (optional)
+                    await SaveSessionResultToDatabaseAsync(sessionResult);
+                    Debug.WriteLine("Session result saved to database.");
+
+                    return Ok(sessionResult);
+                }
+                else
+                {
+                    Debug.WriteLine("Session results found in cache. Returning cached results...");
+                    // Session results found in cache, return them
+                    return Ok(cachedResults);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors or exceptions
+                Debug.WriteLine($"Error fetching session results for session with ID {sessionId}: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
 
 
 

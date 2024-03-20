@@ -177,6 +177,7 @@ const SessionService = {
 
     startSession: async (sessionId) => {
         try {
+            console.log(`session service-> startSession, session id: ${sessionId}`);
             const response = await fetch(`${SessionService.backendUrl}${sessionId}/start`, {
                 method: 'POST',
                 headers: {
@@ -201,8 +202,8 @@ const SessionService = {
     
     submitAnswer: async (userResponse) => {
         try {
-            console.log("userResponse:", JSON.stringify(userResponse));
-            const response = await fetch(`${SessionService.backendUrl}${userResponse.SessionID}/submit-answer`, {
+            console.log("submitAnswer, userResponse:", JSON.stringify(userResponse));
+            const response = await fetch(`${SessionService.backendUrl}${userResponse.sessionID}/submit-answer`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

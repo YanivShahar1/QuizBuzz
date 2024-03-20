@@ -1,7 +1,24 @@
-import React from 'react';
+import React, { useState , useEffect} from 'react';
 
 const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSubmit, timer }) => {
     const isTimerExpired = timer === 0;
+
+    const [answerSubmitted, setAnswerSubmitted] = useState(false);
+
+    useEffect(() => {
+        // Reset answerSubmitted when the question changes
+        setAnswerSubmitted(false);
+    }, [question]);
+
+    const handleAnswerSelection = index => {
+        handleAnswerChange(index);
+    };
+
+    const handleSubmitClick = () => {
+        handleAnswerSubmit();
+        setAnswerSubmitted(true); 
+    };
+
 
     return (
         <div>
@@ -15,7 +32,7 @@ const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSu
                                 name="answer"
                                 value={index}
                                 checked={userAnswer && userAnswer.includes(index)}
-                                onChange={() => handleAnswerChange(index)}
+                                onChange={() => handleAnswerSelection(index)}
                                 disabled={isTimerExpired} // Disable input when timer is expired
                             />
                             {option}
@@ -23,10 +40,16 @@ const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSu
                     </li>
                 ))}
             </ul>
-            <p>Time remaining: {timer} seconds</p>
-            <button onClick={handleAnswerSubmit} disabled={isTimerExpired}>
-                Submit Answer
-            </button>
+            {!answerSubmitted && 
+                <div>
+                    <p>Time remaining: {timer} seconds</p>
+                    <button onClick={handleSubmitClick} disabled={ isTimerExpired || answerSubmitted}>
+                        Submit Answer
+                    </button>
+                
+                </div>}
+            {answerSubmitted && <p>waiting for other players to finish, left time : {timer}</p>}
+            
         </div>
     );
 };

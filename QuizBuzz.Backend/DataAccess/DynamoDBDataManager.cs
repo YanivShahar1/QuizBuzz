@@ -1,9 +1,9 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
-using QuizBuzz.Backend.Models;
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.DocumentModel;
+using System.Diagnostics;
 
 namespace QuizBuzz.Backend.DataAccess
 {
@@ -51,6 +51,29 @@ namespace QuizBuzz.Backend.DataAccess
             }
         }
 
+        public async Task<T> GetItemAsync<T>(object hashKey, object rangeKey)
+        {
+            try
+            {
+                // Perform the database operation to load the item
+                var item = await _dbContext.LoadAsync<T>(hashKey, rangeKey);
+
+                // Log success
+                //_logger.LogInformation($"Item of type '{typeof(T).Name}' fetched successfully");
+
+                return item;
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                //_logger.LogError(ex, $"Error fetching item of type '{typeof(T).Name}' with hash key '{hashKey}' and range key '{rangeKey}'");
+
+                // Propagate the exception to the caller
+                throw;
+            }
+        }
+
+
         public async Task DeleteItemAsync<T>(object hashKey)
         {
             await _dbContext.DeleteAsync<T>(hashKey);
@@ -65,6 +88,19 @@ namespace QuizBuzz.Backend.DataAccess
             {
                 IndexName = indexName
             });
+
+            // Retrieve the next set of items asynchronously
+            return await query.GetNextSetAsync();
+        }
+
+        public async Task<IEnumerable<T>> QueryItemsByKeysAsync<T>(string hashKey, string rangeKey, string hashKeyValue, string rangeKeyValue) where T : class
+        {
+            // Perform a query operation using the specified hash and range keys
+            var query = _dbContext.QueryAsync<T>(new List<ScanCondition>
+                            {
+                                new ScanCondition(hashKey, ScanOperator.Equal, hashKeyValue),
+                                new ScanCondition(rangeKey, ScanOperator.Equal, rangeKeyValue)
+                            });
 
             // Retrieve the next set of items asynchronously
             return await query.GetNextSetAsync();
@@ -108,8 +144,5 @@ namespace QuizBuzz.Backend.DataAccess
                 throw; // Re-throw the exception to signal an error to the caller
             }
         }
-
-
-
     }
 }
