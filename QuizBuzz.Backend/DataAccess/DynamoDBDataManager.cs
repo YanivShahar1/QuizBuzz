@@ -4,6 +4,7 @@ using Amazon.DynamoDBv2.Model;
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.DocumentModel;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace QuizBuzz.Backend.DataAccess
 {
@@ -25,6 +26,13 @@ namespace QuizBuzz.Backend.DataAccess
 
         public async Task SaveItemAsync<T>(T item)
         {
+            if (item == null)
+            {
+                Debug.WriteLine($"Error: Attempted to save a null item. : {JsonConvert.SerializeObject(item)}");
+                throw new ArgumentNullException(nameof(item), "Item cannot be null");
+            }
+            Debug.WriteLine($"item is not null : {JsonConvert.SerializeObject(item)}");
+
             await _dbContext.SaveAsync(item);
         }
 

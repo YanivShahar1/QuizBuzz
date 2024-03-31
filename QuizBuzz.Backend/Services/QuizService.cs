@@ -127,5 +127,29 @@ namespace QuizBuzz.Backend.Services
             //return await _dynamoDBDataManager.QueryItemsAsync<Quiz>(HostUserIDIndexName, filterConditions);
             return await _dynamoDBDataManager.QueryItemsByIndexAsync<Quiz>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
         }
+
+        public async Task<IEnumerable<Question>> GetQuestionsAsync(string quizId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(quizId))
+                {
+                    throw new ArgumentException("Quiz ID cannot be null or empty.", nameof(quizId));
+                }
+
+                Quiz? quiz = await GetQuizAsync(quizId);
+
+                return quiz?.Questions ?? Enumerable.Empty<Question>();
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                _logger.LogError(ex, $"Error fetching questions for quiz with ID {quizId}: {ex.Message}");
+
+                // Optionally, rethrow the exception or handle it based on the application's error handling strategy
+                throw;
+            }
+        }
+
     }
 }

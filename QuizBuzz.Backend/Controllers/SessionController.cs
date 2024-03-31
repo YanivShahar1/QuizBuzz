@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Amazon.Runtime.Internal.Util;
+using QuizBuzz.Backend.Models.DTO;
 
 
 namespace QuizBuzz.Backend.Controllers
@@ -129,7 +130,7 @@ namespace QuizBuzz.Backend.Controllers
                 Debug.WriteLine("found session, want to add user now ");
                 // Add user to session (update session object or add to participants list)
                 await _sessionService.AddUserToSessionAsync(sessionId, nickname);
-
+                
                 return Ok("User joined session successfully");
             }
             catch (Exception ex)
@@ -196,7 +197,7 @@ namespace QuizBuzz.Backend.Controllers
                 Debug.WriteLine("Saving the updated session in the database...");
                 // Save the updated session in the database
                 await _sessionService.UpdateSessionAsync(session);
-
+                // Notify clients about the submitted question response
                 return Ok("Session started successfully");
             }
             catch (Exception ex)
@@ -208,14 +209,24 @@ namespace QuizBuzz.Backend.Controllers
         }
 
 
-        [HttpPost("{sessionId}/{nickname}/submit-answer")]
-        public async Task<IActionResult> SubmitAnswer(string sessionId, string nickname, [FromBody] QuestionResponse questionResponse)
+        [HttpPost("submit-answer")]
+        public async Task<IActionResult> SubmitAnswer([FromBody] AnswerSubmissionDto answerSubmission)
         {
             try
             {
-                Debug.WriteLine($"In submit answer!");
+                Debug.WriteLine("In submit answer!");
 
-                // Check if the session ID is provided
+                // Check if the answerSubmission object is null
+                if (answerSubmission == null)
+                {
+                    return BadRequest("Answer submission object is required");
+                }
+
+                // Extract sessionId and nickname from the DTO
+                string sessionId = answerSubmission.SessionId;
+                string nickname = answerSubmission.Nickname;
+
+                // Check if the sessionId is provided
                 if (string.IsNullOrWhiteSpace(sessionId))
                 {
                     return BadRequest("Session ID is required");
@@ -227,26 +238,19 @@ namespace QuizBuzz.Backend.Controllers
                     return BadRequest("Nickname is required");
                 }
 
-                // Check if the questionResponse object is null
-                if (questionResponse == null)
-                {
-                    return BadRequest("Question response object is required");
-                }
-
-                Debug.WriteLine($"Session ID: {sessionId}, Nickname: {nickname} \nQuestion response: {JsonConvert.SerializeObject(questionResponse)}");
+                Debug.WriteLine($"Session ID: {sessionId}, Nickname: {nickname} \nAnswer submission: {JsonConvert.SerializeObject(answerSubmission)}");
 
                 // Perform additional validation as needed
-                // For example, check if sessionId, nickname, questionIndex, and selectedOptions are provided
+                // For example, check if sessionId, nickname, QuestionIndex, and QuestionResponse are provided
 
                 // Validate other fields as needed
 
                 // Save the question response to the database
-                await _sessionService.SaveQuestionResponseAsync(sessionId, nickname, questionResponse);
-                Debug.WriteLine($"Saved question response successfully!");
+                bool isCorrect = await _sessionService.SaveQuestionResponseAsync(answerSubmission);
+                Debug.WriteLine("Saved question response successfully!");
 
                 // Notify clients about the submitted question response
-                await _hubContext.Clients.Group(sessionId).SendAsync("QuestionResponseSubmitted", questionResponse);
-                Debug.WriteLine($"Sent QuestionResponseSubmitted!");
+                
 
                 return Ok("Question response submitted successfully");
             }
@@ -269,33 +273,10 @@ namespace QuizBuzz.Backend.Controllers
             {
                 Debug.WriteLine($"Fetching session results for session with ID: {sessionId}");
 
-                // Check if the session results are already cached
-                string cacheKey = $"Result_{sessionId}";
-                Debug.WriteLine($"Checking cache for session result with cache key: {cacheKey}");
-                var cachedResults = _cache.Get<SessionResult>(cacheKey);
+                var sessionResult = await _sessionService.GetSessionResultsAsync(sessionId);
+                Debug.WriteLine($"sessionResult: {sessionResult.ToString()}");
 
-                if (cachedResults == null)
-                {
-                    Debug.WriteLine("Session results not found in cache. Aggregating session results...");
-                    // Session results not cached, aggregate them
-                    var sessionResult = await AggregateSessionResults(sessionId);
-
-                    // Save session result to cache
-                    _cache.Set(cacheKey, sessionResult);
-                    Debug.WriteLine("Session result saved to cache.");
-
-                    // Save session result to database (optional)
-                    await SaveSessionResultToDatabaseAsync(sessionResult);
-                    Debug.WriteLine("Session result saved to database.");
-
-                    return Ok(sessionResult);
-                }
-                else
-                {
-                    Debug.WriteLine("Session results found in cache. Returning cached results...");
-                    // Session results found in cache, return them
-                    return Ok(cachedResults);
-                }
+                return Ok(sessionResult);
             }
             catch (Exception ex)
             {

@@ -10,6 +10,7 @@ namespace QuizBuzz.Backend.Services
 
         Task<IEnumerable<Quiz>> GetQuizzesByHostUserIdAsync(string userId);
 
+        Task<IEnumerable<Question>> GetQuestionsAsync(string quizId);
         // Add other methods as needed for your specific requirements
     }
 }

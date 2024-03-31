@@ -56,8 +56,8 @@ namespace QuizBuzz.Backend.Controllers
             }
         }
 
-        // GET: api/quiz/allCategories
-        [HttpGet("allCategories")]
+        // GET: api/quiz/categories
+        [HttpGet("categories")]
         public IActionResult GetQuizCategories()
         {
             var categories = Enum.GetNames(typeof(eQuizCategory));

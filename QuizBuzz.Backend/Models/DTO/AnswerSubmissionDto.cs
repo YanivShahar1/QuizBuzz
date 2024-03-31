@@ -3,10 +3,13 @@
     public class AnswerSubmissionDto
     {
         public string SessionId { get; set; } = String.Empty;
+        
         public string Nickname { get; set; } = String.Empty;
+       
         public int QuestionIndex { get; set; } = -1;
 
-        // The `required` modifier ensures that this property must be initialized
-        public required QuestionResponse QuestionResponse { get; set; }
+        public List<int> SelectedOptions { get; set; } = new List<int>();
+
+        public long TimeTaken { get; set; }
     }
 }

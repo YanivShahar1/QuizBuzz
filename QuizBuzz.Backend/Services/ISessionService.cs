@@ -1,4 +1,6 @@
 ﻿using QuizBuzz.Backend.Models;
+using QuizBuzz.Backend.Models.DTO;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,7 +19,9 @@ namespace QuizBuzz.Backend.Services
         Task AddUserToSessionAsync(string sessionId, string userId);
         Task<IEnumerable<Session>> GetSessionsByUserIdAsync(string userId);
 
-        Task SaveQuestionResponseAsync(string sessionId, SessionUserResponses userResponse);
+        Task<bool> SaveQuestionResponseAsync(AnswerSubmissionDto answerSubmission);
+
+        Task<SessionResult> GetSessionResultsAsync(string sessionId);
 
     }
 }
