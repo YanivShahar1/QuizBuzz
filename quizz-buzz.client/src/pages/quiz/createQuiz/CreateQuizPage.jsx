@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Accordion, Card, Button, Form, Row, Col, Badge } from 'react-bootstrap';
-import './CreateQuizPage.css';
+// import './CreateQuizPage.css';
 import InfoSection from './InfoSection';
 import QuestionsSection from './QuestionsSection';
 import QuizService from '../../../services/QuizService';
@@ -11,11 +11,32 @@ import AuthService from '../../../services/AuthService';
 const CreateQuizPage = () => {
     console.log(`in CreateQuizPage : 1`);
     const navigate = useNavigate();
+    const [categories, setCategories] = useState([]);
     const [quizInfoCollapsed, setQuizInfoCollapsed] = useState(true);
     const [questionsCollapsed, setQuestionsCollapsed] = useState(true);
     const [ loading, setLoading ] = useState(false);
     const [error, setError] = useState(null);
     console.log(`in CreateQuizPage : 2`);
+
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const categories = await QuizService.fetchCategories();
+                setCategories(categories);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                // Optionally, you can set an error state or show an error message to the user
+                setError('An error occurred while fetching categories. Please try again.');
+            }
+        };
+    
+        fetchCategories();
+    }, []);
+    
+    useEffect(()=>{
+        console.log(`categories updated: ${categories.length}`);
+    },[categories])
 
     const [quizInfo, setQuizInfo] = useState({
         title: '',
@@ -51,74 +72,9 @@ const CreateQuizPage = () => {
                 })),
             };
 
-            const romeQuizData = {
-                hostUserId: AuthService.getSessionUsername(),
-                title: "Rome Through the Ages Quiz",
-                category: "History",
-                description: "Test your knowledge of Rome's rich history and legacy",
-                questions: [
-                    {
-                        questionText: "Who was the legendary founder of Rome?",
-                        options: ["Julius Caesar", "Romulus", "Augustus", "Nero"],
-                        correctOptions: [1],
-                        isMultipleAnswerAllowed: false
-                    },
-                    {
-                        questionText: "Which emperor commissioned the construction of the Colosseum?",
-                        options: ["Nero", "Trajan", "Titus", "Hadrian"],
-                        correctOptions: [2],
-                        isMultipleAnswerAllowed: false
-                    },
-                    {
-                        questionText: "Who was the first Roman Emperor?",
-                        options: ["Julius Caesar", "Mark Antony", "Augustus", "Caligula"],
-                        correctOptions: [2],
-                        isMultipleAnswerAllowed: false
-                    },
-                    {
-                        questionText: "Which event marked the fall of the Western Roman Empire?",
-                        options: ["Sack of Rome", "Battle of Actium", "Death of Julius Caesar", "Construction of Hadrian's Wall"],
-                        correctOptions: [0],
-                        isMultipleAnswerAllowed: false
-                    },
-                    {
-                        questionText: "Who wrote the epic poem 'The Aeneid', which tells the story of the Trojan hero Aeneas and the founding of Rome?",
-                        options: ["Homer", "Virgil", "Ovid", "Horace"],
-                        correctOptions: [1],
-                        isMultipleAnswerAllowed: false
-                    },
-                    {
-                        questionText: "Which Roman emperor famously declared himself a god?",
-                        options: ["Augustus", "Caligula", "Nero", "Constantine"],
-                        correctOptions: [2],
-                        isMultipleAnswerAllowed: false
-                    },
-                    {
-                        questionText: "Which architectural feature was characteristic of Roman aqueducts?",
-                        options: ["Arches", "Domes", "Pillars", "Vaults"],
-                        correctOptions: [0],
-                        isMultipleAnswerAllowed: false
-                    },
-                    {
-                        questionText: "Who was the Roman general known for his crossing of the Alps with elephants during the Second Punic War?",
-                        options: ["Julius Caesar", "Scipio Africanus", "Hannibal", "Tiberius Gracchus"],
-                        correctOptions: [2],
-                        isMultipleAnswerAllowed: false
-                    },
-                    {
-                        questionText: "Which Roman leader famously declared 'Veni, vidi, vici' ('I came, I saw, I conquered')?",
-                        options: ["Julius Caesar", "Augustus", "Mark Antony", "Cicero"],
-                        correctOptions: [0],
-                        isMultipleAnswerAllowed: false
-                    }
-                ]
-            };
-
-
-
-
+            console.log(`want to submit wuiz - > ${quizData}`);
             // Submit the quiz data to the server
-            const createdQuizID = await QuizService.submitQuiz(romeQuizData);
+            const createdQuizID = await QuizService.submitQuiz(quizData);
             alert(`Quiz submitted successfully! Quiz ID: ${createdQuizID}`);
             // Redirect to the dashboard
             navigate('/dashboard');
@@ -176,7 +132,7 @@ const CreateQuizPage = () => {
                             <InfoSection
                                 info={quizInfo}
                                 onInfoChange={handleInfoChange}
-                                categories={mockCategories}
+                                categories={categories}
                             />
                         </div>
                     </div>

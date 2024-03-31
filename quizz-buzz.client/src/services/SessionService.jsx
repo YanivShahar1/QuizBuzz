@@ -200,15 +200,15 @@ const SessionService = {
         }
     },
     
-    submitAnswer: async (userResponse) => {
+    submitAnswer: async (answer) => {
         try {
-            console.log("submitAnswer, userResponse:", JSON.stringify(userResponse));
-            const response = await fetch(`${SessionService.backendUrl}${userResponse.sessionID}/submit-answer`, {
+            console.log("submitAnswer, answer:", JSON.stringify(answer));
+            const response = await fetch(`${SessionService.backendUrl}submit-answer`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(userResponse),
+                body: JSON.stringify(answer),
             });
             if (!response.ok) {
                 const errorMessage = await response.text();
@@ -219,6 +219,33 @@ const SessionService = {
             throw new Error(`Error submitting answer:msg: ${error.message} errormsg: ${error.errorMessage}`);
         }
     },
+
+    fetchSessionResults: async (sessionId) => {
+        try {
+            const response = await fetch(`${SessionService.backendUrl}${sessionId}/results`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (response.status === 404) {
+                console.log("not found results")
+                return []; // not found
+            }
+    
+            if (response.ok) {
+                const sessionResults = await response.json();
+                return sessionResults;
+            } else {
+                const errorMessage = `Failed to fetch sessionResults data. Status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            throw new Error(`Error fetching sessionResults data: ${error.message}`);
+        }
+    },
+    
 
 };
 

@@ -88,6 +88,38 @@ const QuizService = {
         }
     },
 
+    fetchCategories: async () => {
+        const fetchCategoriesUrl = `${QuizService.backendUrl}categories`;
+
+        try {
+            const response = await fetch(fetchCategoriesUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 404) {
+                // Handle the "Not Found" scenario
+                return null;
+            }
+
+            if (!response.ok) {
+                const errorMessage = `Error fetching categories, details: ${response.statusText}`;
+                throw new Error(errorMessage);
+            }
+
+            const categories = await response.json();
+            console.log(`categories: ${categories}`);
+            return categories;
+        } catch (error) {
+            // Log or handle the error as needed
+            console.error('Error in QuizService.fetchQuiz:', error.message);
+            throw error;
+        }
+    },
+
+
 
     fetchUserQuizzes: async (userName) => {
         try {

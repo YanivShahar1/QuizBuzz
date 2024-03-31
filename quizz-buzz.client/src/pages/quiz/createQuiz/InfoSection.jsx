@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Col, Row } from 'react-bootstrap';
+import QuizCategories from './QuizCategories';
+
 
 const InfoSection = ({ info, onInfoChange, categories }) => {
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
+  const handleCategorySelect = (category) => {
+    onInfoChange({ ...info, category: category });
   };
-
-  const filteredCategories = categories.filter((category) =>
-    category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <Form>
@@ -28,21 +25,16 @@ const InfoSection = ({ info, onInfoChange, categories }) => {
       </Row>
 
       <Row className="mb-3">
-        <Form.Group as={Col} controlId="formCategory">
-          <Form.Label>Category</Form.Label>
-          <Form.Control
-            as="select"
-            value={info.category}
-            onChange={(e) => onInfoChange({ ...info, category: e.target.value })}
-          >
-            <option value="">Select category</option>
-            {filteredCategories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </Form.Control>
-        </Form.Group>
+      <Form.Group as={Col} controlId="formCategory">
+      <Form.Label>Category</Form.Label>
+      <div className="position-relative">
+        <QuizCategories
+          categories={categories}
+          onCategorySelect={handleCategorySelect}
+        />
+      </div>
+    </Form.Group>
+
       </Row>
 
       <Row className="mb-3">
@@ -52,7 +44,7 @@ const InfoSection = ({ info, onInfoChange, categories }) => {
             as="textarea"
             rows={3}
             placeholder="Enter description"
-            maxLength={200} // Example max length, adjust as needed
+            maxLength={200}
             value={info.description}
             onChange={(e) => onInfoChange({ ...info, description: e.target.value })}
           />

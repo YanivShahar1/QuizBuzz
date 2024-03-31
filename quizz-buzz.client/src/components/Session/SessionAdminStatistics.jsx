@@ -24,15 +24,6 @@ const SessionAdminStatistics = ({ responses }) => {
             questionStatistics[response.questionIndex].numCorrect++;
             console.log("Updated numCorrect for question", response.questionIndex, ":", questionStatistics[response.questionIndex].numCorrect);
         }
-
-        // Update the count for each selected option for this question
-        response.selectedOptions.forEach(option => {
-            if (!questionStatistics[response.questionIndex].optionCounts[option]) {
-                questionStatistics[response.questionIndex].optionCounts[option] = 0;
-            }
-            questionStatistics[response.questionIndex].optionCounts[option]++;
-            console.log("Updated option count for question", response.questionIndex, ", option", option, ":", questionStatistics[response.questionIndex].optionCounts[option]);
-        });
     });
 
     console.log("Final questionStatistics:", JSON.stringify(questionStatistics));

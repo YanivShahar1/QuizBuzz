@@ -1,24 +1,36 @@
 import React, { useState , useEffect} from 'react';
 
-const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSubmit, timer }) => {
-    const isTimerExpired = timer === 0;
+const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSubmit }) => {
 
     const [answerSubmitted, setAnswerSubmitted] = useState(false);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     useEffect(() => {
         // Reset answerSubmitted when the question changes
         setAnswerSubmitted(false);
+        setIsSubmitDisabled(false)
     }, [question]);
 
+    useEffect(() => {
+        if (userAnswer !== null && userAnswer.length > 0) {
+            console.log("more than 1 answer");
+            setIsSubmitDisabled(false);
+        } else {
+            console.log("no answers yet");
+            
+            setIsSubmitDisabled(true);
+        }
+    }, [userAnswer]);
+    
     const handleAnswerSelection = index => {
         handleAnswerChange(index);
     };
 
     const handleSubmitClick = () => {
-        handleAnswerSubmit();
         setAnswerSubmitted(true); 
-    };
+        handleAnswerSubmit();
 
+    };
 
     return (
         <div>
@@ -33,7 +45,7 @@ const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSu
                                 value={index}
                                 checked={userAnswer && userAnswer.includes(index)}
                                 onChange={() => handleAnswerSelection(index)}
-                                disabled={isTimerExpired} // Disable input when timer is expired
+                                disabled={answerSubmitted} // Disable input when timer is expired
                             />
                             {option}
                         </label>
@@ -42,13 +54,12 @@ const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSu
             </ul>
             {!answerSubmitted && 
                 <div>
-                    <p>Time remaining: {timer} seconds</p>
-                    <button onClick={handleSubmitClick} disabled={ isTimerExpired || answerSubmitted}>
+                    <button onClick={handleSubmitClick} disabled={isSubmitDisabled}>
                         Submit Answer
                     </button>
                 
                 </div>}
-            {answerSubmitted && <p>waiting for other players to finish, left time : {timer}</p>}
+            {answerSubmitted && <p>waiting for other players to finish</p>}
             
         </div>
     );
