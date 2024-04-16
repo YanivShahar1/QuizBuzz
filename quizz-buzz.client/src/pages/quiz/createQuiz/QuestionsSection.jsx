@@ -1,161 +1,209 @@
-import React from 'react';
-import { Accordion, Card, Button, Form, Row, Col, Badge } from 'react-bootstrap';
-import Select from 'react-select';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from 'react';
+import { Button, Container, Form, Row, Col, FormControl, FormCheck } from 'react-bootstrap';
+import { faTrash, faEdit, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import QuestionPreview from '../../../components/Question/QuestionPreview'; // Import the QuestionPreview component
+import './QuestionsSection.css'; // Import the CSS file
 
 const QuestionsSection = ({ questions, setQuestions }) => {
-    console.log("in questionsSection 1");
-    const toggleMultipleAnswers = (questionIndex) => {
-        const updatedQuestions = [...questions];
-        updatedQuestions[questionIndex].multipleAnswers = !updatedQuestions[questionIndex].multipleAnswers;
-        setQuestions(updatedQuestions);
+    const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(null);
+
+    useEffect (() => {
+        console.log(`questions : ${JSON.stringify(questions)}`);
+    },[questions])
+
+    const handleQuestionEdit = (index) => {
+        // Handle edit action for the selected question
+        console.log(`Editing question at index: ${index}`);
     };
 
-    const toggleCorrectAnswer = (questionIndex, optionIndex) => {
+    const handleQuestionDelete = (index) => {
+        const updatedQuestions = questions.filter((_, i) => i !== index);
+        setQuestions(updatedQuestions);
+        setSelectedQuestionIndex(null); // Clear selected question index
+        console.log(`Deleted question at index: ${index}`);
+    };
+
+    const handleOptionChange = (questionIndex, optionIndex, value) => {
         const updatedQuestions = [...questions];
+        updatedQuestions[questionIndex].options[optionIndex] = value;
+        setQuestions(updatedQuestions);
+        console.log(`Option changed for question index: ${questionIndex}, option index: ${optionIndex}, value: ${value}`);
+    };
 
-        // If multiple answers are allowed, toggle the current option
+    const handleCorrectAnswerToggle = (questionIndex, optionIndex) => {
+        console.log(`handleCorrectAnswerToggle , questionIndex = ${questionIndex}, optionIndex = ${optionIndex}  `);
+        const updatedQuestions = [...questions];
+        const isChecked = updatedQuestions[questionIndex].correctAnswers.includes(optionIndex);
+        console.log(`is checked? = ${isChecked}`);
+        
         if (updatedQuestions[questionIndex].multipleAnswers) {
-            const isCorrect = updatedQuestions[questionIndex].correctAnswers.includes(optionIndex);
-
-            if (isCorrect) {
-                // Remove from correct answers
+            // Allow multiple answers, toggle selection
+            if (isChecked) {
                 updatedQuestions[questionIndex].correctAnswers = updatedQuestions[questionIndex].correctAnswers.filter(index => index !== optionIndex);
             } else {
-                // Add to correct answers
                 updatedQuestions[questionIndex].correctAnswers.push(optionIndex);
             }
         } else {
-            // For single answer, set only the current option as correct
-            updatedQuestions[questionIndex].correctAnswers = [optionIndex];
+            // Only one answer allowed, toggle selection if not already selected
+            if (isChecked) {
+                updatedQuestions[questionIndex].correctAnswers = [];
+            } else {
+                updatedQuestions[questionIndex].correctAnswers = [optionIndex];
+            }
         }
-
+        
         setQuestions(updatedQuestions);
+        console.log(`Correct answer toggled for question index: ${questionIndex}, option index: ${optionIndex}`);
+    };
+    
+    
+    const addOption = (questionIndex) => {
+        const updatedQuestions = [...questions];
+        if (updatedQuestions[questionIndex].options.length < 10) {
+            updatedQuestions[questionIndex].options.push('');
+            setQuestions(updatedQuestions);
+            console.log(`Added option for question index: ${questionIndex}`);
+        } else {
+            console.log(`Maximum options reached for question index: ${questionIndex}`);
+        }
+    };
+
+    const handleOptionDelete = (questionIndex, optionIndex) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[questionIndex].options.splice(optionIndex, 1);
+        setQuestions(updatedQuestions);
+        console.log(`Deleted option for question index: ${questionIndex}, option index: ${optionIndex}`);
     };
 
     const addQuestion = () => {
-        setQuestions([...questions, { question: '', multipleAnswers: false, options: ['', ''], correctAnswers: [] }]);
-        /*setCollapsedQuestions([...collapsedQuestions, false]);*/
+        const newQuestion = {
+            question: '',
+            options: ['', ''],
+            correctAnswers: [],
+            multipleAnswers: false,
+        };
+        setQuestions([...questions, newQuestion]);
+        console.log(`Added new question:`, newQuestion);
     };
 
-    const removeQuestion = (index) => {
+    const handleQuestionChange = (index, field, value) => {
         const updatedQuestions = [...questions];
-        updatedQuestions.splice(index, 1);
+        updatedQuestions[index][field] = value;
         setQuestions(updatedQuestions);
+        console.log(`Question changed at index: ${index}, field: ${field}, value: ${value}`);
     };
 
-    const addOption = (questionIndex) => {
-        if (questions[questionIndex].options.length < 6) {
-            const updatedQuestions = [...questions];
-            updatedQuestions[questionIndex].options.push('');
-            setQuestions(updatedQuestions);
-        } else {
-            alert('Maximum of 6 options allowed.');
+    const toggleMultipleAnswers = (index) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[index].multipleAnswers = !updatedQuestions[index].multipleAnswers;
+        
+        if (!updatedQuestions[index].multipleAnswers && updatedQuestions[index].correctAnswers.length) {
+            // If multiple answers are disallowed, clear all selected answers
+            updatedQuestions[index].correctAnswers = [];
         }
+
+        setQuestions(updatedQuestions);
+
+        console.log(`Toggled multiple answers for question index: ${index}`);
     };
-
-    const removeOption = (questionIndex, optionIndex) => {
-        if (questions[questionIndex].options.length > 2) {
-            const updatedQuestions = [...questions];
-            updatedQuestions[questionIndex].options.splice(optionIndex, 1);
-            setQuestions(updatedQuestions);
-        } else {
-            alert('Minimum of 2 options required.');
-        }
-    };
-
-
-    //handlers
-
-    const handleQuestionChange = (questionIndex, field, value) => {
-        setQuestions(prevQuestions => {
-            const updatedQuestions = [...prevQuestions];
-            updatedQuestions[questionIndex][field] = value;
-            return updatedQuestions;
-        });
-    };
-
-
-    const handleOptionChange = (questionIndex, optionIndex, value) => {
-        setQuestions(prevQuestions => {
-            const updatedQuestions = [...prevQuestions];
-            updatedQuestions[questionIndex].options[optionIndex] = value;
-            return updatedQuestions;
-        });
-    };
-    console.log("in questionsSection 2");
 
     return (
-        <div>
-            <Button variant="primary" onClick={addQuestion}>
-                Add Question
-            </Button>
+        <Container>
+            <Row>
+                <Col md={6}>
+                    {questions && questions.length > 0 ? (
+                        <div className="questions-preview">
+                            <h4>Questions Preview</h4>
+                            <ul>
+                                {questions.map((question, index) => (
+                                    question.question.length > 0 && (
+                                        <li key={index}>
+                                        <QuestionPreview question={question} index={index + 1} />
+                                        </li>
+                                    )
+                                    
+                                ))}
 
-            {questions.map((question, questionIndex) => (
-                <div key={questionIndex} className="question-container">
-                    <Form.Group controlId={`formQuestion${questionIndex}`}>
-                        <Form.Label>Question:</Form.Label>
-                        <Form.Check
-                            type="checkbox"
-                            label="Allow Multiple Answers"
-                            checked={question.multipleAnswers}
-                            onChange={() => toggleMultipleAnswers(questionIndex)}
-                        />
-                        <div className="d-flex align-items-center">
-                            <Form.Control
-                                type="text"
-                                placeholder={`Enter question ${questionIndex + 1}`}
-                                value={question.question}
-                                onChange={(e) => handleQuestionChange(questionIndex, 'question', e.target.value)}
-                            />
+                            </ul>
                         </div>
-                    </Form.Group>
-
-                    <Button variant="success" onClick={() => addOption(questionIndex)}>
-                        Add Option
+                    ): (
+                        <p>Add your first question</p>
+                    )}
+                    <Button variant="primary" onClick={addQuestion}>
+                            Add Question
                     </Button>
-
-                    {question.options.map((option, optionIndex) => (
-                        <div key={optionIndex} className={`option-container ${question.correctAnswers.includes(optionIndex) ? 'correct-answer' : ''}`}>
-                            <Form.Group controlId={`formOption${questionIndex}-${optionIndex}`} className="option-group">
-                                <Form.Check
-                                    type={question.multipleAnswers ? 'checkbox' : 'radio'}
-                                    label={`Option ${optionIndex + 1}`}
-                                    checked={question.correctAnswers.includes(optionIndex)}
-                                    onChange={() => toggleCorrectAnswer(questionIndex, optionIndex)}
-                                />
-                                <Form.Control
+                </Col>
+                <Col md={6}>
+                    {questions.map((question, index) => (
+                        <div key={index} className={`question-item ${selectedQuestionIndex === index ? 'selected' : ''}`}>
+                            {/* Question text */}
+                            <Form.Group controlId={`formQuestion${index}`} className="question-input">
+                                <Form.Label>Question {index + 1}:</Form.Label>
+                                <FormControl
                                     type="text"
-                                    placeholder={`Enter option ${optionIndex + 1}`}
-                                    value={option}
-                                    onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
+                                    placeholder={`Enter question ${index + 1}`}
+                                    value={question.question}
+                                    onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
                                 />
                             </Form.Group>
-                            <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => removeOption(questionIndex, optionIndex)}
-                                disabled={question.options.length <= 2}
-                            >
+
+                            {/* Multiple answers allowed checkbox */}
+                            <Form.Group controlId={`formMultipleAnswers${index}`} className="multiple-answers-checkbox">
+                                <FormCheck
+                                    type="checkbox"
+                                    label="Allow Multiple Answers"
+                                    checked={question.multipleAnswers}
+                                    onChange={() => toggleMultipleAnswers(index)}
+                                />
+                            </Form.Group>
+
+                            {/* Options */}
+                            {question.options.map((option, optionIndex) => (
+                                <Form.Group key={optionIndex} controlId={`formOption${index}-${optionIndex}`} className="option-group">
+                                    <div className="option-wrapper">
+                                        <FormCheck
+                                            type={question.multipleAnswers ? 'checkbox' : 'radio'}
+                                            label={`Option ${optionIndex + 1}`}
+                                            checked={question.correctAnswers.includes(optionIndex)}
+                                            onChange={() => handleCorrectAnswerToggle(index, optionIndex)}
+                                        />
+                                        <FormControl
+                                            type="text"
+                                            placeholder={`Enter option ${optionIndex + 1}`}
+                                            value={option}
+                                            onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
+                                            className="option-input"
+                                        />
+                                        {question.correctAnswers.includes(optionIndex) ? (
+                                            <span className="correct-option">&#10003;</span>
+                                        ) : (
+                                            <span className="incorrect-option">&#x2717;</span>
+                                        )}
+                                        <Button variant="danger" size="sm" onClick={() => handleOptionDelete(index, optionIndex)}>
+                                            <FontAwesomeIcon icon={faTrash} />
+                                        </Button>
+                                    </div>
+                                </Form.Group>
+                            ))}
+                            {question.options.length < 10 && (
+                                <Button variant="secondary" size="sm" onClick={() => addOption(index)}>
+                                    <FontAwesomeIcon icon={faPlus} /> Add Option
+                                </Button>
+                            )}
+                            <Button variant="danger" size="sm" onClick={() => handleQuestionDelete(index)}>
                                 <FontAwesomeIcon icon={faTrash} />
+                            </Button>
+                            <Button variant="info" size="sm" onClick={() => handleQuestionEdit(index)}>
+                                <FontAwesomeIcon icon={faEdit} />
                             </Button>
                         </div>
                     ))}
+                </Col>
 
-                    <Badge bg="danger" onClick={() => removeQuestion(questionIndex)}>
-                        Remove Question
-                    </Badge>
-                </div>
-            ))}
-
-            
-        </div>
-
-    )
-}
+            </Row>
+        </Container>
+    );
+};
 
 export default QuestionsSection;
-
-
-

@@ -23,7 +23,7 @@ const SessionPage = () => {
     const [quiz, setQuiz] = useState(null);
     const [question, setQuestion] = useState(null);
     const [nickname, setNickname] = useState(null);
-    const [questionResponses, setQuestionResponses] = useState([]);
+    const [responses, setResponses] = useState([]);
     const [startTime, setStartTime] = useState(null);
     const [leaderboardData, setLeaderboardData] = useState([]); 
 
@@ -121,14 +121,18 @@ const SessionPage = () => {
     }, [isSessionStarted])
 
     useEffect(() => {
+        console.log(`isSessionFinished = ${isSessionFinished}`);
+    }, [isSessionFinished])
+
+    useEffect(() => {
         if (!session) {
             // Session is null, handle the case appropriately
             return;
         }
-        console.log("userResponses changed:", JSON.stringify(questionResponses));
+        console.log("userResponses changed:", JSON.stringify(responses));
         // Count the number of responses for the current question
         
-        const numResponses = questionResponses.filter((response) => response.questionIndex === currentQuestionIndex).length;
+        const numResponses = responses.filter((response) => response.questionIndex === currentQuestionIndex).length;
         console.log(`num responses: ${numResponses}, num participants: ${session.participants.length}`);
         // Check if all participants have answered
         if (numResponses === session.participants.length) {
@@ -136,7 +140,8 @@ const SessionPage = () => {
             console.log("all participants answered! going to the next question !");
             goToNextQuestion();
         }
-    }, [questionResponses]);
+    }, [responses]);
+    
     
     const handleAnswerChange = (index) => {
         // Update user's answer based on the selected option
@@ -186,6 +191,7 @@ const SessionPage = () => {
         }
         else{
             console.log(`no more questions! finish:) `);
+            connection.invoke('SessionFinished', sessionId);
             setSessionFinished(true);
 
         }
@@ -231,7 +237,7 @@ const SessionPage = () => {
             isCorrect:isCorrect
         };
         
-        setQuestionResponses(prevResponses => [...prevResponses,newResponse ]);
+        setResponses(prevResponses => [...prevResponses,newResponse ]);
     };
 
     // Custom hook to listen for "QuestionResponseSubmitted" event
@@ -255,8 +261,10 @@ const SessionPage = () => {
     }, [quiz, currentQuestionIndex]); // Dependency array ensures the effect runs when currentQuestionIndex changes
     
     useEffect(() => {
+        console.log(`session change !! ${session}`);
         if(session){
             setSessionStarted(SessionService.isSessionStarted(session));
+            setSessionFinished(SessionService.isSessionFinished(session));
         }
     }, [session])
 
@@ -268,7 +276,8 @@ const SessionPage = () => {
         console.log("leaderboardata :", leaderboardData);
 
     }, [leaderboardData])
-  useEffect(() => {
+  
+    useEffect(() => {
         const fetchLeaderboardData = async () => {
             try {
                 console.log("fetchleaderboardata:")
@@ -286,9 +295,6 @@ const SessionPage = () => {
     }, [isSessionFinished]);
 
 
-
-  
-  
     if (session == null){
         return (
             <p>Loading session...</p>
@@ -300,8 +306,6 @@ const SessionPage = () => {
             <p>Loading connection...</p>
         )
     }
-    // console.log("session page Responses:", JSON.stringify(userResponses));
-
     
     if(!isSessionStarted){
         return (
@@ -339,7 +343,7 @@ const SessionPage = () => {
                 <h1>Session {session.name}</h1>
                 <p>Welcome, {AuthService.getSessionUsername()}</p>
                 <SessionAdminStatistics 
-                    responses={questionResponses}
+                    responses={responses}
                 />
             </div>
         );

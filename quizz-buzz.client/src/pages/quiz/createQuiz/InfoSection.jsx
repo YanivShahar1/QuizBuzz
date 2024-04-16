@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Form, Col, Row } from 'react-bootstrap';
 import QuizCategories from './QuizCategories';
-
+import PublicCheckbox from '../../../components/PublicCheckbox/PublicCheckbox';
+import './InfoSection.css';
 
 const InfoSection = ({ info, onInfoChange, categories }) => {
-
   const handleCategorySelect = (category) => {
     onInfoChange({ ...info, category: category });
+  };
+
+  const handlePublicChange = (value) => {
+    onInfoChange({ ...info, isPublic: value });
   };
 
   return (
@@ -17,7 +21,7 @@ const InfoSection = ({ info, onInfoChange, categories }) => {
           <Form.Control
             type="text"
             placeholder="Enter title"
-            maxLength={50}
+            maxLength={70}
             value={info.title}
             onChange={(e) => onInfoChange({ ...info, title: e.target.value })}
           />
@@ -25,16 +29,12 @@ const InfoSection = ({ info, onInfoChange, categories }) => {
       </Row>
 
       <Row className="mb-3">
-      <Form.Group as={Col} controlId="formCategory">
-      <Form.Label>Category</Form.Label>
-      <div className="position-relative">
-        <QuizCategories
-          categories={categories}
-          onCategorySelect={handleCategorySelect}
-        />
-      </div>
-    </Form.Group>
-
+        <Form.Group as={Col} controlId="formCategory">
+          <Form.Label>Category</Form.Label>
+          <div className="position-relative">
+            <QuizCategories categories={categories} onCategorySelect={handleCategorySelect} />
+          </div>
+        </Form.Group>
       </Row>
 
       <Row className="mb-3">
@@ -44,27 +44,19 @@ const InfoSection = ({ info, onInfoChange, categories }) => {
             as="textarea"
             rows={3}
             placeholder="Enter description"
-            maxLength={200}
+            maxLength={400}
             value={info.description}
             onChange={(e) => onInfoChange({ ...info, description: e.target.value })}
           />
         </Form.Group>
       </Row>
 
-      <Row className="mb-3">
-        <Form.Group as={Col} controlId="formPublic">
-          <Form.Check
-            type="checkbox"
-            label={
-              <>
-                Public <span className="text-info">(?)</span>
-              </>
-            }
-            checked={info.isPublic}
-            onChange={(e) => onInfoChange({ ...info, isPublic: e.target.checked })}
-          />
-        </Form.Group>
-      </Row>
+      {/*  PublicCheckbox component */}
+      <PublicCheckbox 
+        isPublic={info.isPublic}
+        onPublicChange={handlePublicChange}
+        tooltipText="When checked, this option makes the quiz publicly accessible for other users to utilize."
+      />
     </Form>
   );
 };

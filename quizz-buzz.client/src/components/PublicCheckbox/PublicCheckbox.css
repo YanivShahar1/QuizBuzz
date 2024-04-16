@@ -1,0 +1,12 @@
+.public-checkbox-container {
+    display: flex;
+  }
+  
+  .public-checkbox {
+    margin-right: 5px; /* Adjust margin between checkbox and label */
+  }
+  
+  .question-mark {
+    cursor: pointer;
+  }
+  

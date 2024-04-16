@@ -1,0 +1,27 @@
+.question{
+    flex-wrap: wrap;
+    padding-left: 20px;
+    max-height: 400px; /* Set maximum height for the question preview */
+    overflow-y: auto; /* Enable vertical scrolling if content exceeds the maximum height */
+    word-wrap: break-word;
+    margin-bottom: 10px;
+}
+
+.option {
+    display: flex;
+    min-width: 5px; /* Adjust the width as needed */
+    max-width: 400px;
+    margin-right: 5px; /* Add spacing between badges */
+    margin-bottom: 5px; /* Add spacing between rows */
+    font-weight: bold; /* Make correct and incorrect options bold */
+}
+
+.correct-option {
+    background-color: green;
+    color: white;
+}
+
+.incorrect-option {
+    background-color: red;
+    color: black;
+}

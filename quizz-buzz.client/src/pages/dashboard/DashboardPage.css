@@ -1,8 +1,11 @@
 .dashboard-container {
-    background-color: #ff6a00;
-    padding: 20px 20px; /* Adjust the padding as needed */
-    /* Add more styles here as needed */
+    padding: 20px;
 }
 
-  
-/* Add more specific styles for child components if needed */
+.dashboard-container h1 {
+    margin-bottom: 20px;
+}
+
+.dashboard-container h2 {
+    margin-top: 20px;
+}

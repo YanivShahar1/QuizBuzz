@@ -1,54 +1,23 @@
-/* Global Styles */
-body {
-    font-family: 'Arial', sans-serif;
-}
-
-/* Container Styles */
 .container {
-    max-width: 800px; /* Adjust the max-width according to your design */
-    margin-top: 50px;
-}
-
-/* Quiz Info Section Styles */
-.accordion-item {
-    margin-bottom: 20px;
-}
-
-.accordion-button {
-    background-color: #007bff; /* Primary color for the button */
-    color: #fff; /* Text color */
-    border: 1px solid #007bff; /* Border color */
-}
-
-    .accordion-button:hover {
-        background-color: #0056b3; /* Darker color on hover */
-    }
-
-/* Quiz Question Section Styles */
-.question-container {
-    margin-top: 20px;
-    border: 1px solid #ddd;
+    margin: 0 auto;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-}
-
-    .question-container:hover {
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-        transition: box-shadow 0.3s ease;
-    }
-
-/* Add more space between Form.Group elements */
-.form-group-spacing {
-    margin-bottom: 20px; /* Adjust this value as needed */
-}
-.option-container.correct-answer .option-group {
-    background-color: #c8e6c9; /* Light green background for correct answers */
-}
-
-/* Smaller icons */
-.option-container .option-group .custom-control-label::before {
-    width: 20px;
-    height: 20px;
-}
+  }
+  
+  .accordion-header {
+    background-color: #f8f9fa;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .accordion-body {
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-top: none;
+  }
+  
+  .error-message {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  

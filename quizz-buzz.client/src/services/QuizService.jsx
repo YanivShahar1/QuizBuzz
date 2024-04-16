@@ -42,15 +42,14 @@ const QuizService = {
                 // Handle the "Not Found" scenario
                 return null;
             }
-            
+            console.log(response.status);
             //204 - NoContent-> successfull delete
             if (!response.ok && !response.status === 204) {
+                console.log("1");
                 const errorMessage = `Error  delete quiz details: ${response.statusText}`;
                 throw new Error(errorMessage);
             }
 
-            const data = await response.json();
-            return data;
         } catch (error) {
             // Log or handle the error as needed
             console.error('Error in QuizService.delete:', error.message);

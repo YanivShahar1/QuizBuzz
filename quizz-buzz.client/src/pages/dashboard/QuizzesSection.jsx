@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import QuizService from '../../services/QuizService';
 import { faTrashAlt, faEdit, faEye, faAngleDown, faAngleUp } from '@fortawesome/free-solid-svg-icons';
+import QuizService from '../../services/QuizService';
 import { formatDate } from '../../utils/dateUtils';
 import CreateQuizButton from '../../components/Quiz/Buttons/CreateQuizButton';
+import { Row, Col, Button } from 'react-bootstrap';
+import './QuizzesSection.css';
 
 const QuizzesSection = ({ userName }) => {
-    console.log("in QuizzesSection  1");
     const [isLoading, setIsLoading] = useState(true);
     const [quizzes, setQuizzes] = useState([]);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    console.log("in QuizzesSection  2");
-
-    const toggleCollapse = () => {
-        setIsCollapsed(!isCollapsed);
-    };
 
     useEffect(() => {
         const fetchUserQuizzes = async () => {
             try {
                 setIsLoading(true);
-                console.log(`Fetching quizzes for ${userName}...`);
                 const userQuizzes = await QuizService.fetchUserQuizzes(userName);
                 setQuizzes(userQuizzes);
                 setIsLoading(false);
@@ -30,16 +25,16 @@ const QuizzesSection = ({ userName }) => {
         };
 
         fetchUserQuizzes();
-
     }, [userName]);
-    console.log("in QuizzesSection  3");
+
+    const toggleCollapse = () => {
+        setIsCollapsed(!isCollapsed);
+    };
 
     const handleDeleteQuiz = async (quizId) => {
         try {
             const confirmDelete = window.confirm("Are you sure you want to delete this quiz?");
-            if (!confirmDelete) {
-                return;
-            }
+            if (!confirmDelete) return;
 
             await QuizService.deleteQuiz(quizId);
             setQuizzes(prevQuizzes => prevQuizzes.filter(quiz => quiz.quizID !== quizId));
@@ -56,64 +51,57 @@ const QuizzesSection = ({ userName }) => {
 
     return (
         <div>
-            <h2 onClick={toggleCollapse}>
-                <FontAwesomeIcon icon={isCollapsed ? faAngleDown : faAngleUp} />
-                Quizzes
-            </h2>
-
-            {!isCollapsed && (
-                <div>
-                    {quizzes.length > 0 ? (
-                        <>
-                            <h5>Here are your quizzes:</h5>
+            <Row>
+                {quizzes.length > 0 ? (
+                    <>
+                        <h5>Here are your quizzes:</h5>
+                        <Col>
                             <div className="d-flex justify-content-between align-items-center mb-3">
-                                <div></div>
                                 <CreateQuizButton />
                             </div>
                             <div className="table-responsive">
-                                <table className="table table-striped">
+                                <table className="table table-striped quizzes-table">
                                     <thead>
                                         <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col" className="col-2">Title</th>
-                                            <th scope="col" className="col-2">Date Created</th>
-                                            <th scope="col" className="col-2">Last Updated</th>
-                                            <th scope="col" className="col-2">Actions</th>
+                                            <th>#</th>
+                                            <th>Title</th>
+                                            <th>Date Created</th>
+                                            <th>Last Updated</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {quizzes.map((quiz, index) => (
                                             <tr key={quiz.quizID}>
-                                                <th scope="row" className="col-1">{index + 1}</th>
-                                                <td className="col-1">{quiz.title}</td>
-                                                <td className="col-1">{formatDate(quiz.createdAt)}</td>
-                                                <td className="col-1">{formatDate(quiz.updatedAt)}</td>
-                                                <td className="col-1">
-                                                    <button onClick={() => handleDeleteQuiz(quiz.quizID)} className="btn btn-danger mr-2">
+                                                <td>{index + 1}</td>
+                                                <td>{quiz.title}</td>
+                                                <td>{formatDate(quiz.createdAt)}</td>
+                                                <td>{formatDate(quiz.updatedAt)}</td>
+                                                <td className="action-buttons">
+                                                    <Button variant="danger" className="mr-2" onClick={() => handleDeleteQuiz(quiz.quizID)}>
                                                         <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
-                                                    </button>
-                                                    <button className="btn btn-primary mr-2">
+                                                    </Button>
+                                                    <Button variant="primary" className="mr-2">
                                                         <FontAwesomeIcon icon={faEdit} title="Edit" />
-                                                    </button>
-                                                    <button className="btn btn-success">
+                                                    </Button>
+                                                    <Button variant="success">
                                                         <FontAwesomeIcon icon={faEye} title="Preview" />
-                                                    </button>
+                                                    </Button>
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
-                        </>
-                    ) : (
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                            <div></div>
-                            <p>No quizzes available. Why not create one?</p>
-                            <CreateQuizButton />
-                        </div>
-                    )}
-                </div>
-            )}
+                        </Col>
+                    </>
+                ) : (
+                    <Col>
+                        <p>No quizzes available. Why not create one?</p>
+                        <CreateQuizButton />
+                    </Col>
+                )}
+            </Row>
         </div>
     );
 };

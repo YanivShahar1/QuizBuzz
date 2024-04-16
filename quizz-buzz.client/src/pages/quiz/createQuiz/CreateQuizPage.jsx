@@ -1,23 +1,18 @@
-
 import React, { useState, useEffect } from 'react';
-import { Accordion, Card, Button, Form, Row, Col, Badge } from 'react-bootstrap';
-// import './CreateQuizPage.css';
+import { Container, Row, Col, Accordion, Button } from 'react-bootstrap';
 import InfoSection from './InfoSection';
 import QuestionsSection from './QuestionsSection';
 import QuizService from '../../../services/QuizService';
 import { useNavigate } from 'react-router-dom';
-import AuthService from '../../../services/AuthService';    
+import AuthService from '../../../services/AuthService';
 
 const CreateQuizPage = () => {
-    console.log(`in CreateQuizPage : 1`);
     const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
-    const [quizInfoCollapsed, setQuizInfoCollapsed] = useState(true);
-    const [questionsCollapsed, setQuestionsCollapsed] = useState(true);
-    const [ loading, setLoading ] = useState(false);
+    const [questions, setQuestions] = useState([]);
+    const [quizInfo, setQuizInfo] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
-    console.log(`in CreateQuizPage : 2`);
-
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -26,155 +21,82 @@ const CreateQuizPage = () => {
                 setCategories(categories);
             } catch (error) {
                 console.error('Error fetching categories:', error);
-                // Optionally, you can set an error state or show an error message to the user
                 setError('An error occurred while fetching categories. Please try again.');
             }
         };
-    
+
         fetchCategories();
     }, []);
-    
-    useEffect(()=>{
-        console.log(`categories updated: ${categories.length}`);
-    },[categories])
 
-    const [quizInfo, setQuizInfo] = useState({
-        title: '',
-        category: '',
-        description: '',
-        isPublic: false,
-      });
-    
-    const handleInfoChange = (newInfo) => {
+    const handleQuizInfoChange = (newInfo) => {
         setQuizInfo(newInfo);
     };
-    // const [categories, setCategories] = useState([]);
-    const mockCategories = ['General Knowledge', 'Science', 'History', 'Geography', 'Technology', 'Sports', 'Music', 'Movies', 'Literature', 'Mathematics'];
-    console.log(`in CreateQuizPage : 3`);
-
-    // useEffect(() => {
-    //     setCategories(mockCategories.map(category => ({ value: category, label: category })));
-    // }, [mockCategories]);
 
     const handleQuizSubmission = async () => {
         try {
-            setLoading(true);
-            const quizData = {
+            setIsSubmitting(true);
+            const newQuiz = {
                 hostUserId: AuthService.getSessionUsername(),
                 title: quizInfo.title,
                 category: quizInfo.category,
                 description: quizInfo.description,
-                questions: questions.map(question => ({
-                    questionText: question.question,
-                    options: question.options,
-                    correctOptions: question.correctAnswers,
-                    isMultipleAnswerAllowed: question.multipleAnswers
+                questions: questions.map(questionData => ({
+                    questionText: questionData.question,
+                    options: questionData.options,
+                    correctOptions: questionData.correctAnswers,
+                    isMultipleAnswerAllowed: questionData.multipleAnswers
                 })),
             };
 
-            console.log(`want to submit wuiz - > ${quizData}`);
-            // Submit the quiz data to the server
-            const createdQuizID = await QuizService.submitQuiz(quizData);
+            console.log(`want to submit quiz -> ${newQuiz}`);
+            const createdQuizID = await QuizService.submitQuiz(newQuiz);
             alert(`Quiz submitted successfully! Quiz ID: ${createdQuizID}`);
-            // Redirect to the dashboard
             navigate('/dashboard');
-            // Optionally, you can perform additional actions upon successful submission
-            // For example, redirect the user to a success page, show a success message, etc.
-
         } catch (error) {
-            // Handle errors (e.g., display an error message to the user)
             console.error('Error submitting quiz:', error);
-
-            // Optionally, you can set an error state or show an error message to the user
             setError('An error occurred while submitting the quiz. Please try again.');
-
         } finally {
-            // Reset the loading state (e.g., hide the loading spinner)
+            setIsSubmitting(false);
         }
     };
 
-    const [questions, setQuestions] = useState([]);
-
-    console.log(`in CreateQuizPage : 4`);
-
     const canSubmit = () => {
-        return 1;
-        //return questions.length > 0 && questions.every(question => question.correctAnswers.length > 0 && question.options.length >= 2);
+        return questions.length > 0 && questions.every(question => question.correctAnswers.length > 0 && question.options.length >= 2);
     };
 
     console.log(`in CreateQuizPage : 5`);
 
     return (
-        <div className="container mt-5">
+        <Container>
             <h1>Create Your Own Quiz</h1>
-            <div className="accordion" id="quizDetailsAccordion">
-                {/* Quiz Info Section */}
-                <div className="accordion-item">
-                    <h2 className="accordion-header" id="quizInfoHeading">
-                        <button
-                            className="accordion-button"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#quizInfoCollapse"
-                            aria-expanded={quizInfoCollapsed}
-                            aria-controls="quizInfoCollapse"
-                            onClick={() => setQuizInfoCollapsed(!quizInfoCollapsed)}
-                        >
-                            General Quiz Info
-                        </button>
-                    </h2>
-                    <div
-                        id="quizInfoCollapse"
-                        className={`accordion-collapse collapse ${quizInfoCollapsed ? '' : 'show'}`}
-                        aria-labelledby="quizInfoHeading"
-                    >
-                        <div className="accordion-body">
-                            <InfoSection
-                                info={quizInfo}
-                                onInfoChange={handleInfoChange}
-                                categories={categories}
-                            />
-                        </div>
-                    </div>
-                </div>
-                {/* Quiz Question Section */}
-                <div className="accordion-item">
-                    <h2 className="accordion-header" id="quizQuestionsHeading">
-                        <button
-                            className="accordion-button collapsed"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#quizQuestionsCollapse"
-                            aria-expanded={!questionsCollapsed}
-                            aria-controls="quizQuestionsCollapse"
-                            onClick={() => setQuestionsCollapsed(!questionsCollapsed)}
-                        >
-                            Quiz Questions
-                        </button>
-                    </h2>
-                    <div
-                        id="quizQuestionsCollapse"
-                        className={`accordion-collapse collapse ${questionsCollapsed ? '' : 'show'}`}
-                        aria-labelledby="quizQuestionsHeading"
-                    >
-                        <div className="accordion-body">
-                            <QuestionsSection
-                                questions={questions}
-                                setQuestions={setQuestions}
-                            />
-                           
-                        </div>
-                        {canSubmit() && (
-                            <Button variant="success" className="mt-3" onClick={handleQuizSubmission}>
-                                {loading ? 'Submitting...' : 'Submit Quiz'}
-                            </Button>
-                        )}
-
-                        {error && <div className="error-message">{error}</div>}
-                    </div>
-                </div>
-            </div>
-        </div>
+            <Row>
+                <Col>
+                    <Accordion alwaysOpen>
+                        <Accordion.Item eventKey="0">
+                            <Accordion.Header>General Quiz Info</Accordion.Header>
+                            <Accordion.Body>
+                                <InfoSection info={quizInfo} onInfoChange={handleQuizInfoChange} categories={categories} />
+                            </Accordion.Body>
+                        </Accordion.Item>
+                        <Accordion.Item eventKey="1">
+                            <Accordion.Header>Quiz Questions</Accordion.Header>
+                            <Accordion.Body>
+                                <QuestionsSection questions={questions} setQuestions={setQuestions} />
+                                
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Accordion>
+                </Col>
+            </Row>
+            <Row>
+                {canSubmit() && (
+                    <Button variant="success" className="mt-3" onClick={handleQuizSubmission}>
+                        {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
+                    </Button>
+                )}
+                {error && <div className="error-message">{error}</div>}
+            </Row>
+        </Container>
     );
 };
 

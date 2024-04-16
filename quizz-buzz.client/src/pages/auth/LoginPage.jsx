@@ -39,10 +39,6 @@ const Login = () => {
                     Password:
                     <PasswordInput value={password} onChange={setPassword} />
                 </label>
-                <label>
-                    <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
-                    Remember me
-                </label>
                 {errorMessage && <div className="error-msg" > {errorMessage}</div>} {/* Display error message */}
                 <br />
                 <button onClick={handleLogin}>Login</button>

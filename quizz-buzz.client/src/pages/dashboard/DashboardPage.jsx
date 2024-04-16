@@ -1,46 +1,30 @@
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Row, Col, Accordion, Button } from 'react-bootstrap';
 import QuizzesSection from './QuizzesSection';
 import SessionStatisticsSection from './SessionStatisticsSection';
 import AuthService from '../../services/AuthService';
 import './DashboardPage.css';
-import React, { useState, useEffect } from 'react';
-
 
 const DashboardPage = () => {
-    const [userName, setUserName] = useState(AuthService.getSessionUsername()); // Initialize userName with getSessionUsername
-
-    useEffect(() => {
-        // Listen for login/logout events
-        const loginStatusChangeListener = () => {
-            const loggedInUserName = AuthService.getSessionUsername();
-            setUserName(loggedInUserName); // Set userName state
-        };
-
-        // Initial check when the component mounts
-        loginStatusChangeListener();
-
-        // Subscribe to authentication changes
-        AuthService.subscribeToLoginStatusChange(loginStatusChangeListener);
-
-        // Cleanup function
-        return () => {
-            // Unsubscribe from authentication changes when the component unmounts
-            AuthService.unsubscribeFromLoginStatusChange(loginStatusChangeListener);
-        };
-    }, []);
+    const [sessionUserName, setSessionUserName] = useState(AuthService.getSessionUsername());
 
     return (
         <div className="dashboard-container">
-            {userName ? (
-                <div>
-                    <h1>Welcome, {userName}!</h1>
-                    <QuizzesSection userName={userName} />
-                    <SessionStatisticsSection userName={userName} />
-                    {/* Include other sections here */}
-                </div>
-            ) : (
-                <h1>Please log in to access your dashboard</h1>
-            )}
+            <h1 className="dashboard-header">Welcome, {sessionUserName}!</h1>
+            <Accordion defaultActiveKey="0" className="accordion-container">
+                <Accordion.Item eventKey="0">
+                    <Accordion.Header className="section-header">Quizzes</Accordion.Header>
+                    <Accordion.Body className="section-container">
+                        <QuizzesSection userName={sessionUserName} />
+                    </Accordion.Body>
+                </Accordion.Item>
+                <Accordion.Item eventKey="1">
+                    <Accordion.Header className="section-header">Session Statistics</Accordion.Header>
+                    <Accordion.Body className="section-container">
+                        <SessionStatisticsSection userName={sessionUserName} />
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
         </div>
     );
 };

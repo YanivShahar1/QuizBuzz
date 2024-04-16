@@ -1,54 +1,46 @@
-/* WaitingRoom.css */
-
 .waiting-room {
-    margin: 20px;
-    background-color:#45a049;
-
-  }
-  
-  .session-info {
-    background-color: aqua;
-
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-  
-  .students-list {
-    background-color: blue;
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .students-list-item {
-    margin-bottom: 5px;
-  }
-
-  .session-label {
-    display: inline-block;
-    margin-right: 10px;
-  }
-
-  .copy-icon {
-    cursor: pointer;
-    /* Add any additional styles for the copy icon */
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 }
 
-  .start-session-btn {
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .start-session-btn:hover {
-    background-color: #45a049;
-  }
+.session-info {
+  margin-top: 20px;
+}
 
-  
-  
+.admin-section, .user-section {
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+}
+
+.students-list {
+  margin-top: 20px;
+}
+
+.students-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.students-list ul li {
+  margin-bottom: 5px;
+}
+
+.copy-icon {
+  cursor: pointer;
+  margin-left: 5px;
+  font-size: 18px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.session-label {
+  margin-right: 10px;
+}

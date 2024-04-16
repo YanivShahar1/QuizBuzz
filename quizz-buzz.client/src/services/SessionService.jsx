@@ -43,13 +43,41 @@ const SessionService = {
                 throw new Error(errorMessage);
             }
 
-            const data = await response.json();
-            return data;
         } catch (error) {
             console.error('Error in SessionService.deleteSession:', error.message);
             throw error;
         }
     },
+
+    duplicateSession: async (sessionId) => {
+        try {
+            console.log(`Duplicating session with ID: ${sessionId}`);
+            const response = await fetch(`${SessionService.backendUrl}${sessionId}/duplicate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (response.ok) {
+                console.log(`Session duplicated successfully.`);
+                const result = await response.text();
+                console.log(`result = . ${result}`);
+                return result;
+            } else if (response.status === 404) {
+                console.log(`Session with ID ${sessionId} not found.`);
+                throw new Error("Session not found");
+            } else {
+                const errorMessage = `Failed to duplicate session. Status: ${response.status}`;
+                console.error(errorMessage);
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            console.error(`Error duplicating session: ${error.message}`);
+            throw new Error(`Error duplicating session: ${error.message}`);
+        }
+    },
+    
 
     fetchSession: async (sessionId) => {
         try {
@@ -172,6 +200,17 @@ const SessionService = {
         }
         const res = new Date(session.startedAt) < new Date();
         console.log(`session id ${session.sessionID} ${res ? "started" : "not started yet"}`);
+        return res;
+    },
+    
+    isSessionFinished: (session) => {
+        if (!session) {
+            console.log("Session is null");
+            return false;
+        }
+        console.log(`session.endedAt = ${session.endedAt}`);
+        const res = new Date(session.endedAt) < new Date();
+        console.log(`session id ${session.sessionID} ${res ? "finished" : "didnt finished yet"}`);
         return res;
     },
 
