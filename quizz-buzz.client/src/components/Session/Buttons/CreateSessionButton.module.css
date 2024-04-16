@@ -1,19 +1,20 @@
-/* CreateQuizButton.module.css */
-
+/* CreateSessionButton.module.css */
 .button {
-    /* Button styles */
-    background-color: #007bff; /* Primary color */
-    color: white;
-    padding: 12px 24px; /* Increased padding for better button size */
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
     border: none;
     border-radius: 5px;
-    font-size: 22px; /* Increased font size */
-    font-weight: bold; /* Bold font weight */
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    font-size: 16px;
     text-decoration: none;
+    transition: background-color 0.3s ease;
 }
 
-    .button:hover {
-        background-color: #08055f; /* Darker shade of primary color on hover */
-    }
+.button:hover {
+    background-color: #0056b3;
+}
+
+.icon {
+    margin-right: 5px;
+}
