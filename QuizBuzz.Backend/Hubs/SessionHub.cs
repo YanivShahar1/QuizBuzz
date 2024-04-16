@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using QuizBuzz.Backend.Models;
+using QuizBuzz.Backend.Services;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -7,6 +9,14 @@ namespace QuizBuzz.Backend.Hubs
 {
     public class SessionHub : Hub
     {
+
+        private readonly ISessionService _sessionService;
+
+        public SessionHub(ISessionService sessionService)
+        {
+            _sessionService = sessionService;
+        }
+
         public async Task UserJoined(string sessionId, string userId)
         {
             Debug.WriteLine($"Adding user {userId} to session group {sessionId}");
@@ -51,12 +61,13 @@ namespace QuizBuzz.Backend.Hubs
             }
         }
 
-        public async Task EndQuiz(string quizId)
+        public async Task SessionFinished(string sessionId)
         {
             try
             {
-                Debug.WriteLine($"Ending quiz '{quizId}'");
-                await Clients.All.SendAsync("QuizEnded", quizId);
+                // Update session end time using the session service
+                await _sessionService.FinishSessionAsync(sessionId);
+                Debug.WriteLine($"Session finished: {sessionId}");  
             }
             catch (Exception ex)
             {

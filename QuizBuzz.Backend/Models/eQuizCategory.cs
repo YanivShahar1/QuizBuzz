@@ -4,6 +4,7 @@
     {
         GeneralKnowledge,
         Science,
+        ComputerScience,
         History,
         Geography,
         Technology,

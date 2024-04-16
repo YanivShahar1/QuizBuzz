@@ -22,6 +22,8 @@ namespace QuizBuzz.Backend.Services
         Task<bool> SaveQuestionResponseAsync(AnswerSubmissionDto answerSubmission);
 
         Task<SessionResult> GetSessionResultsAsync(string sessionId);
+        Task FinishSessionAsync(string sessionId);
+
 
     }
 }

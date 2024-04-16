@@ -125,14 +125,22 @@ namespace QuizBuzz.Backend.Services
             // Save the updated session back to the database
             await _dynamoDBDataManager.SaveItemAsync(updatedSession);
 
-            // Invalidate the cache to reflect the updated session
+            // Update the session in the cache to reflect the changes
             string cacheKey = $"Session_{updatedSession.SessionID}";
-            _cache.Remove(cacheKey);
+            _cache.Set(cacheKey, updatedSession, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10), // Set cache expiration time
+                Priority = CacheItemPriority.High
+            });
+
+            // Notify subscribers about the updated session
             await _sessionNotificationService.NotifySessionUpdated(updatedSession.SessionID);
 
             Debug.WriteLine($"Session with ID {updatedSession.SessionID} updated successfully.");
+
             _logger.LogInformation($"Session with ID {updatedSession.SessionID} updated successfully.");
         }
+
 
 
         public async Task<IEnumerable<string>> GetSessionParticipantsAsync(string sessionId)
@@ -564,6 +572,45 @@ namespace QuizBuzz.Backend.Services
             }
         }
 
+        public async Task FinishSessionAsync(string sessionId)
+        {
+            try
+            {
+                // Fetch the session from the database
+                Session? session = await GetSessionByIdAsync(sessionId);
+                if (session == null)
+                {
+                    throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
+                }
+
+                if (session.EndedAt <= DateTime.Now)
+                {
+                    // Session is already finished, so no need to finish it again
+                    Debug.WriteLine($"Session with ID {sessionId} is already finished, the time is {session.EndedAt}.");
+                    _logger.LogInformation($"Session with ID {sessionId} is already finished.");
+                    return;
+                }
+
+                // Update the session end time
+                session.EndedAt = DateTime.UtcNow;
+
+                // Save the updated session in the database
+                await UpdateSessionAsync(session);
+
+                // Log that the session has been finished successfully
+                Debug.WriteLine($"Session with ID {sessionId} has been finished successfully.");
+                _logger.LogInformation($"Session with ID {sessionId} has been finished successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Log the error and handle exceptions
+                Debug.WriteLine($"Error finishing session {sessionId}: {ex.Message}");
+                _logger.LogError(ex, $"Error finishing session {sessionId}: {ex.Message}");
+                throw; // Rethrow the exception to be handled by the caller
+            }
+        }
+
 
     }
+
 }
