@@ -1,0 +1,29 @@
+.quizzes-section-header:hover {
+  color: #007bff;
+}
+
+.quizzes-table {
+  width: 100%;
+}
+
+.quizzes-table th,
+.quizzes-table td {
+  padding: 8px;
+}
+
+.quizzes-table th {
+  text-align: left;
+}
+
+.quizzes-table th[colspan="7"] {
+  text-align: center;
+}
+
+.quizzes-table .action-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+.quizzes-table .action-buttons button {
+  margin-right: 5px;
+}

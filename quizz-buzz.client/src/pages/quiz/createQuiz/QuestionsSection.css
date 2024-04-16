@@ -1,0 +1,40 @@
+.question-item {
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.question-input {
+    margin-bottom: 10px;
+}
+
+.multiple-answers-checkbox {
+    margin-bottom: 10px;
+}
+
+.option-group {
+    margin-bottom: 10px;
+}
+
+.option-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.option-input {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.correct-option, .incorrect-option {
+    margin-right: 10px;
+}
+
+.correct-option {
+    color: green;
+}
+
+.incorrect-option {
+    color: red;
+}

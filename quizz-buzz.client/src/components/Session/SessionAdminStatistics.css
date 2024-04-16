@@ -1,0 +1,38 @@
+/* CSS for SessionAdminStatistics component */
+
+.session-admin-statistics {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.session-admin-statistics h2 {
+    margin-bottom: 20px;
+}
+
+.question-stats {
+    margin-bottom: 30px;
+}
+
+.question-stats h3 {
+    margin-bottom: 10px;
+    color: #007bff; /* Blue color for question headers */
+}
+
+.option-list {
+    list-style: none;
+    padding: 0;
+}
+
+.option-list li {
+    margin-bottom: 5px;
+}
+
+/* Highlight correct answers */
+.option-list .correct-answer {
+    color: #28a745; /* Green color for correct answers */
+}
+
+/* Additional styling for better readability can be added as needed */
