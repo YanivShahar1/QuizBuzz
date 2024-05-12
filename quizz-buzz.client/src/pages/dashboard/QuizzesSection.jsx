@@ -3,9 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faEdit, faEye, faAngleDown, faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import QuizService from '../../services/QuizService';
 import { formatDate } from '../../utils/dateUtils';
-import CreateQuizButton from '../../components/Quiz/Buttons/CreateQuizButton';
+import CreateQuizButton from '../../components/Quiz/CreateQuizButton/CreateQuizButton';
 import { Row, Col, Button, Modal } from 'react-bootstrap';
 import './QuizzesSection.css';
+import EditQuizModal from '../../components/Quiz/EditQuizModal/EditQuizModal';
 
 const QuizzesSection = ({ userName }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -13,7 +14,8 @@ const QuizzesSection = ({ userName }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     
     const [ShowPreviewModal, setShowPreviewModal] = useState(false); // Define ShowPreviewModal state
-    const [selectedQuizId, setSelectedQuizId] = useState(null); // State to store the selected quiz ID
+    const [selectedQuiz, setSelectedQuiz] = useState(null); // State to store the selected quiz
+    const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
         const fetchUserQuizzes = async () => {
@@ -48,12 +50,18 @@ const QuizzesSection = ({ userName }) => {
         }
     };
 
-    const handlePreviewQuiz = async (quizId) => {
+    const handleEditQuiz = async (quiz) => {
+        setShowEditModal(true);
+        setSelectedQuiz(quiz);
+        
+    };
+
+    const handlePreviewQuiz = async (quiz) => {
         try {
             // Logic to navigate to the quiz preview page or open a preview modal
-            console.log(`Previewing quiz with ID: ${quizId}`);
+            console.log(`Previewing quiz with ID: ${quiz.quizID}`);
             setShowPreviewModal(true); // Set ShowPreviewModal state to true to show the modal
-            setSelectedQuizId(quizId); // Store the selected quiz ID in state
+            setSelectedQuiz(quiz); // Store the selected quiz ID in state
         } catch (error) {
             console.error('Error previewing quiz:', error);
             alert("An error occurred while previewing the quiz. Please try again later.");
@@ -96,10 +104,10 @@ const QuizzesSection = ({ userName }) => {
                                                     <Button variant="danger" className="mr-2" onClick={() => handleDeleteQuiz(quiz.quizID)}>
                                                         <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
                                                     </Button>
-                                                    <Button variant="primary" className="mr-2">
+                                                    <Button variant="primary" className="mr-2" onClick={() => handleEditQuiz(quiz)}>
                                                         <FontAwesomeIcon icon={faEdit} title="Edit" />
                                                     </Button>
-                                                    <Button variant="success" onClick={() => handlePreviewQuiz(quiz.quizID)}>
+                                                    <Button variant="success" onClick={() => handlePreviewQuiz(quiz)}>
                                                         <FontAwesomeIcon icon={faEye} title="Preview" />
                                                     </Button>
                                                 </td>
@@ -133,6 +141,14 @@ const QuizzesSection = ({ userName }) => {
                     {/* Additional action buttons can be added here if needed */}
                 </Modal.Footer>
             </Modal>
+
+            {/* Edit Quiz Modal */}
+            <EditQuizModal
+                quiz={selectedQuiz}
+                show={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                onSave={(updatedQuiz) => console.log(updatedQuiz)}
+            />
         </div>
     );
 };

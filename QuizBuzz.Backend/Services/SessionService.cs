@@ -299,14 +299,14 @@ namespace QuizBuzz.Backend.Services
                 // Calculate whether the response is correct
 
                 // Create or retrieve the SessionUserResponses object for the given session ID and nickname
-                SessionUserResponses? currentResponses = await getSessionUserResponsesAsync(sessionId, nickname);
-                SessionUserResponses sessionUserResponses;
+                UserResponses? currentResponses = await getSessionUserResponsesAsync(sessionId, nickname);
+                UserResponses sessionUserResponses;
                 if (currentResponses == null)
                 {
                     Debug.WriteLine($"sessionUserResponses is null");
 
                     // If the SessionUserResponses object doesn't exist, create a new one
-                    sessionUserResponses = new SessionUserResponses
+                    sessionUserResponses = new UserResponses
                     {
                         SessionID = sessionId,
                         Nickname = nickname,
@@ -433,7 +433,7 @@ namespace QuizBuzz.Backend.Services
             foreach (var participant in session.Participants)
             {
                 // Retrieve the session user responses for the participant
-                SessionUserResponses? sessionUserResponses = await getSessionUserResponsesAsync(sessionId, participant);
+                UserResponses? sessionUserResponses = await getSessionUserResponsesAsync(sessionId, participant);
 
                 if (sessionUserResponses == null)
                 {
@@ -451,7 +451,7 @@ namespace QuizBuzz.Backend.Services
             return sessionResult;
         }
 
-        private async Task<ParticipantResult> calculateParticipantResult(SessionUserResponses sessionUserResponses, string quizId)
+        private async Task<ParticipantResult> calculateParticipantResult(UserResponses sessionUserResponses, string quizId)
         {
             // Get the quiz asynchronously
             Quiz? quiz = await _quizService.GetQuizAsync(quizId);
@@ -509,7 +509,7 @@ namespace QuizBuzz.Backend.Services
         }
 
 
-        private async Task<SessionUserResponses?> getSessionUserResponsesAsync(string sessionId, string participant)
+        private async Task<UserResponses?> getSessionUserResponsesAsync(string sessionId, string participant)
         {
             if (string.IsNullOrEmpty(sessionId))
             {
@@ -529,7 +529,7 @@ namespace QuizBuzz.Backend.Services
 
             // Check if the session user responses exist in the cache
             string cacheKey = $"SessionUserResponses_{sessionId}_{participant}";
-            if (_cache.TryGetValue(cacheKey, out SessionUserResponses? cachedResponses))
+            if (_cache.TryGetValue(cacheKey, out UserResponses? cachedResponses))
             {
                 Debug.WriteLine($"Session user responses for participant {participant} in session with ID {sessionId} found in cache.");
                 return cachedResponses;
@@ -540,7 +540,7 @@ namespace QuizBuzz.Backend.Services
             // Fetch user responses from the database
             try
             {
-                SessionUserResponses? userResponses = await _dynamoDBDataManager.GetItemAsync<SessionUserResponses>(sessionId, participant);
+                UserResponses? userResponses = await _dynamoDBDataManager.GetItemAsync<UserResponses>(sessionId, participant);
                 Debug.WriteLine($"userResponses: {userResponses}.");
 
                 if (userResponses != null)
@@ -611,6 +611,33 @@ namespace QuizBuzz.Backend.Services
         }
 
 
-    }
+        public async Task<IEnumerable<UserResponses>> GetSessionResponsesAsync(string sessionId)
+        {
+            // Fetch the session from the database
+            Session session = await _dynamoDBDataManager.GetItemAsync<Session>(sessionId);
 
+            if (session == null)
+            {
+                throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
+            }
+
+            // Initialize a list to store user responses
+            List<UserResponses> userResponsesList = new List<UserResponses>();
+
+            // Iterate over the participants in the session
+            foreach (string participant in session.Participants)
+            {
+                // Fetch user responses for each participant
+                UserResponses userResponses = await _dynamoDBDataManager.GetItemAsync<UserResponses>(sessionId, participant);
+
+                if (userResponses != null)
+                {
+                    // Add user responses to the list
+                    userResponsesList.Add(userResponses);
+                }
+            }
+
+            return userResponsesList;
+        }
+    }
 }

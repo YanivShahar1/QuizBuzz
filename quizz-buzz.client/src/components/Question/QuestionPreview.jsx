@@ -6,7 +6,7 @@ const QuestionPreview = ({ question, index }) => {
   return (
     <div className="question">
       <ListGroup.Item >
-      <div>{"question #"}{index} : {question.question}</div>
+      <div>{"Question "}{index} : {question.question}</div>
       <ListGroup horizontal>
       {question.options.map((option, index) => (
           <ListGroup.Item>

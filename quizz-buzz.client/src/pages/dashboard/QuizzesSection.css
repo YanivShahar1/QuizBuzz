@@ -1,42 +1,36 @@
-.quizzes-section-container {
+/* quizzesStatisticsSection.css */
+
+.quizzes-table-section {
   margin-top: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 20px;
+  margin-bottom: 40px;
 }
 
-.quizzes-section-header {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+.quizzes-table-section h5 {
+  margin-bottom: 10px;
 }
 
-.quizzes-section-header:hover {
-  color: #007bff;
-}
-
-.quizzes-table {
+.quizzes-table-section table {
   width: 100%;
+  border-collapse: collapse;
 }
 
-.quizzes-table th,
-.quizzes-table td {
+.quizzes-table-section th,
+.quizzes-table-section td {
+  border: 1px solid #ddd;
   padding: 8px;
+  text-align: center; /* Center align table cell content */
+  max-width: 30px;
 }
 
-.quizzes-table th {
-  text-align: left;
+.quizzes-table-section th {
+  background-color: #f2f2f2;
 }
 
-.quizzes-table th[colspan="7"] {
-  text-align: center;
-}
-
-.quizzes-table .action-buttons {
+.quizzes-table-section .action-buttons {
   display: flex;
   justify-content: center;
 }
 
-.quizzes-table .action-buttons button {
+.quizzes-table-section .action-buttons button {
   margin-right: 5px;
 }

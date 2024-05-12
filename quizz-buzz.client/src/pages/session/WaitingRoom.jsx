@@ -2,14 +2,27 @@ import React, { useState, useEffect } from 'react';
 import SessionService from '../../services/SessionService';
 import './WaitingRoom.css';
 import AuthService from '../../services/AuthService';
-import useUserJoinedListener from '../../signalR/useUserJoinedListener';
+import useUserJoinedListener from '../../hooks/signalR/useUserJoinedListener';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 
-const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSession }) => {
+const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSession,nickname,setNickname }) => {
     const [participants, setParticipants] = useState([]);
-    const [nickname, setNickname] = useState('');
     const [isUserJoined, setIsUserJoined] = useState(false);
 
+
+    useEffect(() => {
+        const storedNickname = JSON.parse(window.sessionStorage.getItem("nickname"));
+        if (storedNickname !== null) {
+            console.log(`found nickname in sessionstorage: ${storedNickname}`);
+            setIsUserJoined(true);
+            setNickname(storedNickname);
+        }
+      }, []);
+    
+    useEffect(() => {
+
+        console.log("nickname:", nickname);
+      }, [nickname]);
 
     const isHost = (session) => session.hostUserID === AuthService.getSessionUsername();
 
@@ -54,6 +67,8 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
     }, [participants]);
 
     const handleJoinSession = async () => {
+        window.sessionStorage.setItem("nickname", JSON.stringify(nickname));
+
         setIsUserJoined(true);
         onJoinSession(nickname);
     };

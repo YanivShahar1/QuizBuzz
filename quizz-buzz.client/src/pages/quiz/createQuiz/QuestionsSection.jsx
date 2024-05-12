@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Container, Form, Row, Col, FormControl, FormCheck } from 'react-bootstrap';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Container, Form, Row, Col, FormControl, FormCheck, Accordion, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { faTrash, faEdit, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import QuestionPreview from '../../../components/Question/QuestionPreview'; // Import the QuestionPreview component
@@ -7,6 +7,7 @@ import './QuestionsSection.css'; // Import the CSS file
 
 const QuestionsSection = ({ questions, setQuestions }) => {
     const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(null);
+    const addQuestionRef = useRef(null);
 
     useEffect (() => {
         console.log(`questions : ${JSON.stringify(questions)}`);
@@ -112,96 +113,122 @@ const QuestionsSection = ({ questions, setQuestions }) => {
         <Container>
             <Row>
                 <Col md={6}>
-                    {questions && questions.length > 0 ? (
-                        <div className="questions-preview">
-                            <h4>Questions Preview</h4>
-                            <ul>
-                                {questions.map((question, index) => (
-                                    question.question.length > 0 && (
-                                        <li key={index}>
-                                        <QuestionPreview question={question} index={index + 1} />
-                                        </li>
-                                    )
-                                    
-                                ))}
-
-                            </ul>
-                        </div>
-                    ): (
-                        <p>Add your first question</p>
-                    )}
-                    <Button variant="primary" onClick={addQuestion}>
-                            Add Question
-                    </Button>
-                </Col>
-                <Col md={6}>
                     {questions.map((question, index) => (
-                        <div key={index} className={`question-item ${selectedQuestionIndex === index ? 'selected' : ''}`}>
-                            {/* Question text */}
-                            <Form.Group controlId={`formQuestion${index}`} className="question-input">
-                                <Form.Label>Question {index + 1}:</Form.Label>
-                                <FormControl
-                                    type="text"
-                                    placeholder={`Enter question ${index + 1}`}
-                                    value={question.question}
-                                    onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
-                                />
-                            </Form.Group>
-
-                            {/* Multiple answers allowed checkbox */}
-                            <Form.Group controlId={`formMultipleAnswers${index}`} className="multiple-answers-checkbox">
-                                <FormCheck
-                                    type="checkbox"
-                                    label="Allow Multiple Answers"
-                                    checked={question.multipleAnswers}
-                                    onChange={() => toggleMultipleAnswers(index)}
-                                />
-                            </Form.Group>
-
-                            {/* Options */}
-                            {question.options.map((option, optionIndex) => (
-                                <Form.Group key={optionIndex} controlId={`formOption${index}-${optionIndex}`} className="option-group">
-                                    <div className="option-wrapper">
-                                        <FormCheck
-                                            type={question.multipleAnswers ? 'checkbox' : 'radio'}
-                                            label={`Option ${optionIndex + 1}`}
-                                            checked={question.correctAnswers.includes(optionIndex)}
-                                            onChange={() => handleCorrectAnswerToggle(index, optionIndex)}
-                                        />
+                        <Accordion key={index} defaultActiveKey={0}>
+                            <Accordion.Item eventKey={index}>
+                                <Accordion.Header>
+                                    Question {index + 1}
+                                </Accordion.Header>
+                                <Accordion.Body>
+                                    {/* Question text */}
+                                    <Form.Group controlId={`formQuestion${index}`} className="question-input">
+                                        <Form.Label>Question {index + 1}:</Form.Label>
                                         <FormControl
                                             type="text"
-                                            placeholder={`Enter option ${optionIndex + 1}`}
-                                            value={option}
-                                            onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
-                                            className="option-input"
+                                            placeholder={`Enter question ${index + 1}`}
+                                            value={question.question}
+                                            onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
                                         />
-                                        {question.correctAnswers.includes(optionIndex) ? (
-                                            <span className="correct-option">&#10003;</span>
-                                        ) : (
-                                            <span className="incorrect-option">&#x2717;</span>
-                                        )}
-                                        <Button variant="danger" size="sm" onClick={() => handleOptionDelete(index, optionIndex)}>
+                                    </Form.Group>
+
+                                    {/* Multiple answers allowed checkbox */}
+                                    <Form.Group controlId={`formMultipleAnswers${index}`} className="multiple-answers-checkbox">
+                                        <FormCheck
+                                            type="checkbox"
+                                            label="Allow Multiple Answers"
+                                            checked={question.multipleAnswers}
+                                            onChange={() => toggleMultipleAnswers(index)}
+                                        />
+                                    </Form.Group>
+
+                                    {/* Options */}
+                                    {question.options.map((option, optionIndex) => (
+                                        <Form.Group key={optionIndex} controlId={`formOption${index}-${optionIndex}`} className="option-group">
+                                            <div className="option-wrapper">
+                                                <FormCheck
+                                                    type={question.multipleAnswers ? 'checkbox' : 'radio'}
+                                                    label={`Option ${optionIndex + 1}: `}
+                                                    checked={question.correctAnswers.includes(optionIndex)}
+                                                    onChange={() => handleCorrectAnswerToggle(index, optionIndex)}
+                                                />
+                                                <FormControl
+                                                    type="text"
+                                                    placeholder={`Enter option ${optionIndex + 1}`}
+                                                    value={option}
+                                                    onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
+                                                    className="option-input"
+                                                />
+                                                {question.correctAnswers.includes(optionIndex) ? (
+                                                    <span className="correct-option">&#10003;</span>
+                                                ) : (
+                                                    <span className="incorrect-option">&#x2717;</span>
+                                                )}
+                                                <OverlayTrigger
+                                                    placement="top"
+                                                    overlay={<Tooltip>Delete Option</Tooltip>}
+                                                >
+                                                    <Button variant="danger" size="sm" onClick={() => handleOptionDelete(index, optionIndex)}>
+                                                        <FontAwesomeIcon icon={faTrash} />
+                                                    </Button>
+                                                </OverlayTrigger>
+                                            </div>
+                                        </Form.Group>
+                                    ))}
+                                    {question.options.length < 10 && (
+                                        <OverlayTrigger
+                                            placement="top"
+                                            overlay={<Tooltip>Add Option</Tooltip>}
+                                        >
+                                            <Button variant="secondary" size="sm" onClick={() => addOption(index)}>
+                                                <FontAwesomeIcon icon={faPlus} />
+                                            </Button>
+                                        </OverlayTrigger>
+                                    )}
+                                    <OverlayTrigger
+                                        placement="top"
+                                        overlay={<Tooltip>Delete Question</Tooltip>}
+                                    >
+                                        <Button variant="danger" size="sm" onClick={() => handleQuestionDelete(index)}>
                                             <FontAwesomeIcon icon={faTrash} />
                                         </Button>
-                                    </div>
-                                </Form.Group>
-                            ))}
-                            {question.options.length < 10 && (
-                                <Button variant="secondary" size="sm" onClick={() => addOption(index)}>
-                                    <FontAwesomeIcon icon={faPlus} /> Add Option
-                                </Button>
-                            )}
-                            <Button variant="danger" size="sm" onClick={() => handleQuestionDelete(index)}>
-                                <FontAwesomeIcon icon={faTrash} />
-                            </Button>
-                            <Button variant="info" size="sm" onClick={() => handleQuestionEdit(index)}>
-                                <FontAwesomeIcon icon={faEdit} />
-                            </Button>
+                                    </OverlayTrigger>
+                                    {/* Edit question - needed? */}
+                                    {/* <OverlayTrigger
+                                        placement="top"
+                                        overlay={<Tooltip>Edit Question</Tooltip>}
+                                    >
+                                        <Button variant="info" size="sm" onClick={() => handleQuestionEdit(index)}>
+                                            <FontAwesomeIcon icon={faEdit} />
+                                        </Button>
+                                    </OverlayTrigger> */}
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        </Accordion>
+                    ))}
+                </Col>
+                <Col md={6}>
+                    <h4>Questions Preview</h4>
+                    {questions.map((question, index) => (
+                        <div key={index} className={`question-preview ${selectedQuestionIndex === index ? 'selected' : ''}`}>
+                            <QuestionPreview question={question} index={index + 1} />
                         </div>
                     ))}
                 </Col>
-
             </Row>
+           
+            {/* Sticky Add/Delete Question Buttons */}
+            <div ref={addQuestionRef} style={{ position: 'sticky', bottom: '20px', right: '20px', zIndex: '1000' }}>
+                <OverlayTrigger
+                    placement="left"
+                    overlay={<Tooltip>Add Question</Tooltip>}
+                >
+                    <Button variant="primary" size="m" onClick={addQuestion}>
+                        <FontAwesomeIcon icon={faPlus}/>
+                        Add Question
+                    </Button>
+                </OverlayTrigger>
+               
+            </div>
         </Container>
     );
 };

@@ -1,57 +1,36 @@
-.session-statistics-container {
+/* SessionStatisticsSection.css */
+
+.session-table-section {
   margin-top: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 20px;
+  margin-bottom: 40px;
 }
 
-.session-statistics-header {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+.session-table-section h5 {
+  margin-bottom: 10px;
 }
 
-.session-statistics-header svg {
-  margin-right: 10px;
-}
-
-.table-container {
-  margin-top: 20px;
-}
-
-.table-container table {
+.session-table-section table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.table-container th,
-.table-container td {
+.session-table-section th,
+.session-table-section td {
   border: 1px solid #ddd;
   padding: 8px;
+  text-align: center; /* Center align table cell content */
+  max-width: 30px;
 }
 
-.table-container th {
+.session-table-section th {
   background-color: #f2f2f2;
-  text-align: left;
 }
 
-.table-container th[colspan="7"] {
-  text-align: center;
-}
-
-.table-container .action-buttons {
+.session-table-section .action-buttons {
   display: flex;
   justify-content: center;
 }
 
-.table-container .action-buttons button {
+.session-table-section .action-buttons button {
   margin-right: 5px;
-}
-
-.create-session-button-container {
-  margin-bottom: 20px; /* Add margin bottom to create space */
-}
-
-.session-table-section {
-  margin-top: 20px; /* Add margin top to create space */
 }

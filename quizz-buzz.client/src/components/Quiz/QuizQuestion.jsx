@@ -9,6 +9,7 @@ const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSu
         // Reset answerSubmitted when the question changes
         setAnswerSubmitted(false);
         setIsSubmitDisabled(false)
+        console.log(`question: ${JSON.stringify(question)}`);
     }, [question]);
 
     useEffect(() => {

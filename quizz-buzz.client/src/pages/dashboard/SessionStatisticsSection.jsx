@@ -5,12 +5,17 @@ import { faTrashAlt, faEye } from '@fortawesome/free-solid-svg-icons';
 import SessionService from '../../services/SessionService';
 import { formatDate } from '../../utils/dateUtils';
 import CreateSessionButton from '../../components/Session/Buttons/CreateSessionButton';
-import { Button, Row } from 'react-bootstrap'; // Import Button and Row from React-Bootstrap
+import { Button, Row, Modal, Col } from 'react-bootstrap'; // Import Button, Row, and Modal from React-Bootstrap
+import SessionAdminStatistics from '../../components/Session/SessionAdminStatistics';
 import './SessionStatisticsSection.css';
+import SessionResults from '../../components/Session/SessionResults/SessionResults';
 
 const SessionStatisticsSection = ({ userName }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [sessions, setSessions] = useState([]);
+    const [showResultsModal, setShowResultsModal] = useState(false);
+    const [chosenSessionResults, setChosenSessionResults] = useState(null);
+
 
     useEffect(() => {
         const fetchUserSessions = async () => {
@@ -28,13 +33,32 @@ const SessionStatisticsSection = ({ userName }) => {
         fetchUserSessions();
     }, [userName]);
 
+    useEffect(() => {
+        // Reset chosenSessionResults to null when showStatisticsModal becomes false
+        if(!showResultsModal){
+            setChosenSessionResults(null);
+        }
+
+    },[showResultsModal])
+
+    const fetchSessionResults = async (sessionId) => {
+        try {
+            console.log("fetchleaderboardata:")
+            const data = await SessionService.fetchSessionResults(sessionId); 
+            console.log("sessionresults fetched:", data );
+            setChosenSessionResults(data); // Update leaderboard data state
+        } catch (error) {
+            console.error('Error fetching leaderboard data:', error);
+        }
+    };
+
     const finishedSessions = sessions.filter(session => SessionService.isSessionFinished(session));
     const notStartedSessions = sessions.filter(session => !SessionService.isSessionStarted(session));
     const runningSessions = sessions.filter(session => !SessionService.isSessionFinished(session) && SessionService.isSessionStarted(session));
 
     const handleDeleteSession = async (sessionId) => {
         try {
-            const confirmDelete = window.confirm("Are you sure you want to delete this session?");
+            const confirmDelete = window.confirm(`Are you sure you want to delete session ${sessionId}?`);
             if (!confirmDelete) return;
 
             await SessionService.deleteSession(sessionId);
@@ -56,132 +80,160 @@ const SessionStatisticsSection = ({ userName }) => {
         }
     };
 
+     // Function to handle click on "View Statistics" button
+     const handleViewResults = (sessionId) => {
+        setShowResultsModal(false);
+        console.log("in handleViewStatistics");
+        fetchSessionResults(sessionId);
+        setShowResultsModal(true); // Show the statistics modal
+    };
+
     if (isLoading) {
         return <p>Loading...</p>;
     }
 
     return (
         <Row>
-            <CreateSessionButton />
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <CreateSessionButton />
+            </div>
 
             {/* Finished Sessions Section */}
             <div className="session-table-section">
-                <h5>Finished Sessions:</h5>
-                {finishedSessions.length > 0 ? (
-                    <table className="table table-striped">
-                        {/* Table Header */}
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Date Started</th>
-                                <th scope="col">Date Ended</th>
-                                <th scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        {/* Table Body */}
-                        <tbody>
-                            {finishedSessions.map((session, index) => (
-                                <tr key={session.sessionID}>
-                                    <th scope="row">{index + 1}</th>
-                                    <td>{session.name}</td>
-                                    <td>{formatDate(session.startedAt)}</td>
-                                    <td>{formatDate(session.endedAt)}</td>
-                                    <td>
-                                        {/* Buttons for Action */}
-                                        <Button variant="danger" onClick={() => handleDeleteSession(session.sessionID)}>
-                                            <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
-                                        </Button>
-                                        <Button variant="success" className="ml-2">
-                                            <FontAwesomeIcon icon={faEye} title="View Statistics" />
-                                        </Button>
-                                    </td>
+                {finishedSessions.length > 0 && (
+                    <div>
+                        <h5>Finished Sessions:</h5>
+                        <table className="table table-striped">
+                            {/* Table Header */}
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Date Started</th>
+                                    <th scope="col">Date Ended</th>
+                                    <th scope="col">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <p>No finished sessions available.</p>
+                            </thead>
+                            {/* Table Body */}
+                            <tbody>
+                                {finishedSessions.map((session, index) => (
+                                    <tr key={session.sessionID}>
+                                        <th scope="row">{index + 1}</th>
+                                        <td>{session.name}</td>
+                                        <td>{session.sessionID}</td>
+                                        <td>{formatDate(session.startedAt)}</td>
+                                        <td>{formatDate(session.endedAt)}</td>
+                                        <td>
+                                            {/* Buttons for Action */}
+                                            <Button variant="danger" onClick={() => handleDeleteSession(session.sessionID)}>
+                                                <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
+                                            </Button>
+                                            <Button variant="success" className="ml-2" onClick={ () => handleViewResults(session.sessionID)}>
+                                                <FontAwesomeIcon icon={faEye} title="View Results" />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 
             {/* Not Started Sessions Section */}
             <div className="session-table-section">
-                <h5>Not Started Sessions:</h5>
-                {notStartedSessions.length > 0 ? (
-                    <table className="table table-striped">
-                        {/* Table Header */}
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Date Created</th>
-                                <th scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        {/* Table Body */}
-                        <tbody>
-                            {notStartedSessions.map((session, index) => (
-                                <tr key={session.sessionID}>
-                                    <th scope="row">{index + 1}</th>
-                                    <td>{session.name}</td>
-                                    <td>{formatDate(session.createdAt)}</td>
-                                    <td>
-                                        {/* Buttons for Action */}
-                                        <Button variant="danger" onClick={() => handleDeleteSession(session.sessionID)}>
-                                            <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
-                                        </Button>
-                                        <Button variant="success" className="ml-2">
-                                            <FontAwesomeIcon icon={faEye} title="View Statistics" />
-                                        </Button>
-                                    </td>
+                {notStartedSessions.length > 0 && (
+                    <div>
+                        <h5>Awaiting Sessions:</h5>
+                        <table className="table table-striped">
+                            {/* Table Header */}
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Date Created</th>
+                                    <th scope="col">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <p>No not started sessions available.</p>
+                            </thead>
+                            {/* Table Body */}
+                            <tbody>
+                                {notStartedSessions.map((session, index) => (
+                                    <tr key={session.sessionID}>
+                                        <th scope="row">{index + 1}</th>
+                                        <td>{session.name}</td>
+                                        <td>{session.sessionID}</td>
+                                        <td>{formatDate(session.createdAt)}</td>
+                                        <td>
+                                            {/* Buttons for Action */}
+                                            <Button variant="danger" onClick={() => handleDeleteSession(session.sessionID)}>
+                                                <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
+                                            </Button>
+                                            <Button variant="success" className="ml-2">
+                                                <FontAwesomeIcon icon={faEye} title="View Statistics" />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>   
                 )}
             </div>
 
             {/* Running Sessions Section */}
             <div className="session-table-section">
-                <h5>Running Sessions:</h5>
-                {runningSessions.length > 0 ? (
-                    <table className="table table-striped">
-                        {/* Table Header */}
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Date Started</th>
-                                <th scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        {/* Table Body */}
-                        <tbody>
-                            {runningSessions.map((session, index) => (
-                                <tr key={session.sessionID}>
-                                    <th scope="row">{index + 1}</th>
-                                    <td>{session.name}</td>
-                                    <td>{formatDate(session.startedAt)}</td>
-                                    <td>
-                                        {/* Buttons for Action */}
-                                        <Button variant="danger" onClick={() => handleDeleteSession(session.sessionID)}>
-                                            <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
-                                        </Button>
-                                        <Button variant="success" className="ml-2">
-                                            <FontAwesomeIcon icon={faEye} title="View Statistics" />
-                                        </Button>
-                                    </td>
+                {runningSessions.length > 0 && (
+                    <div>
+                        <h5>Running Sessions:</h5>
+                        <table className="table table-striped">
+                            {/* Table Header */}
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Date Started</th>
+                                    <th scope="col">Date Created</th>
+                                    <th scope="col">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <p>No running sessions available.</p>
+                            </thead>
+                            {/* Table Body */}
+                            <tbody>
+                                {runningSessions.map((session, index) => (
+                                    <tr key={session.sessionID}>
+                                        <th scope="row">{index + 1}</th>
+                                        <td>{session.name}</td>
+                                        <td>{session.sessionID}</td>
+                                        <td>{formatDate(session.startedAt)}</td>
+                                        <td>{formatDate(session.createdAt)}</td>
+                                        <td>
+                                            {/* Buttons for Action */}
+                                            <Button variant="danger" onClick={() => handleDeleteSession(session.sessionID)}>
+                                                <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
+                                            </Button>
+                                            <Button variant="success" className="ml-2" onClick={() => handleViewResults(session.sessionID)}>
+                                                <FontAwesomeIcon icon={faEye} title="View Statistics" />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
+
+            {/* Modal for displaying statistics */}
+            <Modal show={showResultsModal && chosenSessionResults != null} onHide={() => setShowResultsModal(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Session Admin Statistics</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <SessionResults data = {chosenSessionResults} />
+                </Modal.Body>
+            </Modal>
         </Row>
     );
 };

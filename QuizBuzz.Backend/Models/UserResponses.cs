@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace QuizBuzz.Backend.Models
 {
     [DynamoDBTable("PlayerResponses")]
-    public class SessionUserResponses
+    public class UserResponses
     {
         [DynamoDBHashKey]
         public string SessionID { get; set; } = string.Empty;

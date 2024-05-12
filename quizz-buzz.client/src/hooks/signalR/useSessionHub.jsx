@@ -10,6 +10,7 @@ const useSessionHub = () => {
                 const newConnection = new HubConnectionBuilder()
                     .withUrl("https://localhost:7141/sessionHub")
                     .configureLogging(LogLevel.Debug)
+                    .withAutomaticReconnect() 
                     .build();
 
                 await newConnection.start();

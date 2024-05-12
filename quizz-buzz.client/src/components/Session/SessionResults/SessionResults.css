@@ -1,0 +1,54 @@
+/* Apply general styles to the leaderboard container */
+.leaderboard-container {
+    font-family: Arial, sans-serif;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px; /* Add margin to separate from other elements */
+}
+
+/* Center the heading */
+h2 {
+    text-align: center;
+    margin-bottom: 20px; /* Add space below the heading */
+}
+
+/* Styling for the top players table */
+.top-players-table {
+    margin-bottom: 20px; /* Add margin at the bottom */
+}
+
+/* Styling for the other players table */
+.other-players-table {
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+}
+
+/* Styling for table headers */
+th {
+    text-align: center;
+    background-color: #f2f2f2; /* Light gray background */
+    padding: 10px;
+}
+
+/* Styling for table data cells */
+td {
+    text-align: center;
+    padding: 10px;
+}
+
+/* Apply alternating background color to table rows */
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* Light gray background for even rows */
+}
+
+/* Styling for the top player row */
+.top-player-row {
+    background-color: #ffd700; /* Yellow background for top players */
+}
+
+/* Remove default list styles */
+ol {
+    list-style: none;
+    padding: 0;
+}

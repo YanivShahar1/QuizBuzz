@@ -9,6 +9,7 @@ using QuizBuzz.Backend.DataAccess;
 using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using QuizBuzz.Backend.Hubs;
+using Newtonsoft.Json;
 
 namespace QuizBuzz.Backend.Controllers
 {
@@ -77,7 +78,7 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
-                Debug.WriteLine($"CreateQuizAsync , newQuiz ,: {newQuiz}");
+                Debug.WriteLine($"CreateQuizAsync , newQuiz ,: {JsonConvert.SerializeObject(newQuiz)}");
 
                 string quizId = await _quizService.SaveQuizAsync(newQuiz);
                 _logger.LogInformation($"Quiz created with ID: {quizId}");

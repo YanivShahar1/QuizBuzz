@@ -1,28 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'react-bootstrap';
 import './SessionAdminStatistics.css';
 
-
 const SessionAdminStatistics = ({ responses }) => {
-    const questionStatistics = {};
+    const [questionStatistics, setQuestionStatistics] = useState({});
 
-    responses.forEach(response => {
-        if (!questionStatistics[response.questionIndex]) {
-            questionStatistics[response.questionIndex] = {
-                numCorrect: 0,
-                optionCounts: {}
-            };
-        }
+    useEffect(() => {
+        console.log(`responses: ${JSON.stringify(responses)}`);
+    }, [responses]);
 
-        if (response.isCorrect) {
-            questionStatistics[response.questionIndex].numCorrect++;
-        }
-    });
+    useEffect(() => {
+        console.log(`questionStatistics changed: ${JSON.stringify(questionStatistics)}`);
+        console.log(`questionStatistics size: ${Object.keys(questionStatistics).length}`);
+    }, [questionStatistics]);
+
+    useEffect(() => {
+        // Calculate question statistics when responses change
+        const stats = {};
+        responses.forEach(response => {
+            if (!stats[response.questionIndex]) {
+                stats[response.questionIndex] = {
+                    numCorrect: 0,
+                    optionCounts: {}
+                };
+            }
+
+            if (response.isCorrect) {
+                stats[response.questionIndex].numCorrect++;
+            }
+        });
+        setQuestionStatistics(stats);
+    }, [responses]);
 
     return (
         <div className="session-admin-statistics">
             <h2>Session Admin Statistics</h2>
-            {questionStatistics.lentgh > 0 ? (
+            {Object.keys(questionStatistics).length > 0 ? (
                 <Row>
                     {Object.entries(questionStatistics).map(([questionIndex, stats]) => (
                         <Col key={questionIndex} md={6}>
@@ -33,14 +46,13 @@ const SessionAdminStatistics = ({ responses }) => {
                         </Col>
                     ))}
                 </Row>
-
-            ):(
+            ) : (
                 <Row>
                     <Col>
                         <p>No responses recorded</p>
                     </Col>
                 </Row>
-            ) }
+            )}
         </div>
     );
 };

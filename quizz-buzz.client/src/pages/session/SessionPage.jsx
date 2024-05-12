@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Leaderboard from '../../components/Leaderboard/Leaderboard';
+import SessionResults from '../../components/Session/SessionResults/SessionResults';
 import SessionService from '../../services/SessionService';
 import QuizService from '../../services/QuizService';
 import AuthService from '../../services/AuthService';
 import WaitingRoom from './WaitingRoom';
 import QuizQuestion from '../../components/Quiz/QuizQuestion';
-import useSessionHub from '../../signalR/useSessionHub';
+import useSessionHub from '../../hooks/signalR/useSessionHub';
 import SessionAdminStatistics from '../../components/Session/SessionAdminStatistics';
-import useSessionStartedListener from '../../signalR/useSessionStartedListener';
-import useQuestionResponseSubmittedListener from '../../signalR/useQuestionResponseSubmittedListener'
-import useSessionUpdatedListener from '../../signalR/useSessionUpdatedListener'
+import useSessionStartedListener from '../../hooks/signalR/useSessionStartedListener';
+import useQuestionResponseSubmittedListener from '../../hooks/signalR/useQuestionResponseSubmittedListener'
+import useSessionUpdatedListener from '../../hooks/signalR/useSessionUpdatedListener'
 
 const SessionPage = () => {
     const connection = useSessionHub();
@@ -26,6 +26,15 @@ const SessionPage = () => {
     const [responses, setResponses] = useState([]);
     const [startTime, setStartTime] = useState(null);
     const [leaderboardData, setLeaderboardData] = useState([]); 
+    
+    useEffect(() => {
+        const storedNickname = JSON.parse(window.sessionStorage.getItem("nickname"));
+        if (storedNickname !== null) {
+            console.log(`found nickname in sessionstorage: ${storedNickname}`);
+            setNickname(storedNickname);
+        }
+      }, []);
+    
 
     const isHost = () => {
         if (session) {
@@ -61,7 +70,7 @@ const SessionPage = () => {
     useEffect(() => {
         fetchSessionData();
     }, [sessionId]);
-    
+
     const startSession = async () => {
         try {
             // Call API to start the session
@@ -315,6 +324,8 @@ const SessionPage = () => {
                     session={session}
                     onStartSession={startSession}
                     onJoinSession={joinSession}
+                    nickname={nickname}
+                    setNickname={setNickname}
                 />
             </div>
 
@@ -328,8 +339,8 @@ const SessionPage = () => {
             <div>
                 <h1>Session {session.name}</h1>
                 <p>Session Finished!</p>
-                <Leaderboard 
-                    leaderboardData={leaderboardData} 
+                <SessionResults 
+                    data={leaderboardData} 
                     isHost={isHost}
                 />
             </div>

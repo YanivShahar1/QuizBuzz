@@ -1,3 +1,6 @@
+import AuthService from "./AuthService";
+
+
 const SessionService = {
     backendUrl : "https://localhost:7141/api/session/",
     submitSession: async (sessionData) => {
@@ -134,6 +137,35 @@ const SessionService = {
         }
     },
 
+    fetchResponses: async (sessionId) => {
+        try {
+            console.log("sssion id in fetchresponses: .. ", sessionId);
+            const response = await fetch(`${SessionService.backendUrl}${sessionId}/responses`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (response.status === 404) {
+                console.log(`Responses not found for session with ID ${sessionId}`);
+                return []; // Responses not found
+            }
+    
+            if (response.ok) {
+                const responses = await response.json();
+                console.log(`Responses found for session with ID ${sessionId}:`, responses);
+                return responses;
+            } else {
+                const errorMessage = `Failed to fetch responses. Status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            throw new Error(`Error fetching responses: ${error.message}`);
+        }
+    },
+    
+
     
     joinSession: async (sessionId, nickname) => {
         try {
@@ -213,6 +245,8 @@ const SessionService = {
         console.log(`session id ${session.sessionID} ${res ? "finished" : "didnt finished yet"}`);
         return res;
     },
+
+
 
     startSession: async (sessionId) => {
         try {

@@ -286,6 +286,27 @@ namespace QuizBuzz.Backend.Controllers
             }
         }
 
+        [HttpGet("{sessionId}/responses")]
+        public async Task<IActionResult> GetSessionResponses(string sessionId)
+        {
+            try
+            {
+                Debug.WriteLine($"Fetching responses for session with ID: {sessionId}");
+
+                var sessionResponses = await _sessionService.GetSessionResponsesAsync(sessionId);
+                Debug.WriteLine($"Fetched {sessionResponses.Count()} responses");
+
+                return Ok(sessionResponses);
+            }
+            catch (Exception ex)
+            {
+                // Handle any errors or exceptions
+                Debug.WriteLine($"Error fetching responses for session with ID {sessionId}: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
 
     }
 }

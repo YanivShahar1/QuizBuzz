@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SessionService from '../../../services/SessionService';
 import QuizService from '../../../services/QuizService';
 import AuthService from '../../../services/AuthService';
+import CreateQuizButton from '../../../components/Quiz/CreateQuizButton/CreateQuizButton';
 import { Form, Button, Row, Col, Alert, Container, Accordion } from 'react-bootstrap';
 
 const CreateSessionPage = () => {
@@ -86,6 +87,7 @@ const CreateSessionPage = () => {
                                     </option>
                                 ))}
                             </Form.Control>
+                            <CreateQuizButton></CreateQuizButton>
                         </Form.Group>
                         <Form.Group controlId="maxTimePerQuestion">
                             <Form.Label>Max Time Per Question (seconds):</Form.Label>

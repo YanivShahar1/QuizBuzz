@@ -24,6 +24,8 @@ namespace QuizBuzz.Backend.Services
         Task<SessionResult> GetSessionResultsAsync(string sessionId);
         Task FinishSessionAsync(string sessionId);
 
+        Task<IEnumerable<UserResponses>> GetSessionResponsesAsync(string sessionId);
+
 
     }
 }

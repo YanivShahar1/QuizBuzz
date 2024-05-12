@@ -48,13 +48,13 @@ const CreateQuizPage = () => {
                 })),
             };
 
-            console.log(`want to submit quiz -> ${newQuiz}`);
+            console.log(`want to submit quiz -> ${JSON.stringify(newQuiz)}`);
             const createdQuizID = await QuizService.submitQuiz(newQuiz);
             alert(`Quiz submitted successfully! Quiz ID: ${createdQuizID}`);
             navigate('/dashboard');
         } catch (error) {
             console.error('Error submitting quiz:', error);
-            setError('An error occurred while submitting the quiz. Please try again.');
+            setError('An error occurred while submitting the quiz:', error);
         } finally {
             setIsSubmitting(false);
         }
