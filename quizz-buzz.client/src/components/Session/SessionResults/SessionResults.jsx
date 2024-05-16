@@ -13,12 +13,9 @@ const SessionResults = ({ data }) => {
         // Compare based on number of correct answers
         console.log(`comparing : a = ${a}, b = ${b}`);
         if (a.numCorrectAnswers !== b.numCorrectAnswers) {
-            console.log(`based #answers, ${b.numCorrectAnswers - a.numCorrectAnswers}`)
             return b.numCorrectAnswers - a.numCorrectAnswers; // Sort in descending order of correct answers
         } else {
             // If correct answers are the same, compare based on average response time
-            console.log(`based #time, ${a.averageResponseTime - b.averageResponseTime}`)
-            
             return a.AverageResponseTime - b.AverageResponseTime; // Sort in ascending order of response time
         }
     });

@@ -21,10 +21,35 @@ function QuizCategories({ categories, onCategorySelect }) {
   };
 
   const handleCategorySelect = (category) => {
-    console.log(`category select: ${category}`);
     setSearchTerm(category);
     onCategorySelect(category);
     setIsOpen(false);
+  };
+
+  const handleSuggestCategory = () => {
+    const newCategory = searchTerm.trim();
+    if (newCategory) {
+      onCategorySelect(newCategory);
+      setIsOpen(false);
+    }
+  };
+
+  const renderDropdownContent = () => {
+    if (filteredCategories.length === 0) {
+      return (
+        <div>
+          <div>No categories found.</div>
+          <div onClick={handleSuggestCategory}>+ Suggest a category</div>
+        </div>
+      );
+    }
+    return (
+      <div>
+        {filteredCategories.map((category, index) => (
+          <div key={index} onClick={() => handleCategorySelect(category)}>{category}</div>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -38,9 +63,7 @@ function QuizCategories({ categories, onCategorySelect }) {
       />
       {isOpen && (
         <div className="dropdown-menu" style={{ display: isOpen ? 'block' : 'none' }}>
-          {filteredCategories.map((category, index) => (
-            <div key={index} onClick={() => handleCategorySelect(category)}>{category}</div>
-          ))}
+          {renderDropdownContent()}
         </div>
       )}
     </div>
