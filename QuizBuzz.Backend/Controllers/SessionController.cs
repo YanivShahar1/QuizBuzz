@@ -2,7 +2,6 @@
 using System;
 using System.Threading.Tasks;
 using QuizBuzz.Backend.Models;
-using QuizBuzz.Backend.Services;
 using Microsoft.Extensions.Logging;
 using QuizBuzz.Backend.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -10,6 +9,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using Amazon.Runtime.Internal.Util;
 using QuizBuzz.Backend.Models.DTO;
+using QuizBuzz.Backend.Services;
 
 
 namespace QuizBuzz.Backend.Controllers
@@ -30,35 +30,28 @@ namespace QuizBuzz.Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateSessionAsync([FromBody] Session newSession)
+        public async Task<IActionResult> SaveSessionAsync([FromBody] Session newSession)
         {
             try
             {
-                Debug.WriteLine("Creating session");
-                newSession.SessionID = Guid.NewGuid().ToString(); // Generate a unique ID for the session
-                Debug.WriteLine($"Generated SessionID: {newSession.SessionID}");
-                await _sessionService.CreateSessionAsync(newSession);
-                Debug.WriteLine($"saved session with sessionId: {newSession.SessionID} successfully");
-
-                return CreatedAtAction(nameof(GetSessionById), new { sessionId = newSession.SessionID }, newSession);
+                await _sessionService.SaveSessionAsync(newSession);
+                return CreatedAtAction(nameof(GetSessionByIdAsync), new { sessionId = newSession.SessionID }, newSession);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("error in Creating session");
 
-                _logger.LogError(ex, $"Error creating session: {ex.Message}");
+                
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         [HttpGet("{sessionId}", Name = "GetSessionById")]
-        public async Task<IActionResult> GetSessionById(string sessionId)
+        public async Task<IActionResult> GetSessionByIdAsync(string sessionId)
         {
             try
             {
-                Debug.WriteLine($"get session by sessionid : {sessionId}");
-
-                Session? session = await _sessionService.GetSessionByIdAsync(sessionId);
+                Session? session = await _sessionService.GetSessionAsync(sessionId);
                 if (session == null)
                 {
                     Debug.WriteLine($"no sessions foud for id : {sessionId}");
@@ -121,7 +114,7 @@ namespace QuizBuzz.Backend.Controllers
             {
                 // Validate the session and user
                 Debug.WriteLine($"user {nickname} want to join session {sessionId}");
-                Session? session = await _sessionService.GetSessionByIdAsync(sessionId);
+                Session? session = await _sessionService.GetSessionAsync(sessionId);
                 if (session == null)
                 {
                     Debug.WriteLine($"didnt found any session with id {sessionId}");
@@ -147,7 +140,7 @@ namespace QuizBuzz.Backend.Controllers
             Debug.WriteLine("GetSessionsByUserId:");
             try
             {
-                var sessions = await _sessionService.GetSessionsByUserIdAsync(userId);
+                var sessions = await _sessionService.GetUserSessions(userId);
                 if (sessions == null || !sessions.Any())
                 {
                     Console.WriteLine("No sessions!:");
@@ -175,7 +168,7 @@ namespace QuizBuzz.Backend.Controllers
             {
                 Debug.WriteLine("Fetching the session from the database...");
                 // Fetch the session from the database
-                Session? session = await _sessionService.GetSessionByIdAsync(sessionId);
+                Session? session = await _sessionService.GetSessionAsync(sessionId);
                 if (session == null)
                 {
                     Debug.WriteLine("Session not found in the database.");
@@ -246,7 +239,7 @@ namespace QuizBuzz.Backend.Controllers
                 // Validate other fields as needed
 
                 // Save the question response to the database
-                bool isCorrect = await _sessionService.SaveQuestionResponseAsync(answerSubmission);
+                bool isCorrect = await _sessionService.UpdateUserResponsesAsync(answerSubmission);
                 Debug.WriteLine("Saved question response successfully!");
 
                 // Notify clients about the submitted question response

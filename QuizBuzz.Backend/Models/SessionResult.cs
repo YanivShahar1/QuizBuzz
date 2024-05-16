@@ -11,7 +11,6 @@ namespace QuizBuzz.Backend.Models
 
         public List<ParticipantResult> ParticipantResults { get; set; } = new List<ParticipantResult>();
 
-        // Add any additional fields or metrics you want to track for the session results
     }
 
     public class ParticipantResult
