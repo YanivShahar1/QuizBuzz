@@ -18,16 +18,16 @@
   border-radius: 5px;
 }
 
-.students-list {
+.participants-list {
   margin-top: 20px;
 }
 
-.students-list ul {
+.participants-list ul {
   list-style: none;
   padding: 0;
 }
 
-.students-list ul li {
+.participants-list ul li {
   margin-bottom: 5px;
 }
 

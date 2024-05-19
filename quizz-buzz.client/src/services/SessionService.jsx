@@ -14,10 +14,11 @@ const SessionService = {
             });
 
             if (response.ok) {
-                const createdSession = await response.json();
-                return createdSession.sessionID;
+                const sessionId = await response.text();
+                return sessionId;
             } else {
                 const rawResponse = await response.text();
+
                 throw new Error(`Failed to create session. Raw Response: ${rawResponse}`);
             }
         } catch (error) {
@@ -285,6 +286,7 @@ const SessionService = {
             });
             if (!response.ok) {
                 const errorMessage = await response.text();
+                console.log(`error msg submitAnswer: ${errorMessage}`);
                 throw new Error(`Failed to submit answer. Status: ${response.status} text : ${errorMessage}
                                 \n error :${response.errorMessage}`);
             }

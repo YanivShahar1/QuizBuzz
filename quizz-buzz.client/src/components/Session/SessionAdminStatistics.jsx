@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'react-bootstrap';
+
 import './SessionAdminStatistics.css';
+
 
 const SessionAdminStatistics = ({ responses }) => {
     const [questionStatistics, setQuestionStatistics] = useState({});
@@ -31,6 +33,9 @@ const SessionAdminStatistics = ({ responses }) => {
         });
         setQuestionStatistics(stats);
     }, [responses]);
+
+
+   
 
     return (
         <div className="session-admin-statistics">

@@ -9,7 +9,7 @@ const QuestionPreview = ({ question, index }) => {
       <div>{"Question "}{index} : {question.question}</div>
       <ListGroup horizontal>
       {question.options.map((option, index) => (
-          <ListGroup.Item>
+          <ListGroup.Item  key={index}>
             <span style={{ color: question.correctAnswers.includes(index) ? 'green' : 'red' }}>{option}</span>
           </ListGroup.Item>
       ))}

@@ -18,6 +18,7 @@ const CreateQuizPage = () => {
         const fetchCategories = async () => {
             try {
                 const categories = await QuizService.fetchCategories();
+                console.log(`categories: ${categories}`);
                 setCategories(categories);
             } catch (error) {
                 console.error('Error fetching categories:', error);

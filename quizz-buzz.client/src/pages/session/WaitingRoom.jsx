@@ -8,16 +8,6 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSession,nickname,setNickname }) => {
     const [participants, setParticipants] = useState([]);
     const [isUserJoined, setIsUserJoined] = useState(false);
-
-
-    useEffect(() => {
-        const storedNickname = JSON.parse(window.sessionStorage.getItem("nickname"));
-        if (storedNickname !== null) {
-            console.log(`found nickname in sessionstorage: ${storedNickname}`);
-            setIsUserJoined(true);
-            setNickname(storedNickname);
-        }
-      }, []);
     
     useEffect(() => {
 
@@ -26,7 +16,8 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
 
     const isHost = (session) => session.hostUserID === AuthService.getSessionUsername();
 
-    const handleUserJoinedSession = (userId) => {
+    const handleUserJoinedSession = (nickname) => {
+        console.log(`user ${nickname} has joined`);
         fetchSessionParticipants();
     };
 
@@ -40,9 +31,6 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
 
     useEffect(() => {
         fetchSessionParticipants();
-        if (sessionHubConnection) {
-            sessionHubConnection.invoke("UserJoined", session.sessionID, session.hostUserID);
-        }
     }, [session]);
 
     const fetchSessionParticipants = async () => {
@@ -50,7 +38,7 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
             const sessionParticipants = await SessionService.getParticipants(session.sessionID);
             setParticipants(sessionParticipants);
         } catch (error) {
-            console.error('Error fetching session students:', error);
+            console.error('Error fetching session participants:', error);
         }
     };
 
@@ -116,18 +104,18 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
                             <Form>
                                 <Form.Group controlId="nickname">
                                     <Form.Label>Enter Nickname:</Form.Label>
-                                    <Form.Control type="text" placeholder="Enter nickname" value={nickname} onChange={(e) => setNickname(e.target.value)} />
+                                    <Form.Control type="text" placeholder="Enter nickname" value={nickname || ''} onChange={(e) => setNickname(e.target.value)} />
                                 </Form.Group>
                                 <Button variant="primary" onClick={handleJoinSession}>Join Session</Button>
                             </Form>
                         )}
                     </div>
                 )}
-                <div className='students-list'>
-                    <h4>Students Joined:</h4>
+                <div className='participants-list'>
+                    <h4>Participants:</h4>
                     <ul>
-                        {participants.map((student, index) => (
-                            <li key={index}>{student}</li>
+                        {participants.map((nickname, index) => (
+                            <li key={index}>{nickname}</li>
                         ))}
                     </ul>
                 </div>

@@ -5,6 +5,7 @@ const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSu
     const [answerSubmitted, setAnswerSubmitted] = useState(false);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
+    console.log(`in quiz wuestion: question ${question}${JSON.stringify(question)}`)
     useEffect(() => {
         // Reset answerSubmitted when the question changes
         setAnswerSubmitted(false);

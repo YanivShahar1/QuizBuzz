@@ -146,7 +146,7 @@ const QuestionsSection = ({ questions, setQuestions }) => {
                                         <Form.Group key={optionIndex} controlId={`formOption${index}-${optionIndex}`} className="option-group">
                                             <div className="option-wrapper">
                                                 <FormCheck
-                                                    type={question.multipleAnswers ? 'checkbox' : 'radio'}
+                                                    type={question.multipleAnswers && question.correctAnswers.length > 1 ? 'checkbox' : 'radio'}
                                                     label={`Option ${optionIndex + 1}: `}
                                                     checked={question.correctAnswers.includes(optionIndex)}
                                                     onChange={() => handleCorrectAnswerToggle(index, optionIndex)}

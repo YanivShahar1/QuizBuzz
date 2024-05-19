@@ -1,14 +1,15 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Amazon.DynamoDBv2;
+using Microsoft.AspNet.SignalR.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.Models;
 using QuizBuzz.Backend.Models.DTO;
-using QuizBuzz.Backend.Services.Interfaces;
-using QuizBuzz.Backend.Services.Managers;
+using QuizBuzz.Backend.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace QuizBuzz.Backend.Services
@@ -25,6 +26,7 @@ namespace QuizBuzz.Backend.Services
         private readonly ILogger<SessionService> _logger;
         private readonly ISessionNotificationService _sessionNotificationService;
 
+
         public SessionService(ISessionNotificationService sessionNotificationService, IQuizService quizService, SessionCacheService sessionCacheService, IDynamoDBDataManager dynamoDBDataManager, ILogger<SessionService> logger)
         {
             _sessionNotificationService = sessionNotificationService ?? throw new ArgumentNullException(nameof(sessionNotificationService));
@@ -37,24 +39,25 @@ namespace QuizBuzz.Backend.Services
         }
 
 
-        public async Task<string> SaveSessionAsync(Session newSession)
+        public async Task<string> SubmitSessionAsync(Session session)
         {
-            _sessionManager.InitializeSessionWithId(newSession);
-            await _dynamoDBDataManager.SaveItemAsync(newSession);
-            _logger.LogInformation($"Saved {newSession.SessionID} in DynamoDB database");
-            return newSession.SessionID;
+            _sessionManager.InitializeSessionWithId(session);
+            await _dynamoDBDataManager.SaveItemAsync(session);
+            _logger.LogInformation($"Saved {session.SessionID} in DynamoDB database");
+            return session.SessionID;
         }
 
 
-        public async Task<Session?> GetSessionAsync(string sessionId)
+        public async Task<Session> FetchSessionAsync(string sessionId)
         {
+            Session session;
             Session? cachedSession = _sessionCacheService.GetItem(sessionId);
             if (cachedSession != null)
             {
-                return cachedSession;
+                session =  cachedSession;
             }
             // If not found in cache, fetch it from the database
-            Session session = await _dynamoDBDataManager.GetItemAsync<Session>(sessionId);
+            session = await _dynamoDBDataManager.GetItemAsync<Session>(sessionId);
 
             // Cache the fetched session
             if (session != null)
@@ -77,85 +80,67 @@ namespace QuizBuzz.Backend.Services
                 throw new ArgumentException("Session ID cannot be null or empty.", nameof(sessionId));
             }
 
-            Debug.WriteLine($"Deleting session with ID: {sessionId}");
-
+            // Delete session from database and cache
             await _dynamoDBDataManager.DeleteItemAsync<Session>(sessionId);
-
             _sessionCacheService.RemoveItemAsync(sessionId);
             _logger.LogInformation($"Session with ID {sessionId} deleted from database. Cache invalidated.");
         }
 
 
-        public async Task UpdateSessionAsync(Session updatedSession)
+        public async Task SaveSessionAsync(Session updatedSession)
         {
             if (updatedSession == null)
             {
                 throw new ArgumentNullException(nameof(updatedSession), "Updated session cannot be null");
             }
-
-            Debug.WriteLine($"Updating session with ID: {updatedSession.SessionID}");
-
-            // Save the updated session back to the database
-            await _dynamoDBDataManager.SaveItemAsync(updatedSession);
-
             // Save updated session in cache
-            _sessionCacheService.CacheItem(updatedSession.SessionID,updatedSession);
-
-            // Notify subscribers about the updated session
-            await _sessionNotificationService.NotifySessionUpdated(updatedSession.SessionID);
-
-            _logger.LogInformation($"Session with ID {updatedSession.SessionID} updated successfully.");
+            _sessionCacheService.CacheItem(updatedSession.SessionID, updatedSession);
+            await _dynamoDBDataManager.SaveItemAsync(updatedSession);
         }
-
 
         public async Task<IEnumerable<string>> GetSessionParticipantsAsync(string sessionId)
         {
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                throw new ArgumentException("Session ID cannot be null or empty.", nameof(sessionId));
-            }
-
-            Debug.WriteLine($"Fetching participants for session with ID: {sessionId}");
-
-            // Fetch the session from the database
-            Session? session = await GetSessionAsync(sessionId);
-
-            if (session != null)
-            {
-                return session.Participants;
-            }
-            else
-            {
-                throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
-            }
+            Session session = await FetchSessionAsync(sessionId);
+            return session.Participants;
         }
 
 
-        public async Task AddUserToSessionAsync(string sessionId, string userNickname)
+        public async Task JoinSession(string sessionId, string userNickname)
         {
-
-            // Fetch the session from the database
-            Session? session = await GetSessionAsync(sessionId);
-
+            Session? session = await FetchSessionAsync(sessionId);
             if (session != null)
             {
                 _sessionManager.AddParticipantToSession(session, userNickname);
-
-                // Update the session in the database,cache and notify about the update
-                await _dynamoDBDataManager.SaveItemAsync(session);
-                _sessionCacheService.CacheItem(sessionId, session);
-                await _sessionNotificationService.NotifySessionUpdated(sessionId);
+                await SaveSessionAsync(session);
+                await _sessionNotificationService.NotifyUserJoined(sessionId, userNickname);
                 _logger.LogInformation($"User with ID {userNickname} added to session with ID: {sessionId}");
             }
             else
             {
-                // Session not found
+                _logger.LogInformation($"Session with ID {sessionId} not found");
                 throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
             }
         }
 
+        public async Task<bool> ValidateSessionAdmin(string sessionid, string userName)
+        {
+            Session session = await FetchSessionAsync(sessionid);
+            return (session.HostUserID == userName);
+        }
 
-        public async Task<IEnumerable<Session>> GetUserSessions(string hostUserId)
+        public async Task StartSession(string sessionId)
+        {
+            Session? session = await FetchSessionAsync(sessionId);
+           
+            _sessionManager.StartSession(session);
+            await SaveSessionAsync(session);
+            await _sessionNotificationService.NotifySessionStarted(sessionId);
+            _logger.LogInformation($"Session with ID {sessionId} has started ");
+
+        }
+
+
+        public async Task<IEnumerable<Session>> GetSessionsByHostId(string hostUserId)
         {
 
             if (string.IsNullOrEmpty(hostUserId))
@@ -163,6 +148,12 @@ namespace QuizBuzz.Backend.Services
                 throw new ArgumentException("Host user ID cannot be null or empty.", nameof(hostUserId));
             }
 
+            //to do, check first if in cache
+          /*  var sessionIds = _sessionCacheService.GetUserSessionIds(hostUserId);
+            if(sessionIds != null)
+            {
+
+            }*/
             var sessions = await _dynamoDBDataManager.QueryItemsByIndexAsync<Session>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
             var sessionIds = sessions.Select(session => session.SessionID).ToList();
             _sessionCacheService.CacheUserSessionIds(hostUserId, sessionIds);
@@ -170,33 +161,27 @@ namespace QuizBuzz.Backend.Services
             return sessions;
         }
 
-        public async Task<bool> UpdateUserResponsesAsync(AnswerSubmissionDto answerDto)
+        public async Task<bool> SubmitUserAnswerAsync(AnswerSubmissionDto answerDto)
         {
             try
             {
                 string sessionId = answerDto.SessionId;
-                Session? session = await GetSessionAsync(sessionId);
-                if (session == null)
-                {
-                    throw new ArgumentException($"Cannot find session {sessionId}", nameof(sessionId));
-                }
+                Session? session = await FetchSessionAsync(sessionId);
+               
 
-                Quiz? quiz = await _quizService.GetQuizAsync(session.AssociatedQuizID);
-                if (quiz == null)
-                {
-                    throw new ArgumentException($"Cannot find quiz {session.AssociatedQuizID}", nameof(session.AssociatedQuizID));
-                }
+                Quiz quiz = await _quizService.FetchQuizAsync(session.AssociatedQuizID);
                 
                 Response response = _sessionManager.CreateQuestionResponse(answerDto, quiz);
 
-                UserResponses? currentResponses = await getSessionUserResponsesAsync(sessionId, answerDto.Nickname);
+                UserResponses? currentResponses = await fetchSessionUserResponsesAsync(sessionId, answerDto.Nickname);
                 UserResponses sessionUserResponses = _sessionManager.AddUserResponse(currentResponses, response, answerDto);
-                
                 // Save the SessionUserResponses object to the database
                 await _dynamoDBDataManager.SaveItemAsync(sessionUserResponses);
-                
                 _logger.LogInformation($"response saved in database, isCorrect = {response.IsCorrect}");
-                await _sessionNotificationService.NotifyQuestionResponseSubmitted(sessionId, answerDto.Nickname, answerDto.QuestionIndex, response.IsCorrect);
+
+                await _sessionNotificationService.NotifyAdminUserAnswered(sessionId, answerDto.Nickname, answerDto.QuestionIndex, response);
+                await notifyIfQuestionChanged(answerDto.QuestionIndex, answerDto.SessionId, quiz.Questions.Count);
+                
                 return response.IsCorrect; // Return whether the response is correct
             }
             catch (Exception ex)
@@ -208,7 +193,7 @@ namespace QuizBuzz.Backend.Services
         }
 
 
-        public async Task<SessionResult> GetSessionResultsAsync(string sessionId)
+        public async Task<SessionResult> FetchSessionResultsAsync(string sessionId)
         {
             //TODO: add check that session is ended! else ther's no resluts yet..
             try
@@ -227,19 +212,15 @@ namespace QuizBuzz.Backend.Services
                 if (sessionResult == null)
                 {
                     // If no session result is found, create it and save to db
-                    Session? session = await GetSessionAsync(sessionId);    
-                    if(session == null)
-                    {
-                        throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
-                    }
+                    Session session = await FetchSessionAsync(sessionId); 
+                 
 
                     Dictionary<string, UserResponses> participantsResponses = new Dictionary<string, UserResponses>();
                     // Iterate through participants and retrieve their responses
                     foreach (var participant in session.Participants)
                     {
                         // Retrieve the session user responses for the participant
-                        UserResponses? sessionUserResponses = await getSessionUserResponsesAsync(sessionId, participant);
-
+                        UserResponses? sessionUserResponses = await fetchSessionUserResponsesAsync(sessionId, participant);
 
                         if (sessionUserResponses == null)
                         {
@@ -248,11 +229,7 @@ namespace QuizBuzz.Backend.Services
                         participantsResponses.Add(participant, sessionUserResponses);
                     }
 
-                    Quiz? quiz = await _quizService.GetQuizAsync(session.AssociatedQuizID);
-                    if (quiz == null)
-                    {
-                        throw new KeyNotFoundException($"quiz of session with ID {sessionId} not found.");
-                    }
+                    Quiz? quiz = await _quizService.FetchQuizAsync(session.AssociatedQuizID);
                     sessionResult = _sessionManager.CreateSessionResult(session, participantsResponses, quiz);
                     await _dynamoDBDataManager.SaveItemAsync(sessionResult);
                 }
@@ -270,9 +247,28 @@ namespace QuizBuzz.Backend.Services
                 throw;
             }
         }
-       
 
-        private async Task<UserResponses?> getSessionUserResponsesAsync(string sessionId, string participantName)
+
+        private async Task notifyIfQuestionChanged(int oldQuestionIndex, string sessionId, int totalQuestions)
+        {
+            if (_sessionManager.HasQuestionIndexChanged(sessionId, oldQuestionIndex))
+            {
+                //questionchanged. last user from the session participants that answering current question
+                int currentQuestionIndex = _sessionManager.GetCurrentQuestionIndex(sessionId);
+
+                if (currentQuestionIndex >= totalQuestions)
+                {
+                    await FinishSessionAsync(sessionId);
+                    await _sessionNotificationService.NotifySessionFinished(sessionId);
+                }
+                else
+                {
+                    await _sessionNotificationService.NotifyNewQuestionIndex(sessionId, currentQuestionIndex);
+                }
+            }
+        }
+
+        private async Task<UserResponses?> fetchSessionUserResponsesAsync(string sessionId, string participantName)
         {
 
             UserResponses? cachedUserResponses = _sessionCacheService.GetUserResponses(sessionId, participantName);
@@ -313,7 +309,7 @@ namespace QuizBuzz.Backend.Services
             try
             {
                 // Fetch the session from the database
-                Session? session = await GetSessionAsync(sessionId);
+                Session? session = await FetchSessionAsync(sessionId);
                 if (session == null)
                 {
                     throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
@@ -321,7 +317,8 @@ namespace QuizBuzz.Backend.Services
                 _sessionManager.FinishSession(session);
 
                 // Save the updated session in the database
-                await UpdateSessionAsync(session);
+                await SaveSessionAsync(session);
+                
 
                 Debug.WriteLine($"Session with ID {sessionId} has been finished successfully.");
                 _logger.LogInformation($"Session with ID {sessionId} has been finished successfully.");
@@ -346,7 +343,7 @@ namespace QuizBuzz.Backend.Services
                 throw new KeyNotFoundException($"Session with ID {sessionId} not found.");
             }
 
-            // Initialize a list to store user responses
+            // Initialize a list to stnotiore user responses
             List<UserResponses> userResponsesList = new List<UserResponses>();
 
             // Iterate over the participants in the session

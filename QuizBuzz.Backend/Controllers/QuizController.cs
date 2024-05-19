@@ -4,12 +4,13 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Amazon.Runtime.Internal.Util;
-using QuizBuzz.Backend.Services;
 using QuizBuzz.Backend.DataAccess;
 using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using QuizBuzz.Backend.Hubs;
 using Newtonsoft.Json;
+using QuizBuzz.Backend.Enums;
+using QuizBuzz.Backend.Services;
 
 namespace QuizBuzz.Backend.Controllers
 {
@@ -36,7 +37,7 @@ namespace QuizBuzz.Backend.Controllers
             {
                 Debug.WriteLine($"Fetching quiz with ID: {quizId}");
                 _logger.LogInformation($"Fetching quiz with ID: {quizId}");
-                Quiz? quiz = await _quizService.GetQuizAsync(quizId);
+                Quiz? quiz = await _quizService.FetchQuizAsync(quizId);
 
                 if (quiz == null)
                 {
@@ -61,16 +62,27 @@ namespace QuizBuzz.Backend.Controllers
         [HttpGet("categories")]
         public IActionResult GetQuizCategories()
         {
-            var categories = Enum.GetNames(typeof(eQuizCategory));
-
-            // Print categories to console for debugging
-            Console.WriteLine("Available Quiz Categories:");
-            foreach (var category in categories)
+            try
             {
-                Console.WriteLine(category);
+                var categories =  _quizService.GetCategories();
+                // Print categories to console for debugging
+                _logger.LogInformation("Available Quiz Categories:");
+                foreach (var category in categories)
+                {
+                    _logger.LogInformation(category);
+                }
+                return Ok(categories);
             }
-            return Ok(categories);
+            catch (Exception ex)
+            {
+                // Log the exception
+                _logger.LogError($"An error occurred while getting quiz categories: {ex.Message}");
+                // Return an error response
+                return StatusCode(500, "An error occurred while fetching quiz categories.");
+            }
         }
+
+
 
         // POST: api/Quiz
         [HttpPost]

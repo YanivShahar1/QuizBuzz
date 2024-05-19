@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, json } from 'react-router-dom';
 import SessionResults from '../../components/Session/SessionResults/SessionResults';
 import SessionService from '../../services/SessionService';
 import QuizService from '../../services/QuizService';
@@ -9,11 +9,13 @@ import QuizQuestion from '../../components/Quiz/QuizQuestion';
 import useSessionHub from '../../hooks/signalR/useSessionHub';
 import SessionAdminStatistics from '../../components/Session/SessionAdminStatistics';
 import useSessionStartedListener from '../../hooks/signalR/useSessionStartedListener';
-import useQuestionResponseSubmittedListener from '../../hooks/signalR/useQuestionResponseSubmittedListener'
+import useSessionFinishedListener from '../../hooks/signalR/useSessionFinishedListener';
+import useNextQuestionListener from '../../hooks/signalR/useNextQuestionListener'
 import useSessionUpdatedListener from '../../hooks/signalR/useSessionUpdatedListener'
+import useUserResponseSubmittedListener from '../../hooks/signalR/useUserResponseListener';
+
 
 const SessionPage = () => {
-    const connection = useSessionHub();
     const { sessionId } = useParams();
     const [session, setSession] = useState(null);
     const [isSessionStarted, setSessionStarted] = useState(false);
@@ -21,45 +23,128 @@ const SessionPage = () => {
     const [userAnswer, setUserAnswer] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [quiz, setQuiz] = useState(null);
-    const [question, setQuestion] = useState(null);
     const [nickname, setNickname] = useState(null);
     const [responses, setResponses] = useState([]);
     const [startTime, setStartTime] = useState(null);
     const [leaderboardData, setLeaderboardData] = useState([]); 
+    const connection = useSessionHub();
     
+    const subscribeToSessionGroup = () => {
+        if(connection!=null && session != null){
+            console.log("connection is not null, invoke JoinSessionGroup");
+            connection.invoke("JoinSessionGroup", session.sessionID);
+        }else{
+            console.log(`connection or session is null`);
+        }
+    }
+
+    const subscribeToAdminGroup = () => {
+        if(connection!=null && session != null){
+            console.log("connection is not null, invoke JoinAdminGroup");
+            connection.invoke("JoinAdminGroup",session.sessionID, AuthService.getSessionUsername());
+            return true;
+        }else{
+            console.log(`connection is null`);
+            return false;
+        }
+    }
+
     useEffect(() => {
         const storedNickname = JSON.parse(window.sessionStorage.getItem("nickname"));
         if (storedNickname !== null) {
             console.log(`found nickname in sessionstorage: ${storedNickname}`);
             setNickname(storedNickname);
         }
-      }, []);
+    });
     
+    useEffect(() => {
+        fetchSessionData();
+    }, [sessionId]);
 
-    const isHost = () => {
+    useEffect(() => {
+        console.log(`session has changed !! ${JSON.stringify(session)}`);
+        if(session){
+            if(SessionService.isSessionStarted(session)){
+                setSessionStarted(true);
+            }
+            if(SessionService.isSessionFinished(session)){
+                setSessionFinished(true);
+            }
+            subscribeToSessionGroup();
+            if(isCurrentUserSessionHost(session)){
+                subscribeToAdminGroup();
+            }
+        }
+        else{
+            console.log(`session is null`);
+        }
+    }, [session])
+
+    useEffect(() => {
+        console.log(`session has changed !! ${JSON.stringify(session)}`);
+        if(quiz){
+            console.log(`quiz has changed: ${JSON.stringify(quiz)}`);
+
+        }
+        else{
+            console.log(`quiz is null`);
+        }
+    }, [quiz])
+    useEffect(() => {
+
+        console.log(`isSessionFinished = ${isSessionFinished}, isSessionStarted= ${isSessionStarted}`);
+
+    },[isSessionFinished, isSessionStarted])
+    // useEffect to re-render the question when currentQuestionIndex changes
+    useEffect(() => {
+        setStartTime(Date.now);
+        setUserAnswer([]); // Reset user's choice
+
+        console.log(`question index changed: ${currentQuestionIndex}`);
+    }, [currentQuestionIndex]); 
+    
+    useEffect(() => {
+        console.log("leaderboardata :", leaderboardData);
+
+    }, [leaderboardData])
+  
+    useEffect(() => {
+        const fetchLeaderboardData = async () => {
+            try {
+                console.log("fetchleaderboardata:")
+                const data = await SessionService.fetchSessionResults(sessionId); // Fetch leaderboard data from your backend service
+                console.log("sessionresults fetched:", data );
+                setLeaderboardData(data); // Update leaderboard data state
+            } catch (error) {
+                console.error('Error fetching leaderboard data:', error);
+            }
+        };
+
+        if (isSessionFinished) {
+            fetchLeaderboardData(); // Fetch leaderboard data when the session is finished
+            fetchSessionData();
+        }
+    }, [isSessionFinished]);
+
+    const isCurrentUserSessionHost = () => {
         if (session) {
             return session.hostUserID === AuthService.getSessionUsername();
         }
-        console.log("session isnot defined yet, cant know if host, so return false!");
-        return false; // Return false if session is null
+        console.log("todo session isnot defined yet, cant know if host, so return false!");
+        return false; 
     };
 
     const fetchSessionData = async () => {
         try {
+            console.log("fetching session data");
             const sessionData = await SessionService.fetchSession(sessionId);
-            setSession(sessionData);
-            console.log("session is set");
+            await setSession(sessionData);
             
-            if (sessionData?.associatedQuizID) {
+            //If quiz is not set or new sessionId,fetch quiz of the new session
+            if (!quiz || sessionData?.sessionID != sessionId ) {
                 const fetchedQuiz = await QuizService.fetchQuiz(sessionData.associatedQuizID);
                 setQuiz(fetchedQuiz);
                 console.log("quiz is set");
-                if(isHost()){
-                    connection.invoke("UserJoined", session.sessionID,session.hostUserID );
-                }
-                else{
-                    console.log("not host..");
-                }
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -67,15 +152,11 @@ const SessionPage = () => {
         }
     };
 
-    useEffect(() => {
-        fetchSessionData();
-    }, [sessionId]);
-
     const startSession = async () => {
         try {
-            // Call API to start the session
-            console.log("in startSession");
-            if(isHost(session)){
+
+            //Todo, always host.. so just call start seesion of session service
+            if(isCurrentUserSessionHost(session)){
                 console.log("in startSession-< HOST!");
 
                 await SessionService.startSession(sessionId);       
@@ -84,9 +165,7 @@ const SessionPage = () => {
                 console.log("in startSession-< not host...............");
 
             }
-            await connection.invoke("SessionStarted", session.sessionID);
-            
-            // Update session state to indicate session has started
+
             setSessionStarted(true);
         } catch (error) {
             console.error('Error starting session:', error);
@@ -94,19 +173,11 @@ const SessionPage = () => {
         }
     };
 
-    const handleSessionUpdated = async () => {
-        try {
-            console.log("execute handleSessionUpdated()");
-            fetchSessionData();
 
-        } catch (error) {
-
-        }
-    }
     const handleSessionStarted = async () => {
         try {
             // Call API to start the session
-            console.log("receive from singlarR: handleSessionStarted");
+            console.log("handleSessionStarted");
             
             // Update session state to indicate session has started
             // Fetch session participants and update the session state
@@ -115,47 +186,29 @@ const SessionPage = () => {
                 ...prevSession,
                 participants: sessionParticipants
             }));
-
             setSessionStarted(true);
-            console.log("started!:)");
+            console.log(`started!:, quiz : ${JSON.stringify(quiz)})`);
             
         } catch (error) {
-            console.error('Error starting session:', error);
+            console.error('Error in handle session started:', error);
             // Handle error (e.g., show error message to user)
         }
     };
 
-    useEffect(() => {
-        console.log(`isSessionStarted = ${isSessionStarted}`);
-    }, [isSessionStarted])
-
-    useEffect(() => {
-        console.log(`isSessionFinished = ${isSessionFinished}`);
-    }, [isSessionFinished])
-
-    useEffect(() => {
-        if (!session) {
-            // Session is null, handle the case appropriately
-            return;
+    const handleSessionFinished = async () => {
+        try {
+            // Call API to start the session
+            console.log("handleSessionFinished");
+            setSessionFinished(true);
+            
+        } catch (error) {
         }
-        console.log("userResponses changed:", JSON.stringify(responses));
-        // Count the number of responses for the current question
-        
-        const numResponses = responses.filter((response) => response.questionIndex === currentQuestionIndex).length;
-        console.log(`num responses: ${numResponses}, num participants: ${session.participants.length}`);
-        // Check if all participants have answered
-        if (numResponses === session.participants.length) {
-            // Move to the next question
-            console.log("all participants answered! going to the next question !");
-            goToNextQuestion();
-        }
-    }, [responses]);
-    
+    };
     
     const handleAnswerChange = (index) => {
         // Update user's answer based on the selected option
         setUserAnswer((prevAnswer) => {
-            if (question && question.isMultipleAnswerAllowed) {
+            if (quiz.questions[currentQuestionIndex].isMultipleAnswerAllowed) {
                 // If multiple answers are allowed, toggle the selected option
                 if (prevAnswer.includes(index)) {
                     // If the option is already selected, remove it
@@ -170,40 +223,31 @@ const SessionPage = () => {
             }
         });
     };
+
+    const handleNewResponseSubmited = (nickname, questionIndex, response) => {
+        const newResponse = {
+            ...response,
+            questionIndex,
+        };
+        console.log(`user ${nickname} response for question: ${questionIndex}, : ${JSON.stringify(newResponse)}`)
+        setResponses(prevResponses => [...prevResponses, newResponse]);
+    };
+
+    useUserResponseSubmittedListener(connection, handleNewResponseSubmited);
     
     useSessionStartedListener(connection, handleSessionStarted);
-
-    useSessionUpdatedListener(connection, handleSessionUpdated);
+    useSessionFinishedListener(connection, handleSessionFinished);
 
     const joinSession = async (nickname) => {
         try{
             console.log(`JoinSession: user nickname is ${nickname}, want to join : ${session.sessionID}`)
             await SessionService.joinSession(session.sessionID, nickname);
-            console.log("finish joinSession with SessionService ");
-            console.log("Notify other participants about the new user with sessionId ");
-
             setNickname(nickname);
-            connection.invoke("UserJoined", session.sessionID, nickname);
 
         }catch(e){
             console.log(e);
         }
        
-    };
-
-    // Function to handle moving to the next question
-    const goToNextQuestion = () => {
-        console.log(`goToNextQuestion`);
-        if (currentQuestionIndex < quiz.questions.length - 1) {
-            console.log(`current question is ${currentQuestionIndex}, going to next question.. `);
-            setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-        }
-        else{
-            console.log(`no more questions! finish:) `);
-            connection.invoke('SessionFinished', sessionId);
-            setSessionFinished(true);
-
-        }
     };
 
     const handleAnswerSubmit = () => {
@@ -234,75 +278,13 @@ const SessionPage = () => {
     
     
     // Handler for the "QuestionResponseSubmitted" event
-    const handleQuestionResponseSubmitted = async (nickname, questionIndex, isCorrect) => {
-        console.log(`Received QuestionResponseSubmitted for ${nickname}, QuestionIndex: ${questionIndex}, IsCorrect: ${isCorrect}`);
-        // Handle the event data as needed
-        // For example, you can update UI or perform other actions based on the received data
-        // Here, you can update state, display notifications, etc.
-        // Add the new user response to the list
-        const newResponse = {
-            nickname: nickname,
-            questionIndex:questionIndex,
-            isCorrect:isCorrect
-        };
-        
-        setResponses(prevResponses => [...prevResponses,newResponse ]);
+    const handleNextQuestion = async (questionIndex) => {
+        console.log(`Received handleNextQuestion for QuestionIndex: ${questionIndex}`);
+        setCurrentQuestionIndex(questionIndex);
     };
-
     // Custom hook to listen for "QuestionResponseSubmitted" event
-    useQuestionResponseSubmittedListener(connection, handleQuestionResponseSubmitted);
-    // useEffect to re-render the question when currentQuestionIndex changes
-
-  useEffect(() => {
-        // Fetch or set the question based on the updated currentQuestionIndex
-        // Replace the following line with your logic to get the question data
-        if(quiz != null && quiz.questions != null){
-            const newQuestion = quiz.questions[currentQuestionIndex];
-            console.log(`setting new question: ${newQuestion}`);
-            setQuestion(newQuestion);
-            setStartTime(Date.now);
-            
-        }
-        else{
-            console.log(`quiz or quiz questions is null`);
-        }
+    useNextQuestionListener(connection, handleNextQuestion);
     
-    }, [quiz, currentQuestionIndex]); // Dependency array ensures the effect runs when currentQuestionIndex changes
-    
-    useEffect(() => {
-        console.log(`session change !! ${session}`);
-        if(session){
-            setSessionStarted(SessionService.isSessionStarted(session));
-            setSessionFinished(SessionService.isSessionFinished(session));
-        }
-    }, [session])
-
-  useEffect(() => {
-        setUserAnswer([]); // Reset user's choice
-    }, [question])
-   
-    useEffect(() => {
-        console.log("leaderboardata :", leaderboardData);
-
-    }, [leaderboardData])
-  
-    useEffect(() => {
-        const fetchLeaderboardData = async () => {
-            try {
-                console.log("fetchleaderboardata:")
-                const data = await SessionService.fetchSessionResults(sessionId); // Fetch leaderboard data from your backend service
-                console.log("sessionresults fetched:", data );
-                setLeaderboardData(data); // Update leaderboard data state
-            } catch (error) {
-                console.error('Error fetching leaderboard data:', error);
-            }
-        };
-
-        if (isSessionFinished) {
-            fetchLeaderboardData(); // Fetch leaderboard data when the session is finished
-        }
-    }, [isSessionFinished]);
-
 
     if (session == null){
         return (
@@ -341,14 +323,14 @@ const SessionPage = () => {
                 <p>Session Finished!</p>
                 <SessionResults 
                     data={leaderboardData} 
-                    isHost={isHost}
+                    isHost={isCurrentUserSessionHost}
                 />
             </div>
         );
     }
 
     
-    if (isHost(session)) {
+    if (isCurrentUserSessionHost(session)) {
         return (
             <div>
                 <h1>Session {session.name}</h1>
@@ -378,15 +360,15 @@ const SessionPage = () => {
             <h1>Session {session.name}</h1>
             <p>Welcome, {nickname}</p>
             <p>Question {currentQuestionIndex + 1} / {quiz.questions.length }</p>
-            {question?(
+            {quiz.questions?(
                 <QuizQuestion
-                    question={question}
+                    question={quiz.questions[currentQuestionIndex]}
                     userAnswer={userAnswer}
                     handleAnswerChange={handleAnswerChange}
                     handleAnswerSubmit={handleAnswerSubmit}
                 />) 
             :(
-                <p>Loading quiz...</p>
+                <p>Loading questions...</p>
             )}
         </div>
     );

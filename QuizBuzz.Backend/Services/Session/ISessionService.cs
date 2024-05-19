@@ -7,23 +7,27 @@ namespace QuizBuzz.Backend.Services
 {
     public interface ISessionService
     {
-        Task<Session?> GetSessionAsync(string sessionId);
-        Task<string> SaveSessionAsync(Session newSession);
+        Task<Session> FetchSessionAsync(string sessionId);
+        Task<string> SubmitSessionAsync(Session newSession);
         Task DeleteSessionAsync(string sessionId);
 
-        Task UpdateSessionAsync(Session updatedSession);
+        Task SaveSessionAsync(Session updatedSession);
 
         Task<IEnumerable<string>> GetSessionParticipantsAsync(string sessionId);
 
-        Task AddUserToSessionAsync(string sessionId, string userId);
-        Task<IEnumerable<Session>> GetUserSessions(string userId);
+        Task JoinSession(string sessionId, string userId);
+        Task<IEnumerable<Session>> GetSessionsByHostId(string userId);
 
-        Task<bool> UpdateUserResponsesAsync(AnswerSubmissionDto answerSubmission);
+        Task<bool> SubmitUserAnswerAsync(AnswerSubmissionDto answerSubmission);
 
-        Task<SessionResult> GetSessionResultsAsync(string sessionId);
+        Task<SessionResult> FetchSessionResultsAsync(string sessionId);
         Task FinishSessionAsync(string sessionId);
 
         Task<IEnumerable<UserResponses>> GetSessionResponsesAsync(string sessionId);
+
+        Task StartSession(string sessionId);
+        Task<bool> ValidateSessionAdmin(string sessionid, string userName);
+
 
 
     }

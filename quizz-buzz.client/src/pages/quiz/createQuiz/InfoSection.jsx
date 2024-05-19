@@ -4,9 +4,12 @@ import QuizCategories from './QuizCategories';
 import PublicCheckbox from '../../../components/PublicCheckbox/PublicCheckbox';
 import './InfoSection.css';
 
-const InfoSection = ({ info, onInfoChange, categories }) => {
+const InfoSection = ({ info = {}, onInfoChange, categories }) => {
+  // Destructure with default values to prevent undefined values
+  const { title = '', category = '', description = '', isPublic = false } = info;
+
   const handleCategorySelect = (category) => {
-    onInfoChange({ ...info, category: category });
+    onInfoChange({ ...info, category });
   };
 
   const handlePublicChange = (value) => {
@@ -22,7 +25,7 @@ const InfoSection = ({ info, onInfoChange, categories }) => {
             type="text"
             placeholder="Enter title"
             maxLength={70}
-            value={info.title}
+            value={title}
             onChange={(e) => onInfoChange({ ...info, title: e.target.value })}
           />
         </Form.Group>
@@ -45,15 +48,14 @@ const InfoSection = ({ info, onInfoChange, categories }) => {
             rows={3}
             placeholder="Enter description"
             maxLength={400}
-            value={info.description}
+            value={description}
             onChange={(e) => onInfoChange({ ...info, description: e.target.value })}
           />
         </Form.Group>
       </Row>
 
-      {/*  PublicCheckbox component */}
       <PublicCheckbox 
-        isPublic={info.isPublic}
+        isPublic={isPublic}
         onPublicChange={handlePublicChange}
         tooltipText="When checked, this option makes the quiz publicly accessible for other users to utilize."
       />
