@@ -35,7 +35,6 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
-                Debug.WriteLine($"Fetching quiz with ID: {quizId}");
                 _logger.LogInformation($"Fetching quiz with ID: {quizId}");
                 Quiz? quiz = await _quizService.FetchQuizAsync(quizId);
 

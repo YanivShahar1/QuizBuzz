@@ -20,14 +20,14 @@ namespace QuizBuzz.Backend.Services
         private const string HostUserIDAttributeName = "HostUserID";
 
         private readonly IQuizService _quizService;
-        private readonly SessionCacheService _sessionCacheService;
+        private readonly QuizCacheService _sessionCacheService;
         private readonly SessionManager _sessionManager;
         private readonly IDynamoDBDataManager _dynamoDBDataManager;
         private readonly ILogger<SessionService> _logger;
         private readonly ISessionNotificationService _sessionNotificationService;
 
 
-        public SessionService(ISessionNotificationService sessionNotificationService, IQuizService quizService, SessionCacheService sessionCacheService, IDynamoDBDataManager dynamoDBDataManager, ILogger<SessionService> logger)
+        public SessionService(ISessionNotificationService sessionNotificationService, IQuizService quizService, QuizCacheService sessionCacheService, IDynamoDBDataManager dynamoDBDataManager, ILogger<SessionService> logger)
         {
             _sessionNotificationService = sessionNotificationService ?? throw new ArgumentNullException(nameof(sessionNotificationService));
             _sessionCacheService = sessionCacheService ?? throw new ArgumentNullException(nameof(sessionCacheService));
