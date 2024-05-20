@@ -1,11 +1,8 @@
-﻿using Amazon.DynamoDBv2;
-using Microsoft.AspNet.SignalR.Json;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.Models;
 using QuizBuzz.Backend.Models.DTO;
-using QuizBuzz.Backend.Services;
+using QuizBuzz.Backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,20 +17,32 @@ namespace QuizBuzz.Backend.Services
         private const string HostUserIDAttributeName = "HostUserID";
 
         private readonly IQuizService _quizService;
-        private readonly QuizCacheService _sessionCacheService;
+        private readonly ICacheService<Session> _sessionCacheService;
+        private readonly ICacheService<SessionResult> _sessionResultCacheService;
+        private readonly ICacheService<UserResponses> _userResponsesCacheService;
         private readonly SessionManager _sessionManager;
         private readonly IDynamoDBDataManager _dynamoDBDataManager;
         private readonly ILogger<SessionService> _logger;
         private readonly ISessionNotificationService _sessionNotificationService;
 
+        private string generateUserResponsesCacheKey(string sessionId, string userName) => ($"{sessionId}_{userName}");
 
-        public SessionService(ISessionNotificationService sessionNotificationService, IQuizService quizService, QuizCacheService sessionCacheService, IDynamoDBDataManager dynamoDBDataManager, ILogger<SessionService> logger)
+        public SessionService(ISessionNotificationService sessionNotificationService,
+                                IQuizService quizService,
+                                IDynamoDBDataManager dynamoDBDataManager,
+                                ILogger<SessionService> logger,
+                                ICacheService<Session> sessionCacheService,
+                                ICacheService<SessionResult> sessionResultCacheService,
+                                ICacheService<UserResponses> userResponsesCacheService)
         {
             _sessionNotificationService = sessionNotificationService ?? throw new ArgumentNullException(nameof(sessionNotificationService));
-            _sessionCacheService = sessionCacheService ?? throw new ArgumentNullException(nameof(sessionCacheService));
             _dynamoDBDataManager = dynamoDBDataManager ?? throw new ArgumentNullException(nameof(dynamoDBDataManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _quizService = quizService ?? throw new ArgumentNullException(nameof(quizService));
+
+            _sessionCacheService = sessionCacheService ?? throw new ArgumentNullException(nameof(sessionCacheService));
+            _sessionResultCacheService = sessionResultCacheService ?? throw new ArgumentNullException(nameof(sessionResultCacheService));
+            _userResponsesCacheService = userResponsesCacheService ?? throw new ArgumentNullException(nameof(userResponsesCacheService));
 
             _sessionManager = new SessionManager();
         }
@@ -82,7 +91,7 @@ namespace QuizBuzz.Backend.Services
 
             // Delete session from database and cache
             await _dynamoDBDataManager.DeleteItemAsync<Session>(sessionId);
-            _sessionCacheService.RemoveItemAsync(sessionId);
+            _sessionCacheService.RemoveItem(sessionId);
             _logger.LogInformation($"Session with ID {sessionId} deleted from database. Cache invalidated.");
         }
 
@@ -148,15 +157,9 @@ namespace QuizBuzz.Backend.Services
                 throw new ArgumentException("Host user ID cannot be null or empty.", nameof(hostUserId));
             }
 
-            //to do, check first if in cache
-          /*  var sessionIds = _sessionCacheService.GetUserSessionIds(hostUserId);
-            if(sessionIds != null)
-            {
-
-            }*/
+          
             var sessions = await _dynamoDBDataManager.QueryItemsByIndexAsync<Session>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
             var sessionIds = sessions.Select(session => session.SessionID).ToList();
-            _sessionCacheService.CacheUserSessionIds(hostUserId, sessionIds);
          
             return sessions;
         }
@@ -198,7 +201,7 @@ namespace QuizBuzz.Backend.Services
             //TODO: add check that session is ended! else ther's no resluts yet..
             try
             {
-                var cachedResults = _sessionCacheService.GetSessionResult(sessionId);
+                var cachedResults = _sessionResultCacheService.GetItem(sessionId);
 
                 if (cachedResults != null)
                 {
@@ -234,7 +237,7 @@ namespace QuizBuzz.Backend.Services
                     await _dynamoDBDataManager.SaveItemAsync(sessionResult);
                 }
 
-                _sessionCacheService.CacheSessionResult(sessionId, sessionResult);
+                _sessionResultCacheService.CacheItem(sessionId, sessionResult);
 
                 _logger.LogInformation($"Session results fetched and cached successfully for session with ID: {sessionId}");
 
@@ -268,10 +271,10 @@ namespace QuizBuzz.Backend.Services
             }
         }
 
-        private async Task<UserResponses?> fetchSessionUserResponsesAsync(string sessionId, string participantName)
+        private async Task<UserResponses?> fetchSessionUserResponsesAsync(string sessionId, string nickname)
         {
 
-            UserResponses? cachedUserResponses = _sessionCacheService.GetUserResponses(sessionId, participantName);
+            UserResponses? cachedUserResponses = _userResponsesCacheService.GetItem($"{sessionId}_{nickname}");
 
             if (cachedUserResponses != null)
             {
@@ -281,25 +284,25 @@ namespace QuizBuzz.Backend.Services
             // Fetch user responses from the database
             try
             {
-                UserResponses? userResponses = await _dynamoDBDataManager.GetItemAsync<UserResponses>(sessionId, participantName);
+                UserResponses? userResponses = await _dynamoDBDataManager.GetItemAsync<UserResponses>(sessionId, nickname);
                 Debug.WriteLine($"userResponses: {userResponses}.");
 
                 if (userResponses != null)
                 {
-                    _sessionCacheService.CacheUserResponses(sessionId,participantName,userResponses);
-                    _logger.LogInformation($"Session user responses for participant {participantName} in session with ID {sessionId} fetched from database and cached.");
+                    _userResponsesCacheService.CacheItem(generateUserResponsesCacheKey(sessionId,nickname),userResponses);
+                    _logger.LogInformation($"Session user responses for participant {nickname} in session with ID {sessionId} fetched from database and cached.");
                     return userResponses;
                 }
                 else
                 {
-                    _logger.LogInformation($"Session user responses for participant {participantName} in session with ID {sessionId} not found in database.");
+                    _logger.LogInformation($"Session user responses for participant {nickname} in session with ID {sessionId} not found in database.");
                     return null;
                 }
             }
             catch (Exception ex)
             {
                 // Log the exception and return null
-                _logger.LogError($"Error fetching session user responses for participant {participantName} in session with ID {sessionId}: {ex.Message}");
+                _logger.LogError($"Error fetching session user responses for participant {nickname} in session with ID {sessionId}: {ex.Message}");
                 return null;
             }
         }

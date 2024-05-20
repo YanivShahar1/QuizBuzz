@@ -44,7 +44,7 @@ namespace QuizBuzz.Backend.Services
             _logger.LogInformation($"Session with ID {sessionId} cached successfully.");
         }
 
-        public void RemoveItemAsync(string sessionId)
+        public void RemoveItem(string sessionId)
         {
             string cacheKey = $"Session_{sessionId}";
             _cache.Remove(cacheKey);

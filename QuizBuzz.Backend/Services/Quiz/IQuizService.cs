@@ -5,7 +5,7 @@ namespace QuizBuzz.Backend.Services
     public interface IQuizService
     {
         Task<Quiz> FetchQuizAsync(string quizId);
-        Task<string> SaveQuizAsync(Quiz newQuiz);
+        Task<string> SubmitQuizAsync(Quiz newQuiz);
         Task DeleteQuizAsync(string quizId);
 
         List<string> GetCategories();

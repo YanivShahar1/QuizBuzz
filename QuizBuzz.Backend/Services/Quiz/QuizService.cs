@@ -5,6 +5,7 @@ using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.Enums;
 using QuizBuzz.Backend.Models;
 using QuizBuzz.Backend.Services;
+using QuizBuzz.Backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,36 +18,41 @@ namespace QuizBuzz.Backend.Services
         private const string HostUserIDIndexName = "HostUserID-index";
         private const string HostUserIDAttributeName = "HostUserID";
 
-        private readonly IMemoryCache _cache;
+        private readonly QuizManager _quizManager;
+
+
+        private readonly ICacheService<Quiz> _quizCache;
         private readonly IDynamoDBDataManager _dynamoDBDataManager;
         private readonly ILogger<QuizService> _logger;
 
-        public QuizService(IMemoryCache cache, IDynamoDBDataManager dynamoDBDataManager, ILogger<QuizService> logger)
+        public QuizService(ICacheService<Quiz> quizCache, IDynamoDBDataManager dynamoDBDataManager, ILogger<QuizService> logger)
         {
-            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _quizCache = quizCache ?? throw new ArgumentNullException(nameof(quizCache));
             _dynamoDBDataManager = dynamoDBDataManager ?? throw new ArgumentNullException(nameof(dynamoDBDataManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _quizManager = new QuizManager();
         }
 
-        public async Task<string> SaveQuizAsync(Quiz newQuiz)
+        public async Task<string> SubmitQuizAsync(Quiz newQuiz)
         {
             ArgumentNullException.ThrowIfNull(newQuiz);
-            _logger.LogInformation($"Saving quiz: {newQuiz}");
 
-            newQuiz.QuizID = Guid.NewGuid().ToString(); // Generate a unique ID for the quiz
-            _logger.LogInformation($"Generated QuizID: {newQuiz.QuizID}");
-
-            // Additional validation or business logic if needed
-            await _dynamoDBDataManager.SaveItemAsync(newQuiz);
-            _logger.LogInformation($"Saved {newQuiz.QuizID} in DynamoDB database");
-
-            // Invalidate the cache to reflect the new data
-            _logger.LogInformation($"Removed AllQuizzes from cache");
-            _cache.Remove("AllQuizzes");
-
-            _logger.LogInformation("New quiz saved to database. Cache invalidated.");
-
+            _quizManager.InitializeQuizWithId(newQuiz);
+            await SaveQuizAsync(newQuiz);
             return newQuiz.QuizID;
+        }
+
+        public async Task SaveQuizAsync(Quiz updatedQuiz)
+        {
+            if (updatedQuiz == null)
+            {
+                throw new ArgumentNullException(nameof(updatedQuiz), "Updated quiz cannot be null");
+            }
+            // Save updated session in cache
+            await _dynamoDBDataManager.SaveItemAsync(updatedQuiz);
+            _quizCache.CacheItem(updatedQuiz.QuizID, updatedQuiz);
+            _logger.LogInformation($"Saved quiz {updatedQuiz.QuizID} in DynamoDB database");
+
         }
 
         public List<string> GetCategories()
@@ -69,15 +75,14 @@ namespace QuizBuzz.Backend.Services
 
             Debug.WriteLine($"Fetching quiz with ID: {quizId}");
 
-            // Check if the quiz exists in the cache
-            string cacheKey = $"Quiz_{quizId}";
-            if (_cache.TryGetValue(cacheKey, out Quiz? cachedQuiz))
+            Quiz? cachedQuiz = _quizCache.GetItem(quizId);
+
+            if (cachedQuiz != null)
             {
                 _logger.LogInformation($"Quiz with ID {quizId} found in cache.");
                 return cachedQuiz!;
             }
             _logger.LogInformation($"Quiz with ID {quizId} not found in cache. Fetching from database.");
-            Debug.WriteLine($"Quiz with ID {quizId} not found in cache. Fetching from database.");
 
             // If not found in cache, fetch it from the database
             Quiz quiz = await _dynamoDBDataManager.GetItemAsync<Quiz>(quizId);
@@ -86,12 +91,7 @@ namespace QuizBuzz.Backend.Services
                 throw new KeyNotFoundException($"Quiz with ID {quizId} not found in database.");
             }
 
-            var cacheOptions = new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10), // Cache for 10 minutes
-                Priority = CacheItemPriority.High
-            };
-            _cache.Set(cacheKey, quiz, cacheOptions);
+            _quizCache.CacheItem(quiz.QuizID, quiz);
 
             _logger.LogInformation($"Quiz with ID {quizId} fetched from database and cached.");
             return quiz;
@@ -107,12 +107,7 @@ namespace QuizBuzz.Backend.Services
             Debug.WriteLine($"Deleting quiz with ID: {quizId}");
 
             await _dynamoDBDataManager.DeleteItemAsync<Quiz>(quizId);
-
-            // Invalidate the cache after deletion
-            _cache.Remove("AllQuizzes");
-            _cache.Remove($"Quiz_{quizId}");
-            Debug.WriteLine($"removed AllQuizzes and : Quiz_{quizId} from cache");
-
+            _quizCache.RemoveItem(quizId);
             _logger.LogInformation($"Quiz with ID {quizId} deleted from database. Cache invalidated.");
         }
 

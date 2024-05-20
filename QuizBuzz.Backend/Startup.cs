@@ -52,7 +52,7 @@ namespace QuizBuzz.Backend
             services.AddSingleton<IQuizService, QuizService>();
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<ISessionNotificationService, SessionNotificationService>();
-            services.AddSingleton<SessionCacheService>();
+            services.AddSingleton<QuizCacheService>();
 
 
 

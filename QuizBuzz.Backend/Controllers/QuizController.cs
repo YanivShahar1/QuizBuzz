@@ -91,7 +91,7 @@ namespace QuizBuzz.Backend.Controllers
             {
                 Debug.WriteLine($"CreateQuizAsync , newQuiz ,: {JsonConvert.SerializeObject(newQuiz)}");
 
-                string quizId = await _quizService.SaveQuizAsync(newQuiz);
+                string quizId = await _quizService.SubmitQuizAsync(newQuiz);
                 _logger.LogInformation($"Quiz created with ID: {quizId}");
 
                 return CreatedAtAction(nameof(GetQuizById), new { quizId = quizId }, newQuiz);

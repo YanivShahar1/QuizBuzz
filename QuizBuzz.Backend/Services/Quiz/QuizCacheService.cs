@@ -43,7 +43,7 @@ namespace QuizBuzz.Backend.Services
             _logger.LogInformation($"Quiz with ID {quizId} cached successfully.");
         }
 
-        public void RemoveItemAsync(string quizId)
+        public void RemoveItem(string quizId)
         {
             string cacheKey = $"Quiz_{quizId}";
             _cache.Remove(cacheKey);
