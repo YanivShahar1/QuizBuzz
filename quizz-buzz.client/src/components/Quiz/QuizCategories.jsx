@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './QuizCategories.css';
-import QuizService from '../../../services/QuizService';
+import QuizService from '../../services/QuizService';
 
 
 function QuizCategories({ categories, onCategorySelect }) {

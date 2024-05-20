@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import QuizService from '../../services/QuizService';
-import QuizQuestion from '../../components/Quiz/QuizQuestion';
+import QuestionDisplay from '../../components/Question/QuestionDisplay/QuestionDisplay'
 import { Link, useNavigate } from 'react-router-dom';
 import ErrorPage from '../ErrorPage';
 
@@ -89,7 +89,7 @@ const QuizPage = () => {
     return (
         <div>
             {currentQuestionIndex < quiz.questions.length ? (
-                <QuizQuestion
+                <QuestionDisplay
                     question={quiz.questions[currentQuestionIndex]}
                     userAnswer={userAnswer}
                     handleAnswerChange={handleAnswerChange}

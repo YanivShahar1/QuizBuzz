@@ -7,7 +7,7 @@ import CreateQuizButton from '../../components/Quiz/CreateQuizButton/CreateQuizB
 import { Row, Col, Button, Modal } from 'react-bootstrap';
 import './QuizzesSection.css';
 import EditQuizModal from '../../components/Quiz/EditQuizModal/EditQuizModal';
-import QuestionPreview from '../../components/Question/QuestionPreview';
+import QuestionPreview from '../../components/Question/QuestionPreview/QuestionPreview';
 
 
 const QuizzesSection = ({ userName }) => {

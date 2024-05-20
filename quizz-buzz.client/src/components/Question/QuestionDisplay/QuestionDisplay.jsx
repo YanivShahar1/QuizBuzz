@@ -1,6 +1,6 @@
 import React, { useState , useEffect} from 'react';
 
-const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSubmit }) => {
+const QuestionDisplay = ({ question, userAnswer, handleAnswerChange, handleAnswerSubmit }) => {
 
     const [answerSubmitted, setAnswerSubmitted] = useState(false);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
@@ -47,7 +47,7 @@ const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSu
                                 value={index}
                                 checked={userAnswer && userAnswer.includes(index)}
                                 onChange={() => handleAnswerSelection(index)}
-                                disabled={answerSubmitted} // Disable input when timer is expired
+                                disabled={answerSubmitted} // Disable input when answerSubmitted
                             />
                             {option}
                         </label>
@@ -67,4 +67,4 @@ const QuizQuestion = ({ question, userAnswer, handleAnswerChange, handleAnswerSu
     );
 };
 
-export default QuizQuestion;
+export default QuestionDisplay;

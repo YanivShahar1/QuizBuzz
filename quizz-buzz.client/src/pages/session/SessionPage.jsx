@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, json } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import SessionResults from '../../components/Session/SessionResults/SessionResults';
 import SessionService from '../../services/SessionService';
 import QuizService from '../../services/QuizService';
 import AuthService from '../../services/AuthService';
 import WaitingRoom from './WaitingRoom';
-import QuizQuestion from '../../components/Quiz/QuizQuestion';
+import QuestionDisplay from '../../components/Question/QuestionDisplay/QuestionDisplay';
 import useSessionHub from '../../hooks/signalR/useSessionHub';
 import SessionAdminStatistics from '../../components/Session/SessionAdminStatistics';
 import useSessionStartedListener from '../../hooks/signalR/useSessionStartedListener';
@@ -55,7 +55,7 @@ const SessionPage = () => {
             console.log(`found nickname in sessionstorage: ${storedNickname}`);
             setNickname(storedNickname);
         }
-    });
+    },[]);
     
     useEffect(() => {
         fetchSessionData();
@@ -292,7 +292,7 @@ const SessionPage = () => {
             <p>Loading session...</p>
         )
     }
-    
+
     if (isSessionFinished) {
         return (
             <div>
@@ -359,7 +359,7 @@ const SessionPage = () => {
             <p>Welcome, {nickname}</p>
             <p>Question {currentQuestionIndex + 1} / {quiz.questions.length }</p>
             {quiz.questions?(
-                <QuizQuestion
+                <QuestionDisplay
                     question={quiz.questions[currentQuestionIndex]}
                     userAnswer={userAnswer}
                     handleAnswerChange={handleAnswerChange}

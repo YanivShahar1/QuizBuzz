@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Container, Form, Row, Col, FormControl, FormCheck, Accordion, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { faTrash, faEdit, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import QuestionPreview from '../../../components/Question/QuestionPreview'; // Import the QuestionPreview component
+import QuestionPreview from '../../../components/Question/QuestionPreview/QuestionPreview'; // Import the QuestionPreview component
 import './QuestionsSection.css'; // Import the CSS file
 
 const QuestionsSection = ({ questions, setQuestions }) => {
@@ -114,7 +114,7 @@ const QuestionsSection = ({ questions, setQuestions }) => {
             <Row>
                 <Col md={6}>
                     {questions.map((question, index) => (
-                        <Accordion defaultActiveKey={0} alwaysOpen>
+                        <Accordion key={index} defaultActiveKey={0} alwaysOpen>
                             <Accordion.Item eventKey={index}>
                                 <Accordion.Header>
                                     Question {index + 1} 

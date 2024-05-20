@@ -1,6 +1,6 @@
 import React, {useEffect,useState}from 'react';
 import { Form, Col, Row } from 'react-bootstrap';
-import QuizCategories from './QuizCategories';
+import QuizCategories from '../../../components/Quiz/QuizCategories';
 import PublicCheckbox from '../../../components/PublicCheckbox/PublicCheckbox';
 import './InfoSection.css';
 
