@@ -47,7 +47,7 @@ namespace QuizBuzz.Backend
             });
 
             services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
-            services.AddSingleton<IDynamoDBDataManager, DynamoDBDataManager>();
+            services.AddSingleton<IDynamoDBManager, DynamoDBDManager>();
             services.AddSingleton<IMemoryCache, MemoryCache>();
             services.AddSingleton<IQuizService, QuizService>();
             services.AddSingleton<ISessionService, SessionService>();

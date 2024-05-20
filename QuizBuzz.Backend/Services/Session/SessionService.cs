@@ -21,7 +21,7 @@ namespace QuizBuzz.Backend.Services
         private readonly ICacheService<SessionResult> _sessionResultCacheService;
         private readonly ICacheService<UserResponses> _userResponsesCacheService;
         private readonly SessionManager _sessionManager;
-        private readonly IDynamoDBDataManager _dynamoDBDataManager;
+        private readonly IDynamoDBManager _dynamoDBDataManager;
         private readonly ILogger<SessionService> _logger;
         private readonly ISessionNotificationService _sessionNotificationService;
 
@@ -29,7 +29,7 @@ namespace QuizBuzz.Backend.Services
 
         public SessionService(ISessionNotificationService sessionNotificationService,
                                 IQuizService quizService,
-                                IDynamoDBDataManager dynamoDBDataManager,
+                                IDynamoDBManager dynamoDBDataManager,
                                 ILogger<SessionService> logger,
                                 ICacheService<Session> sessionCacheService,
                                 ICacheService<SessionResult> sessionResultCacheService,

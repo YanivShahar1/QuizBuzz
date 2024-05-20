@@ -9,6 +9,7 @@ namespace QuizBuzz.Backend.Services
     {
         private readonly IMemoryCache _cache;
         private readonly ILogger<CacheService<T>> _logger;
+
         public CacheService(IMemoryCache cache, ILogger<CacheService<T>> logger)
         {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -25,9 +26,11 @@ namespace QuizBuzz.Backend.Services
                 _logger.LogInformation($"{typeof(T).Name} with ID {itemId} found in cache.");
                 return cachedItem;
             }
-
-            _logger.LogInformation($"{typeof(T).Name} with ID {itemId} not found in cache.");
-            return default;
+            else
+            {
+                _logger.LogInformation($"{typeof(T).Name} with ID {itemId} not found in cache.");
+                return default;
+            }
         }
 
         public void CacheItem(string itemId, T item)
