@@ -2,6 +2,7 @@ import React from 'react';
 import { ListGroup } from 'react-bootstrap';
 import './QuestionPreview.css';
 
+
 const QuestionPreview = ({ question, index }) => {
   return (
     <div className="question">
@@ -15,9 +16,7 @@ const QuestionPreview = ({ question, index }) => {
       ))}
       </ListGroup>
     </ListGroup.Item>
-
     </div>
-    
   );
 };
 

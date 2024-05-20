@@ -7,6 +7,8 @@ import CreateQuizButton from '../../components/Quiz/CreateQuizButton/CreateQuizB
 import { Row, Col, Button, Modal } from 'react-bootstrap';
 import './QuizzesSection.css';
 import EditQuizModal from '../../components/Quiz/EditQuizModal/EditQuizModal';
+import QuestionPreview from '../../components/Question/QuestionPreview';
+
 
 const QuizzesSection = ({ userName }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -131,8 +133,6 @@ const QuizzesSection = ({ userName }) => {
                     <Modal.Title>Preview Quiz</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {/* Content of the modal goes here */}
-                    {/* You can display the preview of the selected quiz inside this modal */}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowPreviewModal(false)}>

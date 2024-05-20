@@ -5,7 +5,7 @@ import AuthService from '../../services/AuthService';
 import useUserJoinedListener from '../../hooks/signalR/useUserJoinedListener';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 
-const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSession,nickname,setNickname }) => {
+const WaitingRoom = ({ sessionId, isHost , onStartSession, sessionHubConnection, onJoinSession,nickname,setNickname }) => {
     const [participants, setParticipants] = useState([]);
     const [isUserJoined, setIsUserJoined] = useState(false);
     
@@ -13,8 +13,6 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
 
         console.log("nickname:", nickname);
       }, [nickname]);
-
-    const isHost = (session) => session.hostUserID === AuthService.getSessionUsername();
 
     const handleUserJoinedSession = (nickname) => {
         console.log(`user ${nickname} has joined`);
@@ -31,11 +29,11 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
 
     useEffect(() => {
         fetchSessionParticipants();
-    }, [session]);
+    }, [sessionId]);
 
     const fetchSessionParticipants = async () => {
         try {
-            const sessionParticipants = await SessionService.getParticipants(session.sessionID);
+            const sessionParticipants = await SessionService.getParticipants(sessionId);
             setParticipants(sessionParticipants);
         } catch (error) {
             console.error('Error fetching session participants:', error);
@@ -62,7 +60,7 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
     };
 
     const handleCopySessionLink = () => {
-        const sessionLink = window.location.href.split('?')[0] + `?sessionId=${session.sessionID}`;
+        const sessionLink = window.location.href.split('?')[0] + `?sessionId=${sessionId}`;
         navigator.clipboard.writeText(sessionLink)
             .then(() => {
                 console.log(`Session link copied to clipboard: ${sessionLink}`);
@@ -77,7 +75,7 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
         <Container className='waiting-room'>
             <h2>Waiting Room</h2>
             <div className='session-info'>
-                {isHost(session) ? (
+                {isHost ? (
                     <Row>
                         <Col md={6}>
                             <div className='admin-section'>
@@ -90,7 +88,7 @@ const WaitingRoom = ({ session, onStartSession, sessionHubConnection, onJoinSess
                         <Col md={6}>
                             <Form.Group controlId="sessionId">
                                 <Form.Label>Session ID:</Form.Label>
-                                <Form.Control type="text" value={session.sessionID} readOnly />
+                                <Form.Control type="text" value={sessionId} readOnly />
                             </Form.Group>
                             <Button variant="secondary" onClick={handleCopySessionLink}>Copy Session Link</Button>
                         </Col>

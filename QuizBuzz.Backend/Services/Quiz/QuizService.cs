@@ -147,5 +147,25 @@ namespace QuizBuzz.Backend.Services
             }
         }
 
+        public bool SuggestCategory(string category)
+        {
+            try
+            {
+                // TODO add logic here to handle the category suggestion, such as saving it to a database or processing it in some way.
+                _logger.LogInformation($"Received category suggestion: {category}");
+
+                // Return true to indicate that the suggestion was successfully received.
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log any errors that occur during the suggestion process.
+                _logger.LogError(ex, $"Error suggesting category: {ex.Message}");
+
+                // Return false to indicate that the suggestion failed.
+                return false;
+            }
+        }
+
     }
 }

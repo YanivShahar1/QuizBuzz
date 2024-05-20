@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import './QuizCategories.css';
+import QuizService from '../../../services/QuizService';
+
 
 function QuizCategories({ categories, onCategorySelect }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -10,9 +13,9 @@ function QuizCategories({ categories, onCategorySelect }) {
   }, [categories]);
 
   const handleSearch = (e) => {
-    const searchTerm = e.target.value.toLowerCase();
+    const searchTerm = e.target.value;
     setSearchTerm(searchTerm);
-    const filtered = categories.filter(category => category.toLowerCase().includes(searchTerm));
+    const filtered = categories.filter(category => category.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredCategories(filtered);
   }
 
@@ -21,6 +24,7 @@ function QuizCategories({ categories, onCategorySelect }) {
   };
 
   const handleCategorySelect = (category) => {
+    console.log(`handleCategorySelect, ${category}`);
     setSearchTerm(category);
     onCategorySelect(category);
     setIsOpen(false);
@@ -28,9 +32,13 @@ function QuizCategories({ categories, onCategorySelect }) {
 
   const handleSuggestCategory = () => {
     const newCategory = searchTerm.trim();
+    console.log(`handleSuggestCategory, ${newCategory}`);
+
     if (newCategory) {
       onCategorySelect(newCategory);
       setIsOpen(false);
+      // TODO : implement QuizService.suggestCategory(newCategory);
+
     }
   };
 

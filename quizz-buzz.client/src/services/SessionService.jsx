@@ -81,6 +81,14 @@ const SessionService = {
             throw new Error(`Error duplicating session: ${error.message}`);
         }
     },
+
+    isCurrentUserSessionHost :(session) => {
+        if (session) {
+            return session.hostUserID === AuthService.getSessionUsername();
+        }
+        console.log("todo session isnot defined yet, cant know if host, so return false!");
+        return false; 
+    },
     
 
     fetchSession: async (sessionId) => {

@@ -65,11 +65,8 @@ namespace QuizBuzz.Backend.Controllers
             {
                 var categories =  _quizService.GetCategories();
                 // Print categories to console for debugging
-                _logger.LogInformation("Available Quiz Categories:");
-                foreach (var category in categories)
-                {
-                    _logger.LogInformation(category);
-                }
+                _logger.LogInformation($"{categories.Count} Quiz Categories found");
+               
                 return Ok(categories);
             }
             catch (Exception ex)
@@ -165,7 +162,44 @@ namespace QuizBuzz.Backend.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        // POST: api/quiz/category
+        [HttpPost("category")]
+        public IActionResult SuggestCategory(string category)
+        {
+            _logger.LogInformation($"SuggestCategory");
 
+
+            try
+            {
+                _logger.LogInformation($"category su = {category}");
+                {
+                    return BadRequest("Category cannot be empty.");
+                }
+                _logger.LogInformation($"category su = {category}");
+
+
+                // Call the service to handle the suggestion
+                bool suggestionResult = _quizService.SuggestCategory(category);
+                _logger.LogInformation($"suggestionResult = {suggestionResult}");
+                if (suggestionResult)
+                {
+                    // If the suggestion was successful, return a success response
+                    return Ok("Category suggestion received and saved successfully.");
+                }
+                else
+                {
+                    // If the suggestion failed, return an appropriate error response
+                    return StatusCode(500, "Failed to save category suggestion.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                _logger.LogError($"An error occurred while processing category suggestion: {ex.Message}");
+                // Return an error response
+                return StatusCode(500, "An error occurred while processing category suggestion.");
+            }
+        }
 
         // Other CRUD operations...
     }

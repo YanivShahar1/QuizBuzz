@@ -114,10 +114,10 @@ const QuestionsSection = ({ questions, setQuestions }) => {
             <Row>
                 <Col md={6}>
                     {questions.map((question, index) => (
-                        <Accordion key={index} defaultActiveKey={0}>
+                        <Accordion defaultActiveKey={0} alwaysOpen>
                             <Accordion.Item eventKey={index}>
                                 <Accordion.Header>
-                                    Question {index + 1}
+                                    Question {index + 1} 
                                 </Accordion.Header>
                                 <Accordion.Body>
                                     {/* Question text */}

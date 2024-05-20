@@ -71,7 +71,7 @@ const SessionPage = () => {
                 setSessionFinished(true);
             }
             subscribeToSessionGroup();
-            if(isCurrentUserSessionHost(session)){
+            if(SessionService.isCurrentUserSessionHost(session)){
                 subscribeToAdminGroup();
             }
         }
@@ -126,13 +126,7 @@ const SessionPage = () => {
         }
     }, [isSessionFinished]);
 
-    const isCurrentUserSessionHost = () => {
-        if (session) {
-            return session.hostUserID === AuthService.getSessionUsername();
-        }
-        console.log("todo session isnot defined yet, cant know if host, so return false!");
-        return false; 
-    };
+    
 
     const fetchSessionData = async () => {
         try {
@@ -156,7 +150,7 @@ const SessionPage = () => {
         try {
 
             //Todo, always host.. so just call start seesion of session service
-            if(isCurrentUserSessionHost(session)){
+            if(SessionService.isCurrentUserSessionHost(session)){
                 console.log("in startSession-< HOST!");
 
                 await SessionService.startSession(sessionId);       
@@ -286,24 +280,40 @@ const SessionPage = () => {
     useNextQuestionListener(connection, handleNextQuestion);
     
 
-    if (session == null){
-        return (
-            <p>Loading session...</p>
-        )
-    }
     
     if (connection == null){
         return (
             <p>Loading connection...</p>
         )
     }
+
+    if (session == null){
+        return (
+            <p>Loading session...</p>
+        )
+    }
+    
+    if (isSessionFinished) {
+        return (
+            <div>
+                <h1>Session {session.name}</h1>
+                <p>Session Finished!</p>
+                <SessionResults 
+                    data={leaderboardData} 
+                    isHost={SessionService.isCurrentUserSessionHost(session)}
+                />
+            </div>
+        );
+    }
+   
     
     if(!isSessionStarted){
         return (
             <div>
                 <WaitingRoom
                     sessionHubConnection = {connection}
-                    session={session}
+                    sessionId={sessionId}
+                    isHost={SessionService.isCurrentUserSessionHost(session)}
                     onStartSession={startSession}
                     onJoinSession={joinSession}
                     nickname={nickname}
@@ -315,22 +325,10 @@ const SessionPage = () => {
         )
     }
 
-    if (isSessionFinished) {
-        // Render leaderboard
-        return (
-            <div>
-                <h1>Session {session.name}</h1>
-                <p>Session Finished!</p>
-                <SessionResults 
-                    data={leaderboardData} 
-                    isHost={isCurrentUserSessionHost}
-                />
-            </div>
-        );
-    }
+    
 
     
-    if (isCurrentUserSessionHost(session)) {
+    if (SessionService.isCurrentUserSessionHost(session)) {
         return (
             <div>
                 <h1>Session {session.name}</h1>

@@ -11,7 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.Hubs;
+using QuizBuzz.Backend.Models;
 using QuizBuzz.Backend.Services;
+using QuizBuzz.Backend.Services.Interfaces;
 using System;
 
 namespace QuizBuzz.Backend
@@ -49,6 +51,12 @@ namespace QuizBuzz.Backend
             services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
             services.AddSingleton<IDynamoDBManager, DynamoDBDManager>();
             services.AddSingleton<IMemoryCache, MemoryCache>();
+            services.AddSingleton<ICacheService<Session>, CacheService<Session>>();
+            services.AddSingleton<ICacheService<Quiz>, CacheService<Quiz>>();
+            services.AddSingleton<ICacheService<UserResponses>, CacheService<UserResponses>>();
+            services.AddSingleton<ICacheService<SessionResult>, CacheService<SessionResult>>();
+
+
             services.AddSingleton<IQuizService, QuizService>();
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<ISessionNotificationService, SessionNotificationService>();

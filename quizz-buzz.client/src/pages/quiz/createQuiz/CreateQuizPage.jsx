@@ -72,7 +72,7 @@ const CreateQuizPage = () => {
             <h1>Create Your Own Quiz</h1>
             <Row>
                 <Col>
-                    <Accordion alwaysOpen>
+                    <Accordion defaultActiveKey="0" alwaysOpen>
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>General Quiz Info</Accordion.Header>
                             <Accordion.Body>

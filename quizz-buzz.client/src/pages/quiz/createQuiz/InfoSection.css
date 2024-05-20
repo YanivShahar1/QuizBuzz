@@ -1,16 +1,20 @@
 .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-label {
-    font-weight: bold;
-  }
-  
-  .checkbox-label {
-    font-weight: normal;
-  }
-  
-  .textarea {
-    resize: vertical;
-  }
-  
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.form-label:hover {
+  text-decoration: underline; 
+}
+
+.checkbox-label {
+  font-weight: normal;
+}
+
+.textarea {
+  resize: vertical;
+}

@@ -27,6 +27,32 @@ const QuizService = {
         }
     },
 
+    suggestCategory: async (category) => {
+        
+        try {
+            const suggestCategoryUrl = `${QuizService.backendUrl}category`;
+            console.log(`suggesting category : ${category}`);
+            const response = await fetch(suggestCategoryUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ category }),
+            });
+
+            console.log(`response = ${JSON.stringify(response)}`);
+            if (response.ok) {
+                const responseData = await response.json();
+                return responseData;
+            } else {
+                const errorMessage = `Failed to suggest category. Status: ${response.status}, Details: ${response.statusText}`;
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            throw new Error(`Error suggesting category: ${error.message}`);
+        }
+    },
+
     deleteQuiz: async (quizId) => {
         const deleteQuizUrl = `${QuizService.backendUrl}${quizId}`;
 
