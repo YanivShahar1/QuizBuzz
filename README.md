@@ -11,15 +11,7 @@ QuizBuzz is a real-time web application that allows users to create and manage q
 - **Live Statistics:** Session admins can view real-time statistics on user answers, including leaderboards, answer distribution, and overall session progress.
 - **AWS Cognito Integration:** Users can register and login using AWS Cognito, enabling secure access control and restricting quiz creation/session management to registered users.
 
-## Table of Contents
-
-- [Description](#description)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Technologies Used](#technologies-used)
-- [Contributing](#contributing)
-- [License](#license)
-
+#Technology used:
 ## React
 - Description: A JavaScript library for building user interfaces.
 - [Website](https://reactjs.org/)
