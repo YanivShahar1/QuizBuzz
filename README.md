@@ -1,6 +1,6 @@
 # QuizBuzz
 
-QuizBuzz is a real-time web application that allows users to create and manage quizzes, conduct live sessions with immediate feedback, and participate in interactive sessions. Users leverage AWS Cognito for secure login and signup.
+QuizBuzz is a real-time web application that allows registered users to create and manage quizzes, conduct live sessions with immediate feedback, and participate in interactive sessions. Users leverage AWS Cognito for secure login and signup.
 
 ## Features
 
