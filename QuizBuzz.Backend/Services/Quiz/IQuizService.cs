@@ -15,6 +15,8 @@ namespace QuizBuzz.Backend.Services
         Task<IEnumerable<Question>> GetQuestionsAsync(string quizId);
 
         bool SuggestCategory(string category);
-    
+        void RemoveCorrectAnswers(Quiz quiz);
+
+
     }
 }

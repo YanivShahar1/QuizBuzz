@@ -1,6 +1,7 @@
 ﻿using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.Enums;
 using QuizBuzz.Backend.Models;
@@ -94,7 +95,18 @@ namespace QuizBuzz.Backend.Services
             _quizCache.CacheItem(quiz.QuizID, quiz);
 
             _logger.LogInformation($"Quiz with ID {quizId} fetched from database and cached.");
+            // Remove correct answers before sending the quiz
+            _logger.LogInformation($"sending quiz : {JsonConvert.SerializeObject(quiz)}");
             return quiz;
+        }
+
+        public void RemoveCorrectAnswers(Quiz quiz)
+        {
+            // Remove correct answers from quiz structure 
+            foreach (var question in quiz.Questions)
+            {
+                question.CorrectOptions.Clear();
+            }
         }
 
         public async Task DeleteQuizAsync(string quizId)

@@ -2,9 +2,9 @@ import React, {useEffect,useState}from 'react';
 import { Form, Col, Row } from 'react-bootstrap';
 import QuizCategories from '../../../components/Quiz/QuizCategories';
 import PublicCheckbox from '../../../components/PublicCheckbox/PublicCheckbox';
-import './InfoSection.css';
+import './GeneralInfoEditor.css';
 
-const InfoSection = ({ info = {}, onInfoChange, categories }) => {
+const GeneralInfoEditor = ({ info = {}, onInfoChange, categories }) => {
   // Destructure with default values to prevent undefined values
   const { title = '', category = '', description = '', isPublic = false } = info;
 
@@ -68,4 +68,4 @@ const InfoSection = ({ info = {}, onInfoChange, categories }) => {
   );
 };
 
-export default InfoSection;
+export default GeneralInfoEditor;

@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faEdit, faEye, faAngleDown, faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import QuizService from '../../services/QuizService';
-import { formatDate } from '../../utils/dateUtils';
+import { formatDate,compareDatesDescending } from '../../utils/dateUtils';
 import CreateQuizButton from '../../components/Quiz/CreateQuizButton/CreateQuizButton';
 import { Row, Col, Button, Modal } from 'react-bootstrap';
-import './QuizzesSection.css';
+import './UserSessions.css';
 import EditQuizModal from '../../components/Quiz/EditQuizModal/EditQuizModal';
 import QuestionPreview from '../../components/Question/QuestionPreview/QuestionPreview';
 
 
-const QuizzesSection = ({ userName }) => {
+const UserQuizzes = ({ userName }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [quizzes, setQuizzes] = useState([]);
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -19,12 +19,17 @@ const QuizzesSection = ({ userName }) => {
     const [selectedQuiz, setSelectedQuiz] = useState(null); // State to store the selected quiz
     const [showEditModal, setShowEditModal] = useState(false);
 
+    const sortUserQuizzes = (quizzes) => {
+        quizzes.sort((a, b) => compareDatesDescending(a.createdAt, b.createdAt));
+    };
+
     useEffect(() => {
         const fetchUserQuizzes = async () => {
             try {
                 setIsLoading(true);
                 const userQuizzes = await QuizService.fetchUserQuizzes(userName);
-                setQuizzes(userQuizzes);
+                sortUserQuizzes(userQuizzes);
+                await setQuizzes(userQuizzes);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error fetching quizzes:', error);
@@ -153,4 +158,4 @@ const QuizzesSection = ({ userName }) => {
     );
 };
 
-export default QuizzesSection;
+export default UserQuizzes;

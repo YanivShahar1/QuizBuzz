@@ -23,7 +23,7 @@ namespace QuizBuzz.Backend.Models
     // Class to represent response data for each question index
     public class Response
     {
-        public List<int> SelectedOptions { get; set; } = new List<int>();
+        public List<string> SelectedOptions { get; set; } = new List<string>();
 
         public long TimeTaken { get; set; }
 

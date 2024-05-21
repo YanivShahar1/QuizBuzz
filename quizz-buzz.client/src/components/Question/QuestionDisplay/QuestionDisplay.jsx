@@ -24,8 +24,8 @@ const QuestionDisplay = ({ question, userAnswer, handleAnswerChange, handleAnswe
         }
     }, [userAnswer]);
     
-    const handleAnswerSelection = index => {
-        handleAnswerChange(index);
+    const handleAnswerSelection = answer => {
+        handleAnswerChange(answer);
     };
 
     const handleSubmitClick = () => {
@@ -44,9 +44,9 @@ const QuestionDisplay = ({ question, userAnswer, handleAnswerChange, handleAnswe
                             <input
                                 type={question.isMultipleAnswerAllowed ? 'checkbox' : 'radio'}
                                 name="answer"
-                                value={index}
-                                checked={userAnswer && userAnswer.includes(index)}
-                                onChange={() => handleAnswerSelection(index)}
+                                value={option}
+                                checked={userAnswer && userAnswer.includes(option)}
+                                onChange={() => handleAnswerSelection(option)}
                                 disabled={answerSubmitted} // Disable input when answerSubmitted
                             />
                             {option}

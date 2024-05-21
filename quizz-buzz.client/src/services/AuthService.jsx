@@ -58,7 +58,10 @@ const AuthService = {
     },
     
     isAuthenticated: () => {
+        console.log(`TODO : isAuthenticated`)
         const cognitoUser = userPool.getCurrentUser();
+
+        console.log(cognitoUser);
         return !!cognitoUser;
     },
 

@@ -6,7 +6,7 @@ const SettingsForm = () => {
 
     return (
         <form className="SettingsForm">
-            {/* Form fields and settings-related UI components */}
+            <p>This page is currently being built. Please check back later.</p>
         </form>
     );
 };

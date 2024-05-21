@@ -3,11 +3,50 @@ import { Button, Container, Form, Row, Col, FormControl, FormCheck, Accordion, O
 import { faTrash, faEdit, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import QuestionPreview from '../../../components/Question/QuestionPreview/QuestionPreview'; // Import the QuestionPreview component
-import './QuestionsSection.css'; // Import the CSS file
+import './QuestionEditor.css'; // Import the CSS file
+import { MAX_OPTIONS_PER_QUESTION } from '../../../utils/constants';
 
-const QuestionsSection = ({ questions, setQuestions }) => {
+const QuestionEditor = ({ questions, setQuestions }) => {
     const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(null);
     const addQuestionRef = useRef(null);
+   
+    // State to hold validation errors for each question
+    const [questionErrors, setQuestionErrors] = useState(Array(questions.length).fill([]));
+    // Method to validate a question and update its errors
+    
+    const updateQuestionErrors = (questionIndex) => {
+        console.log(`in updateQuestionErrors for question ${questionIndex}`);
+        const newQuestionErrors = [...questionErrors];
+        newQuestionErrors[questionIndex] = validateQuestionInput(questions[questionIndex]);
+        setQuestionErrors(newQuestionErrors);
+    };
+
+    useEffect(()=>{
+        updateQuestionErrors(selectedQuestionIndex);
+    },[selectedQuestionIndex])
+
+    // Method to validate each question
+    const validateQuestionInput = (question) => {
+        let errors = [];
+
+        if (!question) {
+            errors.push('Question is null.');
+            return errors;
+        }
+
+        // Check if all options have text
+        const emptyOptions = question.options.filter(option => option.trim() === '');
+        if (emptyOptions.length > 0) {
+            errors.push('All options must have text.');
+        }
+
+        // Check if at least one option is marked as correct
+        if (question.correctAnswers.length === 0) {
+            errors.push('At least one option must be marked as correct.');
+        }
+
+        return errors;
+    };
 
     useEffect (() => {
         console.log(`questions : ${JSON.stringify(questions)}`);
@@ -29,45 +68,59 @@ const QuestionsSection = ({ questions, setQuestions }) => {
         const updatedQuestions = [...questions];
         updatedQuestions[questionIndex].options[optionIndex] = value;
         setQuestions(updatedQuestions);
+        setSelectedQuestionIndex(questionIndex);
         console.log(`Option changed for question index: ${questionIndex}, option index: ${optionIndex}, value: ${value}`);
     };
 
-    const handleCorrectAnswerToggle = (questionIndex, optionIndex) => {
-        console.log(`handleCorrectAnswerToggle , questionIndex = ${questionIndex}, optionIndex = ${optionIndex}  `);
+    const handleCorrectAnswerToggle = (questionIndex, correctOption) => {
+        console.log(`handleCorrectAnswerToggle , questionIndex = ${questionIndex}, correctOption = ${correctOption}  `);
         const updatedQuestions = [...questions];
-        const isChecked = updatedQuestions[questionIndex].correctAnswers.includes(optionIndex);
+        
+        // Get correctAnswers and option value for the specified question
+        let correctAnswers = updatedQuestions[questionIndex].correctAnswers ;
+        console.log(`correctOption = ${correctOption}`);
+
+        const isChecked = correctAnswers.includes(correctOption);
         console.log(`is checked? = ${isChecked}`);
         
         if (updatedQuestions[questionIndex].multipleAnswers) {
             // Allow multiple answers, toggle selection
+            console.log("multiple answers allowed");
             if (isChecked) {
-                updatedQuestions[questionIndex].correctAnswers = updatedQuestions[questionIndex].correctAnswers.filter(index => index !== optionIndex);
+                //uncheck
+                correctAnswers = correctAnswers.filter(val => val !== correctOption);
             } else {
-                updatedQuestions[questionIndex].correctAnswers.push(optionIndex);
+                correctAnswers.push(correctOption);
             }
         } else {
+            console.log("multiple answers NOT allowed");
+
             // Only one answer allowed, toggle selection if not already selected
             if (isChecked) {
-                updatedQuestions[questionIndex].correctAnswers = [];
+                correctAnswers = [];
             } else {
-                updatedQuestions[questionIndex].correctAnswers = [optionIndex];
+                correctAnswers = [correctOption];
             }
         }
-        
+        // Update the correctAnswers array in the question
+        updatedQuestions[questionIndex].correctAnswers = correctAnswers;
         setQuestions(updatedQuestions);
-        console.log(`Correct answer toggled for question index: ${questionIndex}, option index: ${optionIndex}`);
+        setSelectedQuestionIndex(questionIndex); // Clear selected question index
     };
     
     
     const addOption = (questionIndex) => {
         const updatedQuestions = [...questions];
-        if (updatedQuestions[questionIndex].options.length < 10) {
+        if (updatedQuestions[questionIndex].options.length < MAX_OPTIONS_PER_QUESTION) {
             updatedQuestions[questionIndex].options.push('');
             setQuestions(updatedQuestions);
+            setSelectedQuestionIndex(questionIndex); // Clear selected question index
+
             console.log(`Added option for question index: ${questionIndex}`);
         } else {
             console.log(`Maximum options reached for question index: ${questionIndex}`);
         }
+
     };
 
     const handleOptionDelete = (questionIndex, optionIndex) => {
@@ -109,6 +162,7 @@ const QuestionsSection = ({ questions, setQuestions }) => {
         console.log(`Toggled multiple answers for question index: ${index}`);
     };
 
+
     return (
         <Container>
             <Row>
@@ -148,8 +202,8 @@ const QuestionsSection = ({ questions, setQuestions }) => {
                                                 <FormCheck
                                                     type={question.multipleAnswers && question.correctAnswers.length > 1 ? 'checkbox' : 'radio'}
                                                     label={`Option ${optionIndex + 1}: `}
-                                                    checked={question.correctAnswers.includes(optionIndex)}
-                                                    onChange={() => handleCorrectAnswerToggle(index, optionIndex)}
+                                                    checked={question.correctAnswers.includes(option)}
+                                                    onChange={() => handleCorrectAnswerToggle(index, option)}
                                                 />
                                                 <FormControl
                                                     type="text"
@@ -158,7 +212,7 @@ const QuestionsSection = ({ questions, setQuestions }) => {
                                                     onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
                                                     className="option-input"
                                                 />
-                                                {question.correctAnswers.includes(optionIndex) ? (
+                                                {question.correctAnswers.includes(option) ? (
                                                     <span className="correct-option">&#10003;</span>
                                                 ) : (
                                                     <span className="incorrect-option">&#x2717;</span>
@@ -233,4 +287,4 @@ const QuestionsSection = ({ questions, setQuestions }) => {
     );
 };
 
-export default QuestionsSection;
+export default QuestionEditor;

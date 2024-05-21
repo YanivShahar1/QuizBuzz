@@ -25,3 +25,25 @@ export const formatDate = (dateString) => {
         return dateString;
     }
 };
+
+/**
+ * Sort an array of dates in descending order.
+ * @param {string[]} dates - The array of date strings to sort.
+ * @returns {string[]} The sorted array of date strings.
+ */
+export const sortDatesDescending = (dates) => {
+    return dates.sort((a, b) => new Date(b) - new Date(a));
+};
+
+/**
+ * Compare two date strings.
+ * @param {string} dateA - The first date string to compare.
+ * @param {string} dateB - The second date string to compare.
+ * @returns {number} A negative number if dateA is less than dateB, 
+ *                   zero if they are equal, 
+ *                   a positive number if dateA is greater than dateB.
+ */
+export const compareDatesDescending = (dateA, dateB) => {
+    return new Date(dateB) - new Date(dateA);
+};
+

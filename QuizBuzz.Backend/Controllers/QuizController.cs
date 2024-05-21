@@ -42,6 +42,7 @@ namespace QuizBuzz.Backend.Controllers
                 {
                     return NotFound(); 
                 }
+                _quizService.RemoveCorrectAnswers(quiz);
 
                 return Ok(quiz);
             }

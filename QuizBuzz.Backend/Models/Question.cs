@@ -7,7 +7,7 @@ namespace QuizBuzz.Backend.Models
     {
         public string QuestionText { get; set; } = string.Empty;
         public List<string> Options { get; set; } = new List<string>();
-        public List<int> CorrectOptions { get; set; } = new List<int>();
+        public List<string> CorrectOptions { get; set; } = new List<string>();
         public bool IsMultipleAnswerAllowed { get; set; }
     }
 }

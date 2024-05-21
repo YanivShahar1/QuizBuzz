@@ -51,7 +51,7 @@ namespace QuizBuzz.Backend.Services
         {
             string nickname = answerSubmission.Nickname;
             int questionIndex = answerSubmission.QuestionIndex;
-            List<int> selectedOptions = answerSubmission.SelectedOptions;
+            List<string> selectedOptions = answerSubmission.SelectedOptions;
             long timeTaken = answerSubmission.TimeTaken;
 
             // Perform validation on the received data
@@ -72,7 +72,7 @@ namespace QuizBuzz.Backend.Services
                 throw new ArgumentException("At least one option must be selected", nameof(selectedOptions));
             }
 
-            bool isCorrect = calculateIsCorrect(quiz.Questions[questionIndex].CorrectOptions, selectedOptions);
+            bool isCorrect = isCorrectAnswer(quiz.Questions[questionIndex].CorrectOptions, selectedOptions);
             int numQuestions = quiz.Questions.Count();
 
             // Create the response object
@@ -119,14 +119,23 @@ namespace QuizBuzz.Backend.Services
 
         }
 
-        private bool calculateIsCorrect(List<int> correctOptions, List<int> userSelectedOptions)
+        private bool isCorrectAnswer(List<string> correctOptions, List<string> userOptions)
         {
-            // Check if both lists have the same elements, regardless of their order
-            bool res = correctOptions.OrderBy(o => o).SequenceEqual(userSelectedOptions.OrderBy(o => o));
-            Debug.WriteLine($"in calculateIsCorrect, result: {res}");
+            if (correctOptions == null || userOptions == null)
+            {
+                Debug.WriteLine("One or both option lists are null.");
+                return false;
+            }
 
-            return res;
+            var correctOptionsSet = new HashSet<string>(correctOptions);
+            var userSelectedOptionsSet = new HashSet<string>(userOptions);
+
+            bool isCorrect = correctOptionsSet.SetEquals(userSelectedOptionsSet);
+            Debug.WriteLine($"in CalculateIsCorrect, result: {isCorrect}");
+
+            return isCorrect;
         }
+
 
 
         public void FinishSession(Session session)

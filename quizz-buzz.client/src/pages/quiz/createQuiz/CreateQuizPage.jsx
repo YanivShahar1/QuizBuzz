@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Accordion, Button } from 'react-bootstrap';
-import InfoSection from './InfoSection';
-import QuestionsSection from './QuestionsSection';
+import GeneralInfoEditor from './GeneralInfoEditor';
+import QuestionEditor from './QuestionEditor';
 import QuizService from '../../../services/QuizService';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../../../services/AuthService';
@@ -76,13 +76,13 @@ const CreateQuizPage = () => {
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>General Quiz Info</Accordion.Header>
                             <Accordion.Body>
-                                <InfoSection info={quizInfo} onInfoChange={handleQuizInfoChange} categories={categories} />
+                                <GeneralInfoEditor info={quizInfo} onInfoChange={handleQuizInfoChange} categories={categories} />
                             </Accordion.Body>
                         </Accordion.Item>
                         <Accordion.Item eventKey="1">
                             <Accordion.Header>Quiz Questions</Accordion.Header>
                             <Accordion.Body>
-                                <QuestionsSection questions={questions} setQuestions={setQuestions} />
+                                <QuestionEditor questions={questions} setQuestions={setQuestions} />
                                 
                             </Accordion.Body>
                         </Accordion.Item>

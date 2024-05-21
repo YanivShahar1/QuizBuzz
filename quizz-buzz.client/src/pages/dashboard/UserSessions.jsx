@@ -3,18 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faEye } from '@fortawesome/free-solid-svg-icons';
 import SessionService from '../../services/SessionService';
-import { formatDate } from '../../utils/dateUtils';
+import { formatDate ,compareDatesDescending} from '../../utils/dateUtils';
 import CreateSessionButton from '../../components/Session/Buttons/CreateSessionButton';
 import { Button, Row, Modal, Col } from 'react-bootstrap'; // Import Button, Row, and Modal from React-Bootstrap
 import SessionAdminStatistics from '../../components/Session/SessionAdminStatistics';
-import './SessionStatisticsSection.css';
+import './UserSessions.css';
 import SessionResults from '../../components/Session/SessionResults/SessionResults';
 
-const SessionStatisticsSection = ({ userName }) => {
+const UserSessions = ({ userName }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [sessions, setSessions] = useState([]);
     const [showResultsModal, setShowResultsModal] = useState(false);
     const [chosenSessionResults, setChosenSessionResults] = useState(null);
+
+
+    const sortUserSessions = (sessions) => {
+        sessions.sort((a, b) => compareDatesDescending(a.createdAt, b.createdAt));
+    };
 
 
     useEffect(() => {
@@ -23,6 +28,7 @@ const SessionStatisticsSection = ({ userName }) => {
                 setIsLoading(true);
                 console.log(`Fetching sessions for ${userName}...`);
                 const userSessions = await SessionService.fetchUserSessions(userName);
+                sortUserSessions(userSessions);
                 setSessions(userSessions);
                 setIsLoading(false);
             } catch (error) {
@@ -107,9 +113,9 @@ const SessionStatisticsSection = ({ userName }) => {
                             {/* Table Header */}
                             <thead>
                                 <tr>
-                                    <th scope="col">#</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">ID</th>
+                                    <th scope="col">Date Created</th>
                                     <th scope="col">Date Started</th>
                                     <th scope="col">Date Ended</th>
                                     <th scope="col">Actions</th>
@@ -119,9 +125,9 @@ const SessionStatisticsSection = ({ userName }) => {
                             <tbody>
                                 {finishedSessions.map((session, index) => (
                                     <tr key={session.sessionID}>
-                                        <th scope="row">{index + 1}</th>
-                                        <td>{session.name}</td>
+                                        <th scope="row">{session.name}</th>
                                         <td>{session.sessionID}</td>
+                                        <td>{formatDate(session.createdAt)}</td>
                                         <td>{formatDate(session.startedAt)}</td>
                                         <td>{formatDate(session.endedAt)}</td>
                                         <td>
@@ -150,7 +156,6 @@ const SessionStatisticsSection = ({ userName }) => {
                             {/* Table Header */}
                             <thead>
                                 <tr>
-                                    <th scope="col">#</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">ID</th>
                                     <th scope="col">Date Created</th>
@@ -161,8 +166,7 @@ const SessionStatisticsSection = ({ userName }) => {
                             <tbody>
                                 {notStartedSessions.map((session, index) => (
                                     <tr key={session.sessionID}>
-                                        <th scope="row">{index + 1}</th>
-                                        <td>{session.name}</td>
+                                        <th scope="row">{session.name}</th>
                                         <td>{session.sessionID}</td>
                                         <td>{formatDate(session.createdAt)}</td>
                                         <td>
@@ -191,11 +195,10 @@ const SessionStatisticsSection = ({ userName }) => {
                             {/* Table Header */}
                             <thead>
                                 <tr>
-                                    <th scope="col">#</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">ID</th>
-                                    <th scope="col">Date Started</th>
                                     <th scope="col">Date Created</th>
+                                    <th scope="col">Date Started</th>
                                     <th scope="col">Actions</th>
                                 </tr>
                             </thead>
@@ -203,11 +206,10 @@ const SessionStatisticsSection = ({ userName }) => {
                             <tbody>
                                 {runningSessions.map((session, index) => (
                                     <tr key={session.sessionID}>
-                                        <th scope="row">{index + 1}</th>
-                                        <td>{session.name}</td>
+                                        <th scope="row">{session.name}</th>
                                         <td>{session.sessionID}</td>
-                                        <td>{formatDate(session.startedAt)}</td>
                                         <td>{formatDate(session.createdAt)}</td>
+                                        <td>{formatDate(session.startedAt)}</td>
                                         <td>
                                             {/* Buttons for Action */}
                                             <Button variant="danger" onClick={() => handleDeleteSession(session.sessionID)}>
@@ -238,4 +240,4 @@ const SessionStatisticsSection = ({ userName }) => {
     );
 };
 
-export default SessionStatisticsSection;
+export default UserSessions;

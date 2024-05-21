@@ -10,6 +10,7 @@ import LogoutPage from './pages/auth/LogoutPage';
 import SignupPage from './pages/auth/SignupPage';
 import QuizResultsPage from './pages/quiz/QuizResultsPage';
 import HomePage from './pages/HomePage';
+import SettingsPage from './pages/SettingsPage'
 import DashboardPage from './pages/dashboard/DashboardPage';
 import CreateQuizPage from './pages/quiz/createQuiz/CreateQuizPage';
 import CreateSessionPage from './pages/session/createSession/CreateSessionPage';
@@ -34,7 +35,7 @@ function App() {
                <Route path="/quiz-results/:quizId" element={<QuizResultsPage />} />
                <Route path="/session/:sessionId" element={<SessionPage />} />
                {/*<Route path="/user-profile" element={<UserProfilePage />} />*/}
-               {/*<Route path="/settings" element={<SettingsPage />} />*/}
+               <Route path="/settings" element={<SettingsPage />} />
                <Route path="/dashboard" element={<DashboardPage />} />
                <Route path="/login" element={<LoginPage />} />
                <Route path="/logout" element={<LogoutPage />} />

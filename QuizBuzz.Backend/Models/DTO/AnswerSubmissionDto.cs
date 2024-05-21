@@ -8,7 +8,7 @@
        
         public int QuestionIndex { get; set; } = -1;
 
-        public List<int> SelectedOptions { get; set; } = new List<int>();
+        public List<string> SelectedOptions { get; set; } = new List<string>();
 
         public long TimeTaken { get; set; }
     }
