@@ -13,29 +13,12 @@ QuizBuzz is a real-time web application that allows registered users to create a
 
 ## Technologies Used
 
-### React
-- **Description:** A JavaScript library for building user interfaces.
-- **Website:** [React](https://reactjs.org/)
-
-### Node.js
-- **Description:** A JavaScript runtime built on Chrome's V8 JavaScript engine.
-- **Website:** [Node.js](https://nodejs.org/)
-
-### Amazon Cognito Identity
-- **Description:** Provides authentication, authorization, and user management for web and mobile apps.
-- **Website:** [Amazon Cognito](https://aws.amazon.com/cognito/)
-
-### AWS DynamoDB
-- **Description:** A fully managed NoSQL database service provided by Amazon Web Services.
-- **Website:** [AWS DynamoDB](https://aws.amazon.com/dynamodb/)
-
-### SignalR
-- **Description:** A library for adding real-time web functionality to applications.
-- **Website:** [SignalR](https://dotnet.microsoft.com/apps/aspnet/signalr)
-
-### .NET Core ASP.NET
-- **Description:** A cross-platform, high-performance framework for building modern, cloud-based, internet-connected applications.
-- **Website:** [ASP.NET](https://dotnet.microsoft.com/apps/aspnet)
+- **React:** A JavaScript library for building user interfaces. [Website](https://reactjs.org/)
+- **Node.js:** A JavaScript runtime built on Chrome's V8 engine. [Website](https://nodejs.org/)
+- **Amazon Cognito:** Authentication, authorization, and user management. [Website](https://aws.amazon.com/cognito/)
+- **AWS DynamoDB:** Fully managed NoSQL database service. [Website](https://aws.amazon.com/dynamodb/)
+- **SignalR:** Real-time web functionality library. [Website](https://dotnet.microsoft.com/apps/aspnet/signalr)
+- **.NET Core ASP.NET:** Cross-platform framework for building modern, cloud-based applications. [Website (https://dotnet.microsoft.com/apps/aspnet)
 
 ## Preview Videos
 
