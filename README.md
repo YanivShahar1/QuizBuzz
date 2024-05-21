@@ -13,7 +13,7 @@ QuizBuzz is a real-time web application that allows registered users to create a
 
 ## Technologies Used
 
-- ****React:**** A JavaScript library for building user interfaces. [Website](https://reactjs.org/)
+- **React:** A JavaScript library for building user interfaces. [Website](https://reactjs.org/)
 - **Node.js:** A JavaScript runtime built on Chrome's V8 engine. [Website](https://nodejs.org/)
 - **Amazon Cognito:** Authentication, authorization, and user management. [Website](https://aws.amazon.com/cognito/)
 - **AWS DynamoDB:** Fully managed NoSQL database service. [Website](https://aws.amazon.com/dynamodb/)
@@ -25,5 +25,5 @@ QuizBuzz is a real-time web application that allows registered users to create a
 ### Quiz Creation
 [![Quiz Creation Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
 
-### Live Session Management
+### Session Creation and Live Session Management
 [![Live Session Management Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
