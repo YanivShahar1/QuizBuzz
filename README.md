@@ -24,3 +24,9 @@ QuizBuzz is a real-time web application that allows users to create and manage q
 
    ```bash
    git clone [https://github.com/](https://github.com/)<your-username>/QuizBuzz.git
+
+2. Install dependencies:
+
+   ```bash
+   cd QuizBuzz npm install
+
