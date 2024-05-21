@@ -11,30 +11,26 @@ QuizBuzz is a real-time web application that allows users to create and manage q
 - **Live Statistics:** Session admins can view real-time statistics on user answers, including leaderboards, answer distribution, and overall session progress.
 - **AWS Cognito Integration:** Users can register and login using AWS Cognito, enabling secure access control and restricting quiz creation/session management to registered users.
 
-#Technology used:
-## React
+# Technologies Used
+### React
 - Description: A JavaScript library for building user interfaces.
 - [Website](https://reactjs.org/)
 
-## Node.js
+### Node.js
 - Description: A JavaScript runtime built on Chrome's V8 JavaScript engine.
 - [Website](https://nodejs.org/)
 
-## Amazon Cognito Identity
+### Amazon Cognito Identity
 - Description: Provides authentication, authorization, and user management for web and mobile apps.
 - [Website](https://aws.amazon.com/cognito/)
 
-## AWS DynamoDB
+### AWS DynamoDB
 - Description: A fully managed NoSQL database service provided by Amazon Web Services.
 - [Website](https://aws.amazon.com/dynamodb/)
 
-## SignalR
+### SignalR
 - Description: A library for adding real-time web functionality to applications.
 - [Website](https://dotnet.microsoft.com/apps/aspnet/signalr)
-
-## Bootstrap
-- Description: A popular CSS framework for building responsive and mobile-first websites.
-- [Website](https://getbootstrap.com/)
 
 ## .NET Core ASP.NET
 - Description: A cross-platform, high-performance framework for building modern, cloud-based, internet-connected applications.
