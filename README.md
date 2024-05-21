@@ -20,10 +20,10 @@ QuizBuzz is a real-time web application that allows users to create and manage q
 
 ### Steps:
 
-##### 1. Clone the repository
+#### 1. Clone the repository
 
-##### 2. Install dependencies
+### 2. Install dependencies
 
-##### 3. Configure AWS Credentials: 
+#### 3. Configure AWS Credentials: 
 Before using the QuizBuzz application, you need to configure your AWS credentials. Follow the instructions in the [AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) to set up AWS CLI configuration on your machine. This includes setting up access keys, regions, and other configuration details necessary for QuizBuzz to interact with AWS services securely.
 
