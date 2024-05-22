@@ -44,7 +44,7 @@ namespace QuizBuzz.Backend
 			//TODO -> change EnvironmentVariablesAWSCredentials to .env file
             services.AddAWSService<IAmazonDynamoDB>(new AWSOptions
             {
-                Region = Amazon.RegionEndpoint.USEast1, // Replace with your AWS region
+                Region = Amazon.RegionEndpoint.USEast1,
                 Credentials = new EnvironmentVariablesAWSCredentials() // This will use the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables
             });
 

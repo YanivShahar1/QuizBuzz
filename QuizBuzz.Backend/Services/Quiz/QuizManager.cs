@@ -4,7 +4,6 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using QuizBuzz.Backend.Models;
-using QuizBuzz.Backend.Models.DTO;
 
 namespace QuizBuzz.Backend.Services
 {

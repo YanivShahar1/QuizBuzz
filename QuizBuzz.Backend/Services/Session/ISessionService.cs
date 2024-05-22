@@ -1,5 +1,5 @@
-﻿using QuizBuzz.Backend.Models;
-using QuizBuzz.Backend.Models.DTO;
+﻿using QuizBuzz.Backend.DTOs;
+using QuizBuzz.Backend.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

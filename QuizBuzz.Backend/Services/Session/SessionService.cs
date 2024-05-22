@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuizBuzz.Backend.DataAccess;
+using QuizBuzz.Backend.DTOs;
 using QuizBuzz.Backend.Models;
-using QuizBuzz.Backend.Models.DTO;
 using QuizBuzz.Backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -168,6 +168,7 @@ namespace QuizBuzz.Backend.Services
         {
             try
             {
+                _logger.LogInformation($"SubmitUserAnswerAsync,answer : {answerDto}");
                 string sessionId = answerDto.SessionId;
                 Session? session = await FetchSessionAsync(sessionId);
                

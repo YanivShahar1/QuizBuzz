@@ -95,7 +95,6 @@ namespace QuizBuzz.Backend.Services
             _quizCache.CacheItem(quiz.QuizID, quiz);
 
             _logger.LogInformation($"Quiz with ID {quizId} fetched from database and cached.");
-            // Remove correct answers before sending the quiz
             _logger.LogInformation($"sending quiz : {JsonConvert.SerializeObject(quiz)}");
             return quiz;
         }

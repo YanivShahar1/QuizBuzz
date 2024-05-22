@@ -9,8 +9,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using QuizBuzz.Backend.DataAccess;
+using QuizBuzz.Backend.DTOs;
 using QuizBuzz.Backend.Models;
-using QuizBuzz.Backend.Models.DTO;
 using static System.Collections.Specialized.BitVector32;
 
 namespace QuizBuzz.Backend.Services
@@ -126,15 +126,17 @@ namespace QuizBuzz.Backend.Services
                 Debug.WriteLine("One or both option lists are null.");
                 return false;
             }
+            Debug.WriteLine($"correctOptions: {string.Join(", ", correctOptions)}, userOptions: {string.Join(", ", userOptions)}");
 
-            var correctOptionsSet = new HashSet<string>(correctOptions);
-            var userSelectedOptionsSet = new HashSet<string>(userOptions);
+            var correctOptionsSet = new HashSet<string>(correctOptions.Select(option => option.Trim()));
+            var userSelectedOptionsSet = new HashSet<string>(userOptions.Select(option => option.Trim()));
 
             bool isCorrect = correctOptionsSet.SetEquals(userSelectedOptionsSet);
-            Debug.WriteLine($"in CalculateIsCorrect, result: {isCorrect}");
+            Debug.WriteLine($"in CalculateIsCorrect, isCorrect?: {isCorrect}");
 
             return isCorrect;
         }
+
 
 
 

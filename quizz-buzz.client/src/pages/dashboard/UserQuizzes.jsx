@@ -93,7 +93,6 @@ const UserQuizzes = ({ userName }) => {
                                 <table className="table table-striped quizzes-table">
                                     <thead>
                                         <tr>
-                                            <th>#</th>
                                             <th>Title</th>
                                             <th>Date Created</th>
                                             <th>Last Updated</th>
@@ -103,7 +102,6 @@ const UserQuizzes = ({ userName }) => {
                                     <tbody>
                                         {quizzes.map((quiz, index) => (
                                             <tr key={quiz.quizID}>
-                                                <td>{index + 1}</td>
                                                 <td>{quiz.title}</td>
                                                 <td>{formatDate(quiz.createdAt)}</td>
                                                 <td>{formatDate(quiz.updatedAt)}</td>

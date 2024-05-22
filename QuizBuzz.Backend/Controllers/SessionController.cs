@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Amazon.Runtime.Internal.Util;
-using QuizBuzz.Backend.Models.DTO;
 using QuizBuzz.Backend.Services;
+using QuizBuzz.Backend.DTOs;
 
 
 namespace QuizBuzz.Backend.Controllers

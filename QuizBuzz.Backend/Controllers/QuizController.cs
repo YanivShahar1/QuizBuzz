@@ -11,6 +11,8 @@ using QuizBuzz.Backend.Hubs;
 using Newtonsoft.Json;
 using QuizBuzz.Backend.Enums;
 using QuizBuzz.Backend.Services;
+using QuizBuzz.Backend.DTOs;
+using QuizBuzz.Backend.Mappers;
 
 namespace QuizBuzz.Backend.Controllers
 {
@@ -42,9 +44,9 @@ namespace QuizBuzz.Backend.Controllers
                 {
                     return NotFound(); 
                 }
-                _quizService.RemoveCorrectAnswers(quiz);
+                QuizDto quizDto = quiz.ToDto();
 
-                return Ok(quiz);
+                return Ok(quizDto);
             }
             catch (ArgumentException ex)
             {
@@ -163,6 +165,8 @@ namespace QuizBuzz.Backend.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+
         // POST: api/quiz/category
         [HttpPost("category")]
         public IActionResult SuggestCategory(string category)
