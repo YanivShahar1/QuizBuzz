@@ -171,5 +171,51 @@ namespace QuizBuzz.Backend.DataAccess
                 throw;
             }
         }
+
+        public async Task BatchWriteItemAsync(Dictionary<string, List<WriteRequest>> requestItems)
+        {
+            try
+            {
+                var request = new BatchWriteItemRequest
+                {
+                    RequestItems = requestItems
+                };
+
+                var response = await _dynamoDbClient.BatchWriteItemAsync(request);
+
+                if (response.UnprocessedItems.Count > 0)
+                {
+                    _logger.LogWarning("Some items were not processed. Retrying...");
+                    await retryUnprocessedItemsAsync(response.UnprocessedItems);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error performing batch write operation");
+                throw;
+            }
+        }
+
+
+        private async Task retryUnprocessedItemsAsync(Dictionary<string, List<WriteRequest>> unprocessedItems)
+        {
+            // Retry logic for unprocessed items
+            // Implement exponential backoff or other retry strategies as needed
+            int retryCount = 0;
+            int maxRetries = 5;
+            while (unprocessedItems.Count > 0 && retryCount < maxRetries)
+            {
+                await Task.Delay(1000 * (int)Math.Pow(2, retryCount)); // Exponential backoff
+                var response = await _dynamoDbClient.BatchWriteItemAsync(new BatchWriteItemRequest { RequestItems = unprocessedItems });
+                unprocessedItems = response.UnprocessedItems;
+                retryCount++;
+            }
+
+            if (unprocessedItems.Count > 0)
+            {
+                _logger.LogError("Some items could not be processed after multiple retries.");
+            }
+        }
+
     }
 }

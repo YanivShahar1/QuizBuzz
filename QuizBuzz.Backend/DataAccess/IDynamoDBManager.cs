@@ -74,5 +74,13 @@ namespace QuizBuzz.Backend.DataAccess
         /// <param name="rangeKeyValue">The value of the range key.</param>
         /// <returns>A collection of items matching the query criteria.</returns>
         Task<IEnumerable<T>> QueryItemsByKeysAsync<T>(string hashKey, string rangeKey, string hashKeyValue, string rangeKeyValue) where T : class;
+
+        /// <summary>
+        /// Performs a batch write operation on DynamoDB asynchronously.
+        /// This method allows multiple put and delete operations in a single request.
+        /// </summary>
+        /// <param name="requestItems">A dictionary where the key is the table name and the value is a list of write requests.</param>
+        Task BatchWriteItemAsync(Dictionary<string, List<WriteRequest>> requestItems);
+    
     }
 }

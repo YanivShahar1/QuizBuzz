@@ -126,6 +126,26 @@ namespace QuizBuzz.Backend.Controllers
             }
         }
 
+        // New delete endpoint for multiple quizzes
+        [HttpDelete("delete-multiple")]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<string> quizIds)
+        {
+            if (quizIds == null || !quizIds.Any())
+            {
+                return BadRequest("No quiz IDs provided.");
+            }
+
+            try
+            {
+                await _quizService.DeleteQuizzesAsync(quizIds);
+                return NoContent(); // 204 No Content indicates a successful deletion
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
+        }
+
         // GET: api/quiz/all/{userName}
         [HttpGet("all/{userName}")]
         public async Task<IActionResult> GetQuizzesByHostUserIDAsync(string userName)

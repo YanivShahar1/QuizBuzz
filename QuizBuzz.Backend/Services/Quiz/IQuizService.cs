@@ -8,6 +8,8 @@ namespace QuizBuzz.Backend.Services
         Task<string> SubmitQuizAsync(Quiz newQuiz);
         Task DeleteQuizAsync(string quizId);
 
+        Task DeleteQuizzesAsync(List<string> quizIds);
+
         List<string> GetCategories();
 
         Task<IEnumerable<Quiz>> GetQuizzesByHostUserIdAsync(string userId);

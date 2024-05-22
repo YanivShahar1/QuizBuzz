@@ -122,6 +122,34 @@ namespace QuizBuzz.Backend.Services
             _logger.LogInformation($"Quiz with ID {quizId} deleted from database. Cache invalidated.");
         }
 
+        public async Task DeleteQuizzesAsync(List<string> quizIds)
+        {
+            if (quizIds == null || !quizIds.Any())
+            {
+                throw new ArgumentException("Quiz IDs cannot be null or empty.", nameof(quizIds));
+            }
+
+            var deleteRequests = quizIds.Select(id =>
+                new WriteRequest(new DeleteRequest(new Dictionary<string, AttributeValue>
+                {
+                { "QuizID", new AttributeValue { S = id } }
+                }))
+            ).ToList();
+
+            var requestItems = new Dictionary<string, List<WriteRequest>>
+        {
+            { "Quizzes", deleteRequests }
+        };
+
+            await _dbManager.BatchWriteItemAsync(requestItems);
+
+            foreach (var quizId in quizIds)
+            {
+                _quizCache.RemoveItem(quizId);
+                _logger.LogInformation($"Quiz with ID {quizId} deleted from database. Cache invalidated.");
+            }
+        }
+
         public async Task<IEnumerable<Quiz>> GetQuizzesByHostUserIdAsync(string hostUserId)
         {
             if (string.IsNullOrEmpty(hostUserId))
