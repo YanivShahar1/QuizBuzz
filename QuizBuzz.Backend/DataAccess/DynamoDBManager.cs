@@ -10,13 +10,13 @@ using System.Diagnostics;
 
 namespace QuizBuzz.Backend.DataAccess
 {
-    public class DynamoDBDManager : IDynamoDBManager
+    public class DynamoDBManager : IDynamoDBManager
     {
         private readonly IAmazonDynamoDB _dynamoDbClient;
         private readonly IDynamoDBContext _dbContext;
-        private readonly ILogger<DynamoDBDManager> _logger;
+        private readonly ILogger<DynamoDBManager> _logger;
 
-        public DynamoDBDManager(IAmazonDynamoDB dynamoDBClient, ILogger<DynamoDBDManager> logger)
+        public DynamoDBManager(IAmazonDynamoDB dynamoDBClient, ILogger<DynamoDBManager> logger)
         {
             _dynamoDbClient = dynamoDBClient ?? throw new ArgumentNullException(nameof(dynamoDBClient));
             _dbContext = new DynamoDBContext(_dynamoDbClient);
