@@ -20,3 +20,6 @@ QuizBuzz is a real-time web application that allows registered users to create a
 - **SignalR:** Real-time web functionality library. [Website](https://dotnet.microsoft.com/apps/aspnet/signalr)
 - **.NET Core ASP.NET:** Cross-platform framework for building modern, cloud-based applications. [Website (https://dotnet.microsoft.com/apps/aspnet)
 
+### Visit QuizBuzz
+
+You can visit the QuizBuzz web application [here](http://quizbuzz-frontend.s3-website-us-east-1.amazonaws.com/).
