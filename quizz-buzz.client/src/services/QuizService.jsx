@@ -1,6 +1,8 @@
+import { API_BACKEND_URL } from "../utils/constants";
 
 const QuizService = {
-    backendUrl : "https://localhost:7141/api/quiz/",
+    // backendUrl : "https://localhost:7141/api/quiz/",
+    backendUrl : `${API_BACKEND_URL}/quiz/`,
     submitQuiz: async (quizData) => {
         try {
             console.log(`in submit quiz`);

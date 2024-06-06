@@ -1,6 +1,0 @@
-@QuizBuzz.Backend_HostAddress = http://localhost:5096
-
-GET {{QuizBuzz.Backend_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
