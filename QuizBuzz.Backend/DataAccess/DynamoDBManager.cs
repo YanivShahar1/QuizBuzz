@@ -103,19 +103,32 @@ namespace QuizBuzz.Backend.DataAccess
         {
             try
             {
-                var query = _dbContext.QueryAsync<T>(partitionValue, new DynamoDBOperationConfig
+                var queryConfig = new DynamoDBOperationConfig
                 {
                     IndexName = indexName
-                });
+                };
 
-                return await query.GetNextSetAsync();
+                var queryOperation = _dbContext.QueryAsync<T>(partitionValue, queryConfig);
+                var queryResult = await queryOperation.GetNextSetAsync();
+
+                return queryResult;
+            }
+            catch (AmazonDynamoDBException ex)
+            {
+                var errorMessage = $"Error querying items of type '{typeof(T).Name}' by index '{indexName}' with partition key '{partitionKey}' and value '{partitionValue}' from DynamoDB";
+
+                _logger.LogError(ex, errorMessage);
+                throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error querying items of type '{typeof(T).Name}' by index '{indexName}' with partition key '{partitionKey}' and value '{partitionValue}' from DynamoDB");
+                var errorMessage = $"An unexpected error occurred while querying items of type '{typeof(T).Name}' by index '{indexName}' with partition key '{partitionKey}' and value '{partitionValue}' from DynamoDB";
+
+                _logger.LogError(ex, errorMessage);
                 throw;
             }
         }
+
 
         public async Task<IEnumerable<T>> QueryItemsByKeysAsync<T>(string hashKey, string rangeKey, string hashKeyValue, string rangeKeyValue) where T : class
         {

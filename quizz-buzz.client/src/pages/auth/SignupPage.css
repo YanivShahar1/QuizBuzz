@@ -1,75 +1,93 @@
 /* SignupPage.css */
 
-/* Container for the signup page */
+/* Container styles */
 .signup-container {
-    width: 100%;
-    max-width: 400px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-    /* Title styling */
-    .signup-container h2 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        font-size: 24px;
-        text-align: center;
-    }
+.signup-container h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
 
-    /* Error message styling */
-    .signup-container div.error-msg {
-        color: red;
-        margin-bottom: 10px;
-    }
+/* Form styles */
+.signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 
-/* Signup page styling */
-.signup-page label {
-    display: block;
-    margin-bottom: 10px;
+.signup-form__group {
+    display: flex;
+    flex-direction: column;
+}
+
+.signup-form__label {
     font-weight: bold;
+    margin-bottom: 0.5rem;
 }
 
-.signup-page input[type="text"],
-.signup-page input[type="email"],
-.signup-page input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+.signup-form__input {
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
 }
 
-.signup-page button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
+.signup-form__input:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Password conditions styles */
+.password-conditions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.password-conditions__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.password-conditions__item--valid {
+    color: green;
+}
+
+.password-conditions__item--invalid {
+    color: red;
+}
+
+/* Button styles */
+.signup-form__button {
+    padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 3px;
-    color: #fff;
-    font-size: 16px;
+    border-radius: 4px;
+    background-color: #28a745;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-    .signup-page button:hover {
-        background-color: #0056b3;
-    }
-
-/* Password conditions styling */
-.signup-page div.password-condition {
-    margin-bottom: 5px;
+.signup-form__button:disabled {
+    background-color: #6c757d;
 }
 
-    .signup-page div.password-condition span {
-        margin-right: 5px;
-    }
+.signup-form__button:not(:disabled):hover {
+    background-color: #218838;
+}
 
-    .signup-page div.password-condition.green {
-        color: green;
-    }
-
-    .signup-page div.password-condition.red {
-        color: red;
-    }
+/* Alert styles */
+.signup-alert {
+    margin-top: 1rem;
+}

@@ -16,6 +16,7 @@ namespace QuizBuzz.Backend.Services
         Task<IEnumerable<string>> GetSessionParticipantsAsync(string sessionId);
 
         Task JoinSession(string sessionId, string userId);
+        
         Task<IEnumerable<Session>> GetSessionsByHostId(string userId);
 
         Task<bool> SubmitUserAnswerAsync(AnswerSubmissionDto answerSubmission);

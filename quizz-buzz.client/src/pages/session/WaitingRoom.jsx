@@ -61,14 +61,48 @@ const WaitingRoom = ({ sessionId, isHost , onStartSession, sessionHubConnection,
 
     const handleCopySessionLink = () => {
         const sessionLink = window.location.href.split('?')[0] + `?sessionId=${sessionId}`;
-        navigator.clipboard.writeText(sessionLink)
-            .then(() => {
-                console.log(`Session link copied to clipboard: ${sessionLink}`);
-            })
-            .catch((error) => {
-                console.error('Error copying session link:', error);
-            });
+    
+        if (isSecureEnvironment() && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(sessionLink)
+                .then(() => {
+                    console.log(`Session link copied to clipboard: ${sessionLink}`);
+                })
+                .catch((error) => {
+                    console.error('Error copying session link:', error);
+                    fallbackCopyTextToClipboard(sessionLink);
+                });
+        } else {
+            fallbackCopyTextToClipboard(sessionLink);
+        }
     };
+    
+    const fallbackCopyTextToClipboard = (text) => {
+        const tempInput = document.createElement("textarea");
+        tempInput.value = text;
+        tempInput.setAttribute("readonly", "");
+        tempInput.style.position = "absolute";
+        tempInput.style.left = "-9999px";
+        document.body.appendChild(tempInput);
+        
+        // Select text
+        tempInput.focus();
+        tempInput.setSelectionRange(0, tempInput.value.length);
+        
+        // Copy text
+        try {
+            document.execCommand("copy");
+            console.log(`Session link copied to clipboard (fallback): ${text}`);
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+        }
+        
+        document.body.removeChild(tempInput);
+    };
+    
+    const isSecureEnvironment = () => {
+        return window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+    };
+    
     
 
     return (

@@ -1,20 +1,13 @@
-﻿using Amazon.CognitoIdentityProvider;
-using Amazon.DynamoDBv2;
+﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.Hubs;
 using QuizBuzz.Backend.Models;
 using QuizBuzz.Backend.Services;
 using QuizBuzz.Backend.Services.Interfaces;
-using System;
 
 namespace QuizBuzz.Backend
 {
@@ -33,19 +26,17 @@ namespace QuizBuzz.Backend
             {
                 options.AddPolicy("AllowSpecificOrigin",
                     builder => builder
-                        .WithOrigins("https://localhost:3000", "http://localhost:3000")
+                        .WithOrigins("http://quizbuzz-frontend.s3-website-us-east-1.amazonaws.com", "https://quizbuzz-frontend.s3-website-us-east-1.amazonaws.com")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials());
             });
 
 
-            // Add AWS services to the container.
-			//TODO -> change EnvironmentVariablesAWSCredentials to .env file
             services.AddAWSService<IAmazonDynamoDB>(new AWSOptions
             {
                 Region = Amazon.RegionEndpoint.USEast1,
-                Credentials = new EnvironmentVariablesAWSCredentials() // This will use the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables
+
             });
 
             services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
@@ -81,8 +72,8 @@ namespace QuizBuzz.Backend
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseCors("AllowSpecificOrigin");
             app.UseHttpsRedirection();
+            app.UseCors("AllowSpecificOrigin");
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.DTOs;
 using QuizBuzz.Backend.Models;
@@ -157,8 +158,15 @@ namespace QuizBuzz.Backend.Services
                 throw new ArgumentException("Host user ID cannot be null or empty.", nameof(hostUserId));
             }
 
-          
-            var sessions = await _dynamoDBDataManager.QueryItemsByIndexAsync<Session>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
+
+            IEnumerable<Session> sessions = await _dynamoDBDataManager.QueryItemsByIndexAsync<Session>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
+            _logger.LogInformation("sessions");
+
+            foreach (var session in sessions)
+            {
+                string sessionJson = JsonConvert.SerializeObject(session);
+                _logger.LogInformation(sessionJson);
+            }
             var sessionIds = sessions.Select(session => session.SessionID).ToList();
          
             return sessions;

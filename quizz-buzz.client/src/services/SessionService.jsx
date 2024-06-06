@@ -1,8 +1,10 @@
 import AuthService from "./AuthService";
+import { API_BACKEND_URL } from "../utils/constants";
 
 
 const SessionService = {
-    backendUrl : "https://localhost:7141/api/session/",
+    backendUrl : `${API_BACKEND_URL}/session/`,
+
     submitSession: async (sessionData) => {
         try {
             const response = await fetch(SessionService.backendUrl, {

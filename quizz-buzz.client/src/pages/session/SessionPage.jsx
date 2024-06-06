@@ -30,18 +30,18 @@ const SessionPage = () => {
     const connection = useSessionHub();
     
     const subscribeToSessionGroup = () => {
-        if(connection!=null && session != null){
+        if(connection!=null){
             console.log("connection is not null, invoke JoinSessionGroup");
-            connection.invoke("JoinSessionGroup", session.sessionID);
+            connection.invoke("JoinSessionGroup", sessionId);
         }else{
             console.log(`connection or session is null`);
         }
     }
 
     const subscribeToAdminGroup = () => {
-        if(connection!=null && session != null){
+        if(connection!=null){
             console.log("connection is not null, invoke JoinAdminGroup");
-            connection.invoke("JoinAdminGroup",session.sessionID, AuthService.getSessionUsername());
+            connection.invoke("JoinAdminGroup",sessionId, AuthService.getSessionUsername());
             return true;
         }else{
             console.log(`connection is null`);
@@ -62,6 +62,20 @@ const SessionPage = () => {
     }, [sessionId]);
 
     useEffect(() => {
+        console.log(`session and connection has changed`);
+        subscribeToSessionGroup();
+        if(session && connection){
+            if(SessionService.isCurrentUserSessionHost(session)){
+                console.log(`CurrentUserSessionHost -  yes - subscribeToAdminGroup!`);
+                subscribeToAdminGroup();
+            }
+        }
+        else{
+            console.log(`session or connection is null`);
+        }
+    }, [session, connection])
+
+    useEffect(() => {
         console.log(`session has changed !! ${JSON.stringify(session)}`);
         if(session){
             if(SessionService.isSessionStarted(session)){
@@ -69,10 +83,6 @@ const SessionPage = () => {
             }
             if(SessionService.isSessionFinished(session)){
                 setSessionFinished(true);
-            }
-            subscribeToSessionGroup();
-            if(SessionService.isCurrentUserSessionHost(session)){
-                subscribeToAdminGroup();
             }
         }
         else{

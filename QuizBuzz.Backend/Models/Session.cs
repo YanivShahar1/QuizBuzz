@@ -17,13 +17,13 @@ namespace QuizBuzz.Backend.Models
 
         public string AssociatedQuizID { get; set; } = string.Empty;
         public string SessionCode { get; set; } = string.Empty;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime StartedAt { get; set; } = DateTime.MaxValue;
         public DateTime EndedAt { get; set; } = DateTime.MaxValue;
 
         public HashSet<string> Participants { get; set; } = new HashSet<string>();
         public int MaxTimePerQuestion { get; set; }
-
         public int MaxParticipants { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { SIGNALR_SESSION_HUB_URL } from '../../utils/constants';
 
 const useSessionHub = () => {
     const [connection, setConnection] = useState(null);
@@ -7,7 +8,7 @@ const useSessionHub = () => {
     useEffect(() => {
         const startConnection = async () => {
             const newConnection = new HubConnectionBuilder()
-                .withUrl("https://localhost:7141/sessionHub")
+                .withUrl(SIGNALR_SESSION_HUB_URL)
                 .configureLogging(LogLevel.Debug)
                 .withAutomaticReconnect() 
                 .build();
