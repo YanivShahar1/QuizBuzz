@@ -132,14 +132,14 @@ namespace QuizBuzz.Backend.Services
             var deleteRequests = quizIds.Select(id =>
                 new WriteRequest(new DeleteRequest(new Dictionary<string, AttributeValue>
                 {
-                { "QuizID", new AttributeValue { S = id } }
+                    { "QuizID", new AttributeValue { S = id } }
                 }))
-            ).ToList();
+                ).ToList();
 
             var requestItems = new Dictionary<string, List<WriteRequest>>
-        {
-            { "Quizzes", deleteRequests }
-        };
+            {
+                { "Quizzes", deleteRequests }
+            };
 
             await _dbManager.BatchWriteItemAsync(requestItems);
 

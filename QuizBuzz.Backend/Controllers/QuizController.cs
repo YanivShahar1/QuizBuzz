@@ -126,6 +126,28 @@ namespace QuizBuzz.Backend.Controllers
             }
         }
 
+        [HttpDelete]
+        public async Task<IActionResult> DeleteQuizzesAsync([FromBody] List<string> quizIds)
+        {
+            if (quizIds == null || !quizIds.Any())
+            {
+                return BadRequest("Session IDs cannot be null or empty.");
+            }
+
+            try
+            {
+                await _quizService.DeleteQuizzesAsync(quizIds);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error deleting sessions: {ex.Message}");
+                _logger.LogError(ex, $"Error deleting sessions: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
         // New delete endpoint for multiple quizzes
         [HttpDelete("delete-multiple")]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<string> quizIds)
