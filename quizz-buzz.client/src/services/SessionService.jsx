@@ -55,6 +55,33 @@ const SessionService = {
         }
     },
 
+    deleteSessions: async (sessionIds) => {
+        try {
+            const response = await fetch(`${SessionService.backendUrl}delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sessionIds }),
+            });
+    
+            if (response.status === 404) {
+                // Handle the "Not Found" scenario
+                return null;
+            }
+            
+            if (!response.ok && !response.status === 204) {
+                const errorMessage = `Error deleting sessions: ${response.statusText}`;
+                throw new Error(errorMessage);
+            }
+    
+        } catch (error) {
+            console.error('Error in SessionService.deleteSessions:', error.message);
+            throw error;
+        }
+    },
+    
+
     duplicateSession: async (sessionId) => {
         try {
             console.log(`Duplicating session with ID: ${sessionId}`);

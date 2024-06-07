@@ -62,7 +62,7 @@ const UserQuizzes = ({ userName }) => {
         setSelectedQuiz(quiz);
         
     };
-
+    
     const handlePreviewQuiz = async (quiz) => {
         try {
             // Logic to navigate to the quiz preview page or open a preview modal

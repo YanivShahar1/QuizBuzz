@@ -15,7 +15,7 @@ const UserSessions = ({ userName }) => {
     const [sessions, setSessions] = useState([]);
     const [showResultsModal, setShowResultsModal] = useState(false);
     const [chosenSessionResults, setChosenSessionResults] = useState(null);
-
+    const [selectedSessions, setSelectedSessions] = useState([]);
 
     const sortUserSessions = (sessions) => {
         sessions.sort((a, b) => compareDatesDescending(a.createdAt, b.createdAt));
@@ -62,6 +62,30 @@ const UserSessions = ({ userName }) => {
     const notStartedSessions = sessions.filter(session => !SessionService.isSessionStarted(session));
     const runningSessions = sessions.filter(session => !SessionService.isSessionFinished(session) && SessionService.isSessionStarted(session));
 
+
+    const handleCheckboxChange = (sessionId) => {
+        if (selectedSessions.includes(sessionId)) {
+            setSelectedSessions(selectedSessions.filter(id => id !== sessionId));
+        } else {
+            setSelectedSessions([...selectedSessions, sessionId]);
+        }
+    };
+
+    const handleDeleteSelectedSessions = async () => {
+        try {
+            const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedSessions.length} sessions?`);
+            if (!confirmDelete) return;
+    
+            await SessionService.deleteSessions(selectedSessions);
+            setSessions(prevSessions => prevSessions.filter(session => !selectedSessions.includes(session.sessionID)));
+            setSelectedSessions([]);
+            alert("Selected sessions deleted successfully.");
+        } catch (error) {
+            console.error('Error deleting sessions:', error);
+            alert("An error occurred while deleting the selected sessions. Please try again later.");
+        }
+    };
+    
     const handleDeleteSession = async (sessionId) => {
         try {
             const confirmDelete = window.confirm(`Are you sure you want to delete session ${sessionId}?`);
@@ -103,6 +127,12 @@ const UserSessions = ({ userName }) => {
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <CreateSessionButton />
             </div>
+            {/* Delete Selected Sessions Button */}
+            {selectedSessions.length > 0 && (
+                <Button variant="danger" onClick={handleDeleteSelectedSessions}>
+                    Delete Selected Sessions
+                </Button>
+            )}
 
             {/* Finished Sessions Section */}
             <div className="session-table-section">
@@ -139,10 +169,14 @@ const UserSessions = ({ userName }) => {
                                                 <FontAwesomeIcon icon={faEye} title="View Results" />
                                             </Button>
                                         </td>
+                                        <td>
+                                            <input type="checkbox" checked={selectedSessions.includes(session.sessionID)} onChange={() => handleCheckboxChange(session.sessionID)} />
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+                        
                     </div>
                 )}
             </div>
@@ -177,6 +211,9 @@ const UserSessions = ({ userName }) => {
                                             <Button variant="success" className="ml-2">
                                                 <FontAwesomeIcon icon={faEye} title="View Statistics" />
                                             </Button>
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" checked={selectedSessions.includes(session.sessionID)} onChange={() => handleCheckboxChange(session.sessionID)} />
                                         </td>
                                     </tr>
                                 ))}
@@ -218,6 +255,9 @@ const UserSessions = ({ userName }) => {
                                             <Button variant="success" className="ml-2" onClick={() => handleViewResults(session.sessionID)}>
                                                 <FontAwesomeIcon icon={faEye} title="View Statistics" />
                                             </Button>
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" checked={selectedSessions.includes(session.sessionID)} onChange={() => handleCheckboxChange(session.sessionID)} />
                                         </td>
                                     </tr>
                                 ))}
