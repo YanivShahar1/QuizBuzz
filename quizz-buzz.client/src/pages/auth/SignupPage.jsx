@@ -86,7 +86,6 @@ const SignupPage = () => {
     return (
         <div className="signup-container">
             <h2 className="mb-4">Signup</h2>
-            {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
             {showVerificationUI ? (
                 <Form>
                     <Form.Group as={Row} controlId="formVerificationCode">
@@ -158,7 +157,9 @@ const SignupPage = () => {
                         </Col>
                     </Form.Group>
 
-                    <Button onClick={handleSignup} disabled={!isFormValid} className="mt-4">Signup</Button>
+                    <div className="text-center">
+                        <Button onClick={handleSignup()} disabled={!isFormValid} className="mt-4">Signup</Button>
+                    </div>
                 </Form>
             )}
 
