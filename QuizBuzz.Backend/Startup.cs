@@ -26,7 +26,7 @@ namespace QuizBuzz.Backend
             {
                 options.AddPolicy("AllowSpecificOrigin",
                     builder => builder
-                        .WithOrigins("http://quizbuzz-frontend.s3-website-us-east-1.amazonaws.com", "https://quizbuzz-frontend.s3-website-us-east-1.amazonaws.com")
+                        .WithOrigins("http://quizbuzz-frontend.s3-website-us-east-1.amazonaws.com", "https://quizbuzz-frontend.s3-website-us-east-1.amazonaws.com", "http://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials());
@@ -52,7 +52,6 @@ namespace QuizBuzz.Backend
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<ISessionNotificationService, SessionNotificationService>();
             services.AddSingleton<QuizCacheService>();
-
 
 
             services.AddControllers();

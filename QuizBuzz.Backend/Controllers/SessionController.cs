@@ -84,6 +84,28 @@ namespace QuizBuzz.Backend.Controllers
             }
         }
 
+        [HttpDelete]
+        public async Task<IActionResult> DeleteSessionsAsync([FromBody] List<string> sessionIds)
+        {
+            if (sessionIds == null || !sessionIds.Any())
+            {
+                return BadRequest("Session IDs cannot be null or empty.");
+            }
+
+            try
+            {
+                await _sessionService.DeleteSessionsAsync(sessionIds);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error deleting sessions: {ex.Message}");
+                _logger.LogError(ex, $"Error deleting sessions: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
         [HttpGet("{sessionId}/participants", Name = "GetSessionParticipants")]
         public async Task<IActionResult> GetSessionParticipants(string sessionId)
         {

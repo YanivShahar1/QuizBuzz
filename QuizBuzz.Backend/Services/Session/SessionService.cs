@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Amazon.DynamoDBv2.Model;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.DTOs;
@@ -14,8 +15,9 @@ namespace QuizBuzz.Backend.Services
 {
     public class SessionService : ISessionService
     {
-        private const string HostUserIDIndexName = "HostUserID-index";
-        private const string HostUserIDAttributeName = "HostUserID";
+        private const string dynamoDBTableName = "Sessions";
+        private const string hostUserIDIndexName = "HostUserID-index";
+        private const string hostUserIDAttributeName = "HostUserID";
 
         private readonly IQuizService _quizService;
         private readonly ICacheService<Session> _sessionCacheService;
@@ -96,6 +98,39 @@ namespace QuizBuzz.Backend.Services
             _logger.LogInformation($"Session with ID {sessionId} deleted from database. Cache invalidated.");
         }
 
+        public async Task DeleteSessionsAsync(List<string> sessionIds)
+        {
+            if (sessionIds == null || !sessionIds.Any())
+            {
+                throw new ArgumentException("Session IDs cannot be null or empty.", nameof(sessionIds));
+            }
+
+            var writeRequests = sessionIds.Select(sessionId => new WriteRequest
+            {
+                DeleteRequest = new DeleteRequest
+                {
+                    Key = new Dictionary<string, AttributeValue>
+                    {
+                        { "SessionID", new AttributeValue { S = sessionId } }
+                     }
+                }
+            }).ToList();
+
+            var requestItems = new Dictionary<string, List<WriteRequest>>
+            {
+                {dynamoDBTableName , writeRequests }
+            };
+
+            await _dynamoDBDataManager.BatchWriteItemAsync(requestItems);
+
+            foreach (var sessionId in sessionIds)
+            {
+                _sessionCacheService.RemoveItem(sessionId);
+            }
+
+            _logger.LogInformation($"Sessions with IDs {string.Join(", ", sessionIds)} deleted from database. Cache invalidated.");
+        }
+
 
         public async Task SaveSessionAsync(Session updatedSession)
         {
@@ -159,7 +194,7 @@ namespace QuizBuzz.Backend.Services
             }
 
 
-            IEnumerable<Session> sessions = await _dynamoDBDataManager.QueryItemsByIndexAsync<Session>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
+            IEnumerable<Session> sessions = await _dynamoDBDataManager.QueryItemsByIndexAsync<Session>(hostUserIDIndexName, hostUserIDAttributeName, hostUserId);
             _logger.LogInformation("sessions");
 
             foreach (var session in sessions)
