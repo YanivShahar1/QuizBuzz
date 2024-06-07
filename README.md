@@ -17,11 +17,14 @@ You can visit the QuizBuzz web application [here](http://quizbuzz-frontend.s3-we
 
 ## Technologies Used
 
-- **React:** A JavaScript library for building user interfaces. [Website](https://reactjs.org/)
-- **Node.js:** A JavaScript runtime built on Chrome's V8 engine. [Website](https://nodejs.org/)
-- **Amazon Cognito:** Authentication, authorization, and user management. [Website](https://aws.amazon.com/cognito/)
-- **AWS DynamoDB:** Fully managed NoSQL database service. [Website](https://aws.amazon.com/dynamodb/)
-- **SignalR:** Real-time web functionality library. [Website](https://dotnet.microsoft.com/apps/aspnet/signalr)
-- **.NET Core ASP.NET:** Cross-platform framework for building modern, cloud-based applications. [Website (https://dotnet.microsoft.com/apps/aspnet)
+- **React:** A JavaScript library for building user interfaces. 
+- **Node.js:** A JavaScript runtime built on Chrome's V8 engine. 
+- **SignalR:** Real-time web functionality library.
+- **ASP.NET Core:** Cross-platform framework for building modern, cloud-based applications.
+- **AWS EC2:** Scalable virtual servers in the cloud, used for deploying the backend. 
+- **AWS S3:** Scalable object storage, used for hosting the React frontend.
+- **AWS Cognito:** Authentication, authorization, and user management. 
+- **AWS DynamoDB:** Fully managed NoSQL database service.
+
 
 
