@@ -2,6 +2,10 @@
 
 QuizBuzz is a real-time web application that allows registered users to create and manage quizzes, conduct live sessions with immediate feedback, and participate in interactive sessions. Users leverage AWS Cognito for secure login and signup.
 
+### Visit QuizBuzz
+
+You can visit the QuizBuzz web application [here](http://quizbuzz-frontend.s3-website-us-east-1.amazonaws.com/).
+
 ## Features
 
 - **Quiz Creation:** Registered users can create quizzes with various question types (multiple-choice, true/false, open-ended, etc.).
@@ -19,4 +23,5 @@ QuizBuzz is a real-time web application that allows registered users to create a
 - **AWS DynamoDB:** Fully managed NoSQL database service. [Website](https://aws.amazon.com/dynamodb/)
 - **SignalR:** Real-time web functionality library. [Website](https://dotnet.microsoft.com/apps/aspnet/signalr)
 - **.NET Core ASP.NET:** Cross-platform framework for building modern, cloud-based applications. [Website (https://dotnet.microsoft.com/apps/aspnet)
+
 
