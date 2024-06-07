@@ -10,6 +10,7 @@ namespace QuizBuzz.Backend.Services
         Task<Session> FetchSessionAsync(string sessionId);
         Task<string> SubmitSessionAsync(Session newSession);
         Task DeleteSessionAsync(string sessionId);
+        Task DeleteSessionsAsync(List<string> sessionIds);
 
         Task SaveSessionAsync(Session updatedSession);
 
