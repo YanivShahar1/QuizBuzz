@@ -85,6 +85,34 @@ const QuizService = {
         }
     },
 
+    deleteQuizzes: async (quizIds) => {
+        try {
+            console.log(`want to delete quizzes : ${quizIds.join(', ')}`);
+            const response = await fetch(`${QuizService.backendUrl}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(quizIds),
+            });
+    
+            if (response.status === 404) {
+                // Handle the "Not Found" scenario
+                return null;
+            }
+            
+            if (!response.ok && !response.status === 204) {
+                const errorMessage = `Error deleting Quizzes: ${response.statusText}`;
+                throw new Error(errorMessage);
+            }
+    
+        } catch (error) {
+            console.error('Error in QuizService.deleteQuizzes:', error.message);
+            throw error;
+        }
+    },
+    
+
     fetchQuiz: async (quizId) => {
         const fetchQuizUrl = `${QuizService.backendUrl}${quizId}`;
 

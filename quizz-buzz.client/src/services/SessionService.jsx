@@ -57,15 +57,16 @@ const SessionService = {
 
     deleteSessions: async (sessionIds) => {
         try {
-            const response = await fetch(`${SessionService.backendUrl}delete`, {
-                method: 'POST',
+            const response = await fetch(`${SessionService.backendUrl}`, {
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ sessionIds }),
+                body: JSON.stringify(sessionIds),
             });
     
             if (response.status === 404) {
+                console.log(`delete session response status:${response.status} `);
                 // Handle the "Not Found" scenario
                 return null;
             }
