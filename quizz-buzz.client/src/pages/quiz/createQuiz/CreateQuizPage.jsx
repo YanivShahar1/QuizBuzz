@@ -36,6 +36,7 @@ const CreateQuizPage = () => {
     const handleQuizSubmission = async () => {
         try {
             setIsSubmitting(true);
+            //correct answerd index to corect answer strings
             const newQuiz = {
                 hostUserId: AuthService.getSessionUsername(),
                 title: quizInfo.title,
@@ -44,7 +45,7 @@ const CreateQuizPage = () => {
                 questions: questions.map(questionData => ({
                     questionText: questionData.question,
                     options: questionData.options,
-                    correctOptions: questionData.correctAnswers,
+                    correctOptions: questionData.correctAnswers.map(index => questionData.options[index]),
                     isMultipleAnswerAllowed: questionData.multipleAnswers
                 })),
             };

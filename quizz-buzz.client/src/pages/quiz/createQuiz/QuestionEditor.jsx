@@ -25,6 +25,11 @@ const QuestionEditor = ({ questions, setQuestions }) => {
         updateQuestionErrors(selectedQuestionIndex);
     },[selectedQuestionIndex])
 
+    useEffect(()=>{
+        console.log("questions changed: ",JSON.stringify(questions));
+
+    },[questions])
+
     // Method to validate each question
     const validateQuestionInput = (question) => {
         let errors = [];
@@ -152,7 +157,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
         const updatedQuestions = [...questions];
         updatedQuestions[index].multipleAnswers = !updatedQuestions[index].multipleAnswers;
         
-        if (!updatedQuestions[index].multipleAnswers && updatedQuestions[index].correctAnswers.length) {
+        if (!updatedQuestions[index].multipleAnswers && updatedQuestions[index].correctAnswers.length > 1) {
             // If multiple answers are disallowed, clear all selected answers
             updatedQuestions[index].correctAnswers = [];
         }
@@ -167,52 +172,52 @@ const QuestionEditor = ({ questions, setQuestions }) => {
         <Container>
             <Row>
                 <Col md={6}>
-                    {questions.map((question, index) => (
-                        <Accordion key={index} defaultActiveKey={0} alwaysOpen>
-                            <Accordion.Item eventKey={index}>
+                    {questions.map((question, questIndex) => (
+                        <Accordion key={questIndex} defaultActiveKey={0} alwaysOpen>
+                            <Accordion.Item eventKey={questIndex}>
                                 <Accordion.Header>
-                                    Question {index + 1} 
+                                    Question {questIndex + 1} 
                                 </Accordion.Header>
                                 <Accordion.Body>
                                     {/* Question text */}
-                                    <Form.Group controlId={`formQuestion${index}`} className="question-input">
-                                        <Form.Label>Question {index + 1}:</Form.Label>
+                                    <Form.Group controlId={`formQuestion${questIndex}`} className="question-input">
+                                        <Form.Label>Question {questIndex + 1}:</Form.Label>
                                         <FormControl
                                             type="text"
-                                            placeholder={`Enter question ${index + 1}`}
+                                            placeholder={`Enter question ${questIndex + 1}`}
                                             value={question.question}
-                                            onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
+                                            onChange={(e) => handleQuestionChange(questIndex, 'question', e.target.value)}
                                         />
                                     </Form.Group>
 
                                     {/* Multiple answers allowed checkbox */}
-                                    <Form.Group controlId={`formMultipleAnswers${index}`} className="multiple-answers-checkbox">
+                                    <Form.Group controlId={`formMultipleAnswers${questIndex}`} className="multiple-answers-checkbox">
                                         <FormCheck
                                             type="checkbox"
                                             label="Allow Multiple Answers"
                                             checked={question.multipleAnswers}
-                                            onChange={() => toggleMultipleAnswers(index)}
+                                            onChange={() => toggleMultipleAnswers(questIndex)}
                                         />
                                     </Form.Group>
 
                                     {/* Options */}
                                     {question.options.map((option, optionIndex) => (
-                                        <Form.Group key={optionIndex} controlId={`formOption${index}-${optionIndex}`} className="option-group">
+                                        <Form.Group key={optionIndex} controlId={`formOption${questIndex}-${optionIndex}`} className="option-group">
                                             <div className="option-wrapper">
                                                 <FormCheck
                                                     type={question.multipleAnswers && question.correctAnswers.length > 1 ? 'checkbox' : 'radio'}
-                                                    label={`Option ${optionIndex + 1}: `}
-                                                    checked={question.correctAnswers.includes(option)}
-                                                    onChange={() => handleCorrectAnswerToggle(index, option)}
+                                                    label={`Option ${optionIndex + 1}-  `}
+                                                    checked={question.correctAnswers.includes(optionIndex)}
+                                                    onChange={() => handleCorrectAnswerToggle(questIndex, optionIndex)}
                                                 />
                                                 <FormControl
                                                     type="text"
                                                     placeholder={`Enter option ${optionIndex + 1}`}
                                                     value={option}
-                                                    onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
+                                                    onChange={(e) => handleOptionChange(questIndex, optionIndex, e.target.value)}
                                                     className="option-input"
                                                 />
-                                                {question.correctAnswers.includes(option) ? (
+                                                {question.correctAnswers.includes(optionIndex) ? (
                                                     <span className="correct-option">&#10003;</span>
                                                 ) : (
                                                     <span className="incorrect-option">&#x2717;</span>
@@ -221,7 +226,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                                                     placement="top"
                                                     overlay={<Tooltip>Delete Option</Tooltip>}
                                                 >
-                                                    <Button variant="danger" size="sm" onClick={() => handleOptionDelete(index, optionIndex)}>
+                                                    <Button variant="danger" size="sm" onClick={() => handleOptionDelete(questIndex, optionIndex)}>
                                                         <FontAwesomeIcon icon={faTrash} />
                                                     </Button>
                                                 </OverlayTrigger>
@@ -233,7 +238,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                                             placement="top"
                                             overlay={<Tooltip>Add Option</Tooltip>}
                                         >
-                                            <Button variant="secondary" size="sm" onClick={() => addOption(index)}>
+                                            <Button variant="secondary" size="sm" onClick={() => addOption(questIndex)}>
                                                 <FontAwesomeIcon icon={faPlus} />
                                             </Button>
                                         </OverlayTrigger>
@@ -242,7 +247,7 @@ const QuestionEditor = ({ questions, setQuestions }) => {
                                         placement="top"
                                         overlay={<Tooltip>Delete Question</Tooltip>}
                                     >
-                                        <Button variant="danger" size="sm" onClick={() => handleQuestionDelete(index)}>
+                                        <Button variant="danger" size="sm" onClick={() => handleQuestionDelete(questIndex)}>
                                             <FontAwesomeIcon icon={faTrash} />
                                         </Button>
                                     </OverlayTrigger>
