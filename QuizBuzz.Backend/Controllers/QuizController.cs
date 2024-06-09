@@ -109,7 +109,7 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
-                Debug.WriteLine($"DeleteQuizAsync , quizId ,: {quizId}");
+                _logger.LogInformation($"DeleteQuizAsync , quizId ,: {quizId}");
 
                 // Call the service to delete the quiz
                 await _quizService.DeleteQuizAsync(quizId);
@@ -129,10 +129,15 @@ namespace QuizBuzz.Backend.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteQuizzesAsync([FromBody] List<string> quizIds)
         {
+            _logger.LogInformation($"Received request to delete quizzes with IDs: {string.Join(", ", quizIds ?? new List<string>())}");
             if (quizIds == null || !quizIds.Any())
             {
+                _logger.LogError($"Received request to delete quizzes without ids");
+
                 return BadRequest("Session IDs cannot be null or empty.");
             }
+            _logger.LogInformation($"step 2 want to delete quizzes : {JsonConvert.SerializeObject(quizIds)}");
+
 
             try
             {
@@ -141,32 +146,11 @@ namespace QuizBuzz.Backend.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error deleting sessions: {ex.Message}");
                 _logger.LogError(ex, $"Error deleting sessions: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-
-        // New delete endpoint for multiple quizzes
-        [HttpDelete("delete-multiple")]
-        public async Task<IActionResult> DeleteMultiple([FromBody] List<string> quizIds)
-        {
-            if (quizIds == null || !quizIds.Any())
-            {
-                return BadRequest("No quiz IDs provided.");
-            }
-
-            try
-            {
-                await _quizService.DeleteQuizzesAsync(quizIds);
-                return NoContent(); // 204 No Content indicates a successful deletion
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal Server Error: {ex.Message}");
-            }
-        }
 
         // GET: api/quiz/all/{userName}
         [HttpGet("all/{userName}")]
@@ -178,29 +162,28 @@ namespace QuizBuzz.Backend.Controllers
 
                 // Call the service to get quizzes by user ID
                 var quizzes = await _quizService.GetQuizzesByHostUserIdAsync(userName);
-                Debug.WriteLine($"Fetched all quizzes");
+                _logger.LogInformation($"Fetched all quizzes");
 
                 if (quizzes == null || !quizzes.Any())
                 {
-                    Debug.WriteLine($"No quizzes for user {userName}");
+                    _logger.LogInformation($"No quizzes for user {userName}");
 
                     // Return 404 Not Found if no quizzes found for the user
                     return NotFound($"No quizzes found for user with userName: {userName}");
                 }
-                Debug.WriteLine($"found quizzes : {quizzes } for user {userName}");
+                _logger.LogInformation($"found quizzes : {quizzes } for user {userName}");
 
                 return Ok(quizzes);
             }
             catch (ArgumentException ex)
             {
-                Debug.WriteLine($"ArgumentException error {ex.Message}");
+                _logger.LogError($"ArgumentException error {ex.Message}");
 
                 // Return 400 Bad Request for invalid user ID
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception error {ex.Message}");
 
                 // Return 500 Internal Server Error for other exceptions
                 _logger.LogError(ex, $"Error fetching quizzes for user with ID {userName}: {ex.Message}");
@@ -219,6 +202,7 @@ namespace QuizBuzz.Backend.Controllers
             try
             {
                 _logger.LogInformation($"category su = {category}");
+                if(string.IsNullOrEmpty(category))
                 {
                     return BadRequest("Category cannot be empty.");
                 }
@@ -248,6 +232,5 @@ namespace QuizBuzz.Backend.Controllers
             }
         }
 
-        // Other CRUD operations...
     }
 }

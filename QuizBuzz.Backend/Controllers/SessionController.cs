@@ -35,12 +35,14 @@ namespace QuizBuzz.Backend.Controllers
             try
             {
                 string sessionId = await _sessionService.SubmitSessionAsync(newSession);
-               
+                _logger.LogInformation($"Session saved successfully. Session ID: {sessionId}");
+
                 return Ok(sessionId);
 
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error saving session: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -53,11 +55,11 @@ namespace QuizBuzz.Backend.Controllers
                 Session? session = await _sessionService.FetchSessionAsync(sessionId);
                 if (session == null)
                 {
-                    Debug.WriteLine($"no sessions foud for id : {sessionId}");
+                    _logger.LogInformation($"no sessions foud for id : {sessionId}");
 
                     return NotFound();
                 }
-                Debug.WriteLine($"found session : {sessionId} with name : {session.Name}");
+                _logger.LogInformation($"found session : {sessionId} with name : {session.Name}");
                 
                 return Ok(session);
             }
@@ -73,12 +75,13 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
+                _logger.LogInformation($"Deleting session with ID: {sessionId}");
                 await _sessionService.DeleteSessionAsync(sessionId);
+                _logger.LogInformation($"Session deleted successfully. Session ID: {sessionId}");
                 return NoContent();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error deleting session with ID {sessionId}: {ex.Message}");
                 _logger.LogError(ex, $"Error deleting session with ID {sessionId}: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
@@ -89,17 +92,19 @@ namespace QuizBuzz.Backend.Controllers
         {
             if (sessionIds == null || !sessionIds.Any())
             {
+                _logger.LogInformation($"sessionIds list is null or empty");
+
                 return BadRequest("Session IDs cannot be null or empty.");
             }
 
             try
             {
                 await _sessionService.DeleteSessionsAsync(sessionIds);
+                _logger.LogInformation($"Sessions deleted successfully: {string.Join(", ", sessionIds)}");
                 return NoContent();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error deleting sessions: {ex.Message}");
                 _logger.LogError(ex, $"Error deleting sessions: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
@@ -111,14 +116,12 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
-                Debug.WriteLine($" get session participants:");
                 var participants = await _sessionService.GetSessionParticipantsAsync(sessionId);
                 if (participants == null)
                 {
-                    Debug.WriteLine("no participants yet!");
                     return NotFound();
                 }
-                Debug.WriteLine($"found {participants.Count()} participants ");
+                _logger.LogInformation($"found {participants.Count()} participants ");
                 return Ok(participants);
             }
             catch (Exception ex)
@@ -134,14 +137,14 @@ namespace QuizBuzz.Backend.Controllers
             try
             {
                 // Validate the session and user
-                Debug.WriteLine($"user {nickname} want to join session {sessionId}");
+                _logger.LogInformation($"user {nickname} want to join session {sessionId}");
                 Session? session = await _sessionService.FetchSessionAsync(sessionId);
                 if (session == null)
                 {
                     Debug.WriteLine($"didnt found any session with id {sessionId}");
                     return NotFound("Session not found");
                 }
-                Debug.WriteLine("found session, want to add user now ");
+                _logger.LogInformation("found session, want to add user now ");
                 // Add user to session (update session object or add to participants list)
                 await _sessionService.JoinSession(sessionId, nickname);
                 
@@ -149,7 +152,6 @@ namespace QuizBuzz.Backend.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error joining session {sessionId}: {ex.Message}");
                 _logger.LogError(ex, $"Error joining session {sessionId}: {ex.Message}");
                 return BadRequest($"Error joining session: {ex.Message}");
             }
@@ -158,21 +160,16 @@ namespace QuizBuzz.Backend.Controllers
         [HttpGet("all/{userId}")]
         public async Task<IActionResult> GetSessionsByUserId(string userId)
         {
-            Debug.WriteLine("GetSessionsByUserId:");
             try
             {
                 var sessions = await _sessionService.GetSessionsByHostId(userId);
                 if (sessions == null || !sessions.Any())
                 {
-                    Console.WriteLine("No sessions!:");
-                    return NotFound("No sessions found for the user");
+                    _logger.LogInformation($"No sessions found for the user {userId}");
+                    return NotFound($"No sessions found for the user {userId}");
                 }
-                Console.WriteLine("Sessions:");
-                foreach (var session in sessions)
-                {
-                    Console.WriteLine($"Session ID: {session.SessionID}");
-                    // Add more properties if needed
-                }
+                _logger.LogInformation($"found ${sessions.Count()} sessions ");
+             
                 return Ok(sessions);
             }
             catch (Exception ex)
@@ -188,13 +185,12 @@ namespace QuizBuzz.Backend.Controllers
             try
             {
                 await _sessionService.StartSession(sessionId);
-                Debug.WriteLine($"Session {sessionId} started successfully");
+                _logger.LogInformation($"Session {sessionId} started successfully");
 
                 return Ok($"Session {sessionId} started successfully");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"An error occurred while starting session {sessionId}: {ex.Message}");
                 _logger.LogError(ex, $"Error starting session {sessionId}: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
@@ -219,7 +215,7 @@ namespace QuizBuzz.Backend.Controllers
 
                 // Save the question response to the database
                 bool isCorrect = await _sessionService.SubmitUserAnswerAsync(answerSubmission);
-                Debug.WriteLine("Saved question response successfully!");
+                _logger.LogInformation("Saved question response successfully!");
 
                 return Ok("Question response submitted successfully");
             }
@@ -227,7 +223,7 @@ namespace QuizBuzz.Backend.Controllers
             {
                 // Log the error and return a 500 Internal Server Error response
                 // You can customize the error message based on the specific exception if needed
-                Debug.WriteLine($"Error: {ex.Message}");
+                _logger.LogError($"Error: {ex.Message}");
 
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
@@ -240,7 +236,7 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
-                Debug.WriteLine($"Fetching session results for session with ID: {sessionId}");
+                _logger.LogInformation($"Fetching session results for session with ID: {sessionId}");
 
                 var sessionResult = await _sessionService.FetchSessionResultsAsync(sessionId);
                 Debug.WriteLine($"sessionResult: {sessionResult.ToString()}");
@@ -250,7 +246,7 @@ namespace QuizBuzz.Backend.Controllers
             catch (Exception ex)
             {
                 // Handle any errors or exceptions
-                Debug.WriteLine($"Error fetching session results for session with ID {sessionId}: {ex.Message}");
+                _logger.LogError($"Error fetching session results for session with ID {sessionId}: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -260,7 +256,7 @@ namespace QuizBuzz.Backend.Controllers
         {
             try
             {
-                Debug.WriteLine($"Fetching responses for session with ID: {sessionId}");
+                _logger.LogInformation($"Fetching responses for session with ID: {sessionId}");
 
                 var sessionResponses = await _sessionService.GetSessionResponsesAsync(sessionId);
                 Debug.WriteLine($"Fetched {sessionResponses.Count()} responses");
@@ -270,7 +266,7 @@ namespace QuizBuzz.Backend.Controllers
             catch (Exception ex)
             {
                 // Handle any errors or exceptions
-                Debug.WriteLine($"Error fetching responses for session with ID {sessionId}: {ex.Message}");
+                _logger.LogError($"Error fetching responses for session with ID {sessionId}: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
