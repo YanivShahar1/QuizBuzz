@@ -1,33 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './QuizCategories.css';
 import QuizService from '../../services/QuizService';
 
 
 function QuizCategories({ categories, onCategorySelect }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [filteredCategories, setFilteredCategories] = useState([]);
-
+  const dropdownRef = useRef(null); // Ref to store reference to input element
+  
   useEffect(() => {
+    // Initialize filteredCategories with the initial categories
     setFilteredCategories(categories);
   }, [categories]);
+
+  useEffect(() => {
+    const filtered = categories.filter(category => category.toLowerCase().includes(searchTerm.toLowerCase()));
+    setFilteredCategories(filtered);
+  }, [searchTerm]);
+
+
+  useEffect(() => {
+    const handleClickOutsideDropdown = (event) => {
+      if (dropdownRef.current) {
+        // Check if the dropdownRef exists and if the clicked target is not within the dropdownRef
+        if (!dropdownRef.current.contains(event.target)) {
+          console.log('Clicked outside the dropdown element');
+          setIsDropdownOpen(false);
+        } else {
+          console.log('Clicked inside the dropdown element');
+        }
+      } else {
+        console.log('Dropdown ref is not available');
+      }
+    };
+  
+    // Attach the event listener to the document
+    console.log('Adding event listener for mousedown');
+  
+    document.addEventListener('mousedown', handleClickOutsideDropdown);
+  
+    // Cleanup function to remove event listener when component unmounts
+    return () => {
+      console.log('Removing event listener for mousedown');
+      document.removeEventListener('mousedown', handleClickOutsideDropdown);
+    };
+  }, []);
+  
 
   const handleSearch = (e) => {
     const searchTerm = e.target.value;
     setSearchTerm(searchTerm);
-    const filtered = categories.filter(category => category.toLowerCase().includes(searchTerm.toLowerCase()));
-    setFilteredCategories(filtered);
+  
   }
 
   const toggleDropdown = () => {
-    setIsOpen(!isOpen);
+    setIsDropdownOpen(!isDropdownOpen);
   };
 
   const handleCategorySelect = (category) => {
     console.log(`handleCategorySelect, ${category}`);
     setSearchTerm(category);
     onCategorySelect(category);
-    setIsOpen(false);
+    setIsDropdownOpen(false);
   };
 
   const handleSuggestCategory = () => {
@@ -36,7 +71,7 @@ function QuizCategories({ categories, onCategorySelect }) {
 
     if (newCategory) {
       onCategorySelect(newCategory);
-      setIsOpen(false);
+      setIsDropdownOpen(false);
       // TODO : implement QuizService.suggestCategory(newCategory);
 
     }
@@ -63,14 +98,15 @@ function QuizCategories({ categories, onCategorySelect }) {
   return (
     <div className="dropdown">
       <input
+        ref={dropdownRef} 
         type="text"
         placeholder="Search categories"
         value={searchTerm}
         onClick={toggleDropdown}
         onChange={handleSearch}
       />
-      {isOpen && (
-        <div className="dropdown-menu" style={{ display: isOpen ? 'block' : 'none' }}>
+      {isDropdownOpen && (
+        <div className="dropdown-menu" style={{ display: isDropdownOpen ? 'block' : 'none' }}>
           {renderDropdownContent()}
         </div>
       )}
