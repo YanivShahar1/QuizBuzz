@@ -18,6 +18,7 @@ const UserQuizzes = ({ userName }) => {
     const [ShowPreviewModal, setShowPreviewModal] = useState(false); // Define ShowPreviewModal state
     const [selectedQuiz, setSelectedQuiz] = useState(null); // State to store the selected quiz
     const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedQuizzes, setSelectedQuizzes] = useState([]);
 
     const sortUserQuizzes = (quizzes) => {
         quizzes.sort((a, b) => compareDatesDescending(a.createdAt, b.createdAt));
@@ -75,6 +76,29 @@ const UserQuizzes = ({ userName }) => {
         }
     };
 
+    const handleCheckboxChange = (quizId) => {
+        if (selectedQuizzes.includes(quizId)) {
+            setSelectedQuizzes(selectedQuizzes.filter(id => id !== quizId));
+        } else {
+            setSelectedQuizzes([...selectedQuizzes, quizId]);
+        }
+    };
+
+    const handleDeleteSelectedQuizzes = async () => {
+        try {
+            const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedQuizzes.length} quizzes?`);
+            if (!confirmDelete) return;
+    
+            await QuizService.deleteQuizzes(selectedQuizzes);
+            setQuizzes(prevQuizzes => prevQuizzes.filter(quiz => !selectedQuizzes.includes(quiz.quizID)));
+            setSelectedQuizzes([]);
+            alert("Selected quizzes deleted successfully.");
+        } catch (error) {
+            console.error('Error deleting quizzes:', error);
+            alert("An error occurred while deleting the selected quizzes. Please try again later.");
+        }
+    };
+
     if (isLoading) {
         return <p>Loading...</p>;
     }
@@ -85,43 +109,50 @@ const UserQuizzes = ({ userName }) => {
                 {quizzes.length > 0 ? (
                     <>
                         <h5>Here are your quizzes:</h5>
-                        <Col>
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <CreateQuizButton />
-                            </div>
-                            <div className="table-responsive">
-                                <table className="table table-striped quizzes-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Title</th>
-                                            <th>Date Created</th>
-                                            <th>Last Updated</th>
-                                            <th>Actions</th>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <CreateQuizButton />
+                        </div>
+                        {/* Delete Selected Quizzes Button */}
+                        {selectedQuizzes.length > 0 && (
+                            <Button variant="danger" onClick={handleDeleteSelectedQuizzes}>
+                                Delete Selected Quizzes
+                            </Button>
+                        )}
+                        <div className="table-responsive">
+                            <table className="table table-striped quizzes-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Date Created</th>
+                                        <th>Last Updated</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {quizzes.map((quiz, index) => (
+                                        <tr key={quiz.quizID}>
+                                            <td>{quiz.title}</td>
+                                            <td>{formatDate(quiz.createdAt)}</td>
+                                            <td>{formatDate(quiz.updatedAt)}</td>
+                                            <td className="action-buttons">
+                                                <Button variant="danger" className="mr-2" onClick={() => handleDeleteQuiz(quiz.quizID)}>
+                                                    <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
+                                                </Button>
+                                                <Button variant="primary" className="mr-2" onClick={() => handleEditQuiz(quiz)}>
+                                                    <FontAwesomeIcon icon={faEdit} title="Edit" />
+                                                </Button>
+                                                <Button variant="success" onClick={() => handlePreviewQuiz(quiz)}>
+                                                    <FontAwesomeIcon icon={faEye} title="Preview" />
+                                                </Button>
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" checked={selectedQuizzes.includes(quiz.quizID)} onChange={() => handleCheckboxChange(quiz.quizID)} />
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {quizzes.map((quiz, index) => (
-                                            <tr key={quiz.quizID}>
-                                                <td>{quiz.title}</td>
-                                                <td>{formatDate(quiz.createdAt)}</td>
-                                                <td>{formatDate(quiz.updatedAt)}</td>
-                                                <td className="action-buttons">
-                                                    <Button variant="danger" className="mr-2" onClick={() => handleDeleteQuiz(quiz.quizID)}>
-                                                        <FontAwesomeIcon icon={faTrashAlt} title="Delete" />
-                                                    </Button>
-                                                    <Button variant="primary" className="mr-2" onClick={() => handleEditQuiz(quiz)}>
-                                                        <FontAwesomeIcon icon={faEdit} title="Edit" />
-                                                    </Button>
-                                                    <Button variant="success" onClick={() => handlePreviewQuiz(quiz)}>
-                                                        <FontAwesomeIcon icon={faEye} title="Preview" />
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Col>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </>
                 ) : (
                     <Col>
