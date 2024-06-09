@@ -7,7 +7,6 @@
  */
 export const formatDate = (dateString) => {
     try {
-        console.log(`in format date, formatting: ${dateString}`);
         const userLocale = navigator.language || 'en-US';
         const formattedDate = new Date(dateString).toLocaleString(userLocale, {
             year: 'numeric',
@@ -17,7 +16,6 @@ export const formatDate = (dateString) => {
             minute: '2-digit',
             second: `2-digit`
         });
-        console.log(`result: ${formattedDate}`);
         return formattedDate;
     } catch (error) {
         console.error('Error formatting date:', error);
