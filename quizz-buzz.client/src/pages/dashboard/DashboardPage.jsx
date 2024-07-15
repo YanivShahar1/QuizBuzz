@@ -13,7 +13,6 @@ const DashboardPage = () => {
     const [sessionUserName, setSessionUserName] = useState(AuthService.getSessionUsername());
     
     useEffect(() => {
-        console.log(`sessionUserName changed = ${sessionUserName}`);
         if (!sessionUserName) {
             // If session user name is null, navigate to login page
             navigate('/login');
