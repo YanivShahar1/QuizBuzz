@@ -5,17 +5,13 @@ import AuthService from '../../services/AuthService';
 import useUserJoinedListener from '../../hooks/signalR/useUserJoinedListener';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 
-const WaitingRoom = ({ sessionId, isHost , onStartSession, sessionHubConnection, onJoinSession,nickname,setNickname }) => {
+const WaitingRoom = ({ sessionId, isHost , onStartSession, sessionHubConnection, onJoinSession }) => {
     const [participants, setParticipants] = useState([]);
     const [isUserJoined, setIsUserJoined] = useState(false);
+    const username = AuthService.getCurrentLogedInUsername();
     
-    useEffect(() => {
-
-        console.log("nickname:", nickname);
-      }, [nickname]);
-
-    const handleUserJoinedSession = (nickname) => {
-        console.log(`user ${nickname} has joined`);
+    const handleUserJoinedSession = (username) => {
+        console.log(`user ${username} has joined`);
         fetchSessionParticipants();
     };
 
@@ -24,6 +20,9 @@ const WaitingRoom = ({ sessionId, isHost , onStartSession, sessionHubConnection,
 
     useEffect(()=> {
         console.log(`participants list change: ${participants}`);
+        if (participants.length > 0 && participants.includes(username)){
+            setIsUserJoined(true);
+        }
 
     },[participants])
 
@@ -53,10 +52,11 @@ const WaitingRoom = ({ sessionId, isHost , onStartSession, sessionHubConnection,
     }, [participants]);
 
     const handleJoinSession = async () => {
-        window.sessionStorage.setItem("nickname", JSON.stringify(nickname));
+        const username = AuthService.getCurrentLogedInUsername();
+        window.sessionStorage.setItem("username", JSON.stringify());
 
         setIsUserJoined(true);
-        onJoinSession(nickname);
+        onJoinSession(username);
     };
 
     const handleCopySessionLink = () => {
@@ -114,9 +114,15 @@ const WaitingRoom = ({ sessionId, isHost , onStartSession, sessionHubConnection,
                         <Col md={6}>
                             <div className='admin-section'>
                                 <h4>Admin Waiting Room</h4>
-                                <p>Welcome, {AuthService.getSessionUsername()}</p>
-                                <Button variant="primary" disabled={participants.length<=0} onClick={handleStartSession}>Start Session</Button>
-
+                                <p>Welcome, {AuthService.getCurrentLogedInUsername()}</p>
+                                {participants.length > 0 ? (
+                                    <>
+                                        <Button variant="primary" onClick={handleStartSession}>Start Session</Button>
+                                        <p>You can't participate in this session, since you are the admin and you know the answers :(</p>
+                                    </>
+                                ):(
+                                    <p>You need at least 1 participant to start the session </p>
+                                )}
                             </div>
                         </Col>
                         <Col md={6}>
@@ -129,25 +135,19 @@ const WaitingRoom = ({ sessionId, isHost , onStartSession, sessionHubConnection,
                     </Row>
                 ) : (
                     <div className='user-section'>
-                        <h4>User Waiting Room</h4>
+                        <h4>Hello, {username}</h4>
                         {isUserJoined ? (
-                            <p>Welcome, {nickname}</p>
+                            <p>Please wait untill the admin will start the session</p>
                         ) : (
-                            <Form>
-                                <Form.Group controlId="nickname">
-                                    <Form.Label>Enter Nickname:</Form.Label>
-                                    <Form.Control type="text" placeholder="Enter nickname" value={nickname || ''} onChange={(e) => setNickname(e.target.value)} />
-                                </Form.Group>
-                                <Button variant="primary" onClick={handleJoinSession}>Join Session</Button>
-                            </Form>
+                            <Button variant="primary" onClick={handleJoinSession}>Join Session</Button>
                         )}
                     </div>
                 )}
                 <div className='participants-list'>
                     <h4>Participants:</h4>
                     <ul>
-                        {participants.map((nickname, index) => (
-                            <li key={index}>{nickname}</li>
+                        {participants.map((username, index) => (
+                            <li key={index}>{username}</li>
                         ))}
                     </ul>
                 </div>

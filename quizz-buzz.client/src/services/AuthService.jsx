@@ -83,16 +83,16 @@ const AuthService = {
         });
     },
 
-    verifyEmail: async (username, verificationCode) => {
+    confirmUser: async (username) => {
         const userData = {
             Username: username,
             Pool: userPool,
         };
-
+    
         const cognitoUser = new CognitoUser(userData);
-
+    
         return new Promise((resolve, reject) => {
-            cognitoUser.confirmRegistration(verificationCode, true, (err, result) => {
+            cognitoUser.confirmRegistration('verificationCode', true, (err, result) => {
                 if (err) {
                     reject(err);
                     return;
@@ -101,23 +101,37 @@ const AuthService = {
             });
         });
     },
-
-    getSessionUsername: () => {
-        const username = sessionStorage.getItem('username');
-        // console.log(`getSessionUsername username = ${username}`);
-        return username ? username.toLowerCase() : null; // Return lowercase username or an empty string if it's null or undefined
+    
+    signupSimple: async (username, password) => {
+        return new Promise((resolve, reject) => {
+            userPool.signUp(username, password, [], null, (err, result) => {
+                if (err) {
+                    console.error('Signup error details:', err.message);
+                    reject(err);
+                    return;
+                }
+                resolve(result.user);
+                AuthService.triggerLoginStatusChange();
+            });
+        });
     },
+
+    // getSessionUsername: () => {
+    //     const username = sessionStorage.getItem('username');
+    //     // console.log(`getSessionUsername username = ${username}`);
+    //     return username ? username.toLowerCase() : null; // Return lowercase username or an empty string if it's null or undefined
+    // },
     
 
-    //getCurrentLogedInUserName: () => {
-    //    const cognitoUser = userPool.getCurrentUser();
-    //    if (cognitoUser) {
-    //        console.log(`AuthService.getCurrentUser ${cognitoUser.username}`);
-    //        return cognitoUser.username;
-    //    }
+    getCurrentLogedInUsername: () => {
+       const cognitoUser = userPool.getCurrentUser();
+       if (cognitoUser) {
+           console.log(`AuthService.getCurrentUser ${cognitoUser.username}`);
+           return cognitoUser.username;
+       }
 
-    //    return null; // Return null if no user is currently authenticated
-    //},
+       return null; // Return null if no user is currently authenticated
+    },
 
     getCurrentLogedInUser: () => {
         const cognitoUser = userPool.getCurrentUser();

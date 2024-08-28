@@ -30,6 +30,9 @@ namespace QuizBuzz.Backend.Services
         Task StartSession(string sessionId);
         Task<bool> ValidateSessionAdmin(string sessionid, string userName);
 
+        //Task<IEnumerable<Session>> GetSessionsByStatusAsync(string status);
+
+        Task<IEnumerable<Session>> FetchByDateAndStatusAsync(string? sessionStatus, string? startDate, string? endDate);
 
 
     }

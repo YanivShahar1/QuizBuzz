@@ -112,6 +112,35 @@ const QuizService = {
         }
     },
     
+    FetchAllQuizzes: async () => {
+        const fetchQuizzesUrl = `${QuizService.backendUrl}all`;
+        try {
+            const response = await fetch(fetchQuizzesUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 404) {
+                // Handle the "Not Found" scenario
+                return null;
+            }
+
+            if (!response.ok) {
+                const errorMessage = `Error fetching all quizzes, statusText: ${response.statusText}`;
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            // Log or handle the error as needed
+            console.error('Error while fetching all quizzes:', error.message);
+            throw error;
+        }
+
+    },
 
     fetchQuiz: async (quizId) => {
         const fetchQuizUrl = `${QuizService.backendUrl}${quizId}`;
@@ -169,7 +198,7 @@ const QuizService = {
         }
     },
 
-    fetchUserQuizzes: async (userName) => {
+    FetchUserQuizzes: async (userName) => {
         try {
             // Validate userName
             if (!userName || typeof userName !== 'string') {

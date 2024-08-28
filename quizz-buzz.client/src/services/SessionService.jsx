@@ -114,12 +114,44 @@ const SessionService = {
 
     isCurrentUserSessionHost :(session) => {
         if (session) {
-            return session.hostUserID === AuthService.getSessionUsername();
+            return session.hostUserID === AuthService.getCurrentLogedInUsername();
         }
         console.log("todo session isnot defined yet, cant know if host, so return false!");
         return false; 
     },
     
+
+
+    fetchByDateAndStatus: async (filters) => {
+        try {
+            // Remove empty query parameters
+            const filteredFilters = Object.fromEntries(
+                Object.entries(filters).filter(([_, v]) => v !== '' && v != null)
+            );
+            // Convert the filters object to query parameters
+            const queryParams = new URLSearchParams(filteredFilters).toString();
+            const response = await fetch(`${SessionService.backendUrl}by-date-status?${queryParams}`, {
+                method: 'GET',
+            });
+
+            if (response.status === 404) {
+                console.log("No sessions found with the specified filters.");
+                return []; // No sessions found
+            }
+
+            if (response.ok) {
+                const sessions = await response.json();
+                console.log("Filtered sessions:", sessions);
+                return sessions;
+            } else {
+                const errorMessage = `Failed to fetch filtered sessions. Status: ${response.status}}`;
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            console.error(`Error fetching filtered sessions: ${error.message}`);
+            throw new Error(`Error fetching filtered sessions: ${error.message}`);
+        }
+    },
 
     fetchSession: async (sessionId) => {
         try {
@@ -176,9 +208,36 @@ const SessionService = {
         }
     },
 
+    fetchWaitingSessions: async () => {
+        try {
+            const response = await fetch(`${SessionService.backendUrl}by-status/Waiting`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 404) {
+                console.log("No sessions found that have not started yet.");
+                return []; // No sessions found
+            }
+
+            if (response.ok) {
+                const sessions = await response.json();
+                console.log("Sessions not started yet:", sessions);
+                return sessions;
+            } else {
+                const errorMessage = `Failed to fetch sessions that haven't started yet. Status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            console.error(`Error fetching sessions that haven't started yet: ${error.message}`);
+            throw new Error(`Error fetching sessions that haven't started yet: ${error.message}`);
+        }
+    },
+
     fetchResponses: async (sessionId) => {
         try {
-            console.log("sssion id in fetchresponses: .. ", sessionId);
             const response = await fetch(`${SessionService.backendUrl}${sessionId}/responses`, {
                 method: 'GET',
                 headers: {

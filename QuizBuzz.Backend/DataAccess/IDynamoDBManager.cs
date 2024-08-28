@@ -1,4 +1,6 @@
-﻿using Amazon.DynamoDBv2.Model;
+﻿using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 
 namespace QuizBuzz.Backend.DataAccess
 {
@@ -81,6 +83,48 @@ namespace QuizBuzz.Backend.DataAccess
         /// </summary>
         /// <param name="requestItems">A dictionary where the key is the table name and the value is a list of write requests.</param>
         Task BatchWriteItemAsync(Dictionary<string, List<WriteRequest>> requestItems);
+
+        /// <summary>
+        /// Scans items in the DynamoDB table with the specified conditions.
+        /// </summary>
+        /// <typeparam name="T">The type of items to scan.</typeparam>
+        /// <param name="conditions">The conditions to apply to the scan.</param>
+        /// <param name="limit">The maximum number of items to return.</param>
+        /// <param name="lastEvaluatedKey">The key to start the scan from.</param>
+        /// <returns>A tuple containing a collection of items and the last evaluated key.</returns>
+        Task<(IEnumerable<T> Items, Dictionary<string, AttributeValue> LastEvaluatedKey)> ScanItemsAsync<T>(
+            List<ScanCondition>? conditions = null,
+            int limit = 10,
+            Dictionary<string, AttributeValue>? lastEvaluatedKey = null) where T : class;
+
+
+        /// <summary>
+        /// Queries items in the DynamoDB table asynchronously using a QueryRequest.
+        /// </summary>
+        /// <param name="queryRequest">The query request with the specified criteria.</param>
+        /// <returns>The response from the query operation.</returns>
+        Task<QueryResponse> QueryAsync(QueryRequest queryRequest);
+
+        Task<AsyncSearch<T>> FromQueryAsync<T>(QueryOperationConfig queryRequest);
+
+
+        /// <summary>
+        /// Fetches items from a DynamoDB table based on filtered conditions.
+        /// </summary>
+        /// <typeparam name="T">The type of items to retrieve.</typeparam>
+        /// <param name="tableName">The name of the DynamoDB table.</param>
+        /// <param name="indexName">The name of the Global Secondary Index (GSI) to use.</param>
+        /// <param name="keyConditions">The conditions for the key (e.g., hash and range keys).</param>
+        /// <param name="attributeValues">The values for the key conditions.</param>
+        /// <param name="mapper">The function to map DynamoDB items to the type T.</param>
+        /// <returns>A list of items of type T.</returns>
+        Task<List<T>> FetchFilteredItemsAsync<T>(
+            string tableName,
+            string indexName,
+            Dictionary<string, AttributeValue> keyConditions,
+            Dictionary<string, AttributeValue> attributeValues,
+            Func<Dictionary<string, AttributeValue>, T> mapper) where T : class, new();
     
     }
+
 }

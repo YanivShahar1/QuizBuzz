@@ -8,31 +8,31 @@ import './DashboardPage.css';
 import useRequireAuth from '../../hooks/useRequireAuth';
 
 const DashboardPage = () => {
-    // const isAuthenticated = useRequireAuth();
+    const isAuthenticated = useRequireAuth();
     const navigate = useNavigate();
-    const [sessionUserName, setSessionUserName] = useState(AuthService.getSessionUsername());
+    const [username, setUsername] = useState(AuthService.getCurrentLogedInUsername());
     
     useEffect(() => {
-        if (!sessionUserName) {
+        if (!username) {
             // If session user name is null, navigate to login page
             navigate('/login');
         }
-    }, [sessionUserName, navigate]);
+    }, [username, navigate]);
     
     return (
         <div className="dashboard-container">
-            <h1 className="dashboard-header">Welcome, {sessionUserName}!</h1>
+            <h1 className="dashboard-header">Welcome, {username}!</h1>
             <Accordion defaultActiveKey="0" className="accordion-container">
                 <Accordion.Item eventKey="0">
                     <Accordion.Header className="section-header">Quizzes</Accordion.Header>
                     <Accordion.Body className="section-container">
-                        <UserQuizzes userName={sessionUserName} />
+                        <UserQuizzes userName={username} />
                     </Accordion.Body>
                 </Accordion.Item>
                 <Accordion.Item eventKey="1">
                     <Accordion.Header className="section-header">Session Statistics</Accordion.Header>
                     <Accordion.Body className="section-container">
-                        <UserSessions userName={sessionUserName} />
+                        <UserSessions userName={username} />
                     </Accordion.Body>
                 </Accordion.Item>
             </Accordion>

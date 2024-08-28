@@ -20,6 +20,7 @@ import SessionPage from './pages/session/SessionPage';
 //css 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import WaitingSessionsList from './components/Session/WaitingSessionList';
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
                {/*<Route path="/user-profile" element={<UserProfilePage />} />*/}
                <Route path="/settings" element={<SettingsPage />} />
                <Route path="/dashboard" element={<DashboardPage />} />
+               <Route path="/sessions" element={<WaitingSessionsList />} />
                <Route path="/login" element={<LoginPage />} />
                <Route path="/logout" element={<LogoutPage />} />
                <Route path="/signup" element={<SignupPage />} />

@@ -60,6 +60,31 @@ namespace QuizBuzz.Backend.Controllers
             }
         }
 
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllQuizzesAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Fetching all quizzes");
+                var quizzes = await _quizService.GetAllQuizzesAsync();
+
+                if (quizzes == null || !quizzes.Any())
+                {
+                    return NotFound("No quizzes found.");
+                }
+                _logger.LogInformation($"Found {quizzes.Count} quizzes");
+
+
+                return Ok(quizzes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching all quizzes");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
         // GET: api/quiz/categories
         [HttpGet("categories")]
         public IActionResult GetQuizCategories()

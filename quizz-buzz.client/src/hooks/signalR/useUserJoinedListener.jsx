@@ -4,9 +4,9 @@ const useUserJoinedListener = (connection, callback) => {
     useEffect(() => {
         if (!connection) return;
 
-        const handleUserJoined = (userId) => {
-            console.log(`User ${userId} joined the session`);
-            callback(userId);
+        const handleUserJoined = (sessionID, userId) => {
+            console.log(`User ${userId} joined session ${sessionID}`);
+            callback(sessionID, userId);
         };
 
         connection.on("UserJoined", handleUserJoined);

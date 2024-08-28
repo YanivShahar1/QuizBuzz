@@ -1,15 +1,23 @@
-﻿using Amazon.DynamoDBv2.Model;
+﻿using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.DTOs;
+using QuizBuzz.Backend.Enums;
 using QuizBuzz.Backend.Models;
+using QuizBuzz.Backend.Mappers;
 using QuizBuzz.Backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Amazon.Runtime.Internal.Transform;
+using System.Text;
+using Amazon.DynamoDBv2;
+using System.Globalization;
 
 namespace QuizBuzz.Backend.Services
 {
@@ -17,6 +25,7 @@ namespace QuizBuzz.Backend.Services
     {
         private const string dynamoDBTableName = "Sessions";
         private const string hostUserIDIndexName = "HostUserID-index";
+        private const string createdAtStatusIndexName = "SessionStatus-CreatedAt-index";
         private const string hostUserIDAttributeName = "HostUserID";
 
         private readonly IQuizService _quizService;
@@ -24,7 +33,7 @@ namespace QuizBuzz.Backend.Services
         private readonly ICacheService<SessionResult> _sessionResultCacheService;
         private readonly ICacheService<UserResponses> _userResponsesCacheService;
         private readonly SessionManager _sessionManager;
-        private readonly IDynamoDBManager _dynamoDBDataManager;
+        private readonly IDynamoDBManager _dynamoDBManager;
         private readonly ILogger<SessionService> _logger;
         private readonly ISessionNotificationService _sessionNotificationService;
 
@@ -39,7 +48,7 @@ namespace QuizBuzz.Backend.Services
                                 ICacheService<UserResponses> userResponsesCacheService)
         {
             _sessionNotificationService = sessionNotificationService ?? throw new ArgumentNullException(nameof(sessionNotificationService));
-            _dynamoDBDataManager = dynamoDBDataManager ?? throw new ArgumentNullException(nameof(dynamoDBDataManager));
+            _dynamoDBManager = dynamoDBDataManager ?? throw new ArgumentNullException(nameof(dynamoDBDataManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _quizService = quizService ?? throw new ArgumentNullException(nameof(quizService));
 
@@ -47,16 +56,87 @@ namespace QuizBuzz.Backend.Services
             _sessionResultCacheService = sessionResultCacheService ?? throw new ArgumentNullException(nameof(sessionResultCacheService));
             _userResponsesCacheService = userResponsesCacheService ?? throw new ArgumentNullException(nameof(userResponsesCacheService));
 
-            _sessionManager = new SessionManager();
+            _sessionManager = new SessionManager(_sessionNotificationService);
         }
 
 
         public async Task<string> SubmitSessionAsync(Session session)
         {
             _sessionManager.InitializeSessionWithId(session);
-            await _dynamoDBDataManager.SaveItemAsync(session);
+            await _dynamoDBManager.SaveItemAsync(session);
             _logger.LogInformation($"Saved {session.SessionID} in DynamoDB database");
             return session.SessionID;
+        }
+
+        public async Task<IEnumerable<Session>> FetchByDateAndStatusAsync(string? sessionStatus, string? startDate, string? endDate)
+        {
+            // Define the expected date formats
+            string[] formats = { "yyyy-MM-ddTHH:mm:ssZ", "yyyy-MM-dd" };
+            DateTime defaultStartDate = DateTime.MinValue;
+            DateTime defaultEndDate = DateTime.MaxValue;
+
+            // Try to parse startDate
+            if (string.IsNullOrEmpty(startDate) || !DateTime.TryParseExact(startDate, formats,
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime o_startDate))
+            {
+                _logger.LogInformation("Using default startDate");
+                startDate = defaultStartDate.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            }
+
+            // Try to parse endDate
+            if (string.IsNullOrEmpty(endDate) || !DateTime.TryParseExact(endDate, formats,
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime o_endDate))
+            {
+                _logger.LogInformation("Using default endDate");
+                endDate = defaultEndDate.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            }
+
+            _logger.LogInformation($"Fetching sessions with status {sessionStatus ?? "any"} from {startDate} to {endDate}");
+
+
+            // Convert startDate and endDate to the string format used in DynamoDB
+            string startKey = startDate;
+            string endKey = endDate;
+
+            _logger.LogInformation($"fetching by date and status from  {startDate} to {endDate} with status {sessionStatus}");
+            var queryRequest = new QueryRequest
+            {
+                TableName = dynamoDBTableName,  
+                IndexName = createdAtStatusIndexName, 
+                KeyConditionExpression = "SessionStatus = :sessionStatus AND CreatedAt BETWEEN :startKey AND :endKey",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        { ":startKey", new AttributeValue { S = startKey } },
+                        { ":endKey", new AttributeValue { S = endKey } },
+                        { ":sessionStatus", new AttributeValue { S = sessionStatus } }
+                    }
+            };
+
+            // Convert QueryRequest to JSON string
+            string queryRequestJson = JsonConvert.SerializeObject(queryRequest, Formatting.Indented);
+
+            // Log the JSON representation of the QueryRequest
+            _logger.LogInformation($"QueryRequest JSON: {queryRequestJson}, KeyConditionExpression: {queryRequest.KeyConditionExpression}");
+
+
+            try
+            {
+                var response = await _dynamoDBManager.QueryAsync(queryRequest);
+
+                // Convert response items to Session objects
+                var sessions = new List<Session>();
+                foreach (var item in response.Items)
+                {
+                    sessions.Add(DynamoDBMapper.MapToSession(item));
+                }
+
+                return sessions;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching sessions from DynamoDB");
+                throw;
+            }
         }
 
 
@@ -69,7 +149,7 @@ namespace QuizBuzz.Backend.Services
                 session =  cachedSession;
             }
             // If not found in cache, fetch it from the database
-            session = await _dynamoDBDataManager.GetItemAsync<Session>(sessionId);
+            session = await _dynamoDBManager.GetItemAsync<Session>(sessionId);
 
             // Cache the fetched session
             if (session != null)
@@ -93,7 +173,7 @@ namespace QuizBuzz.Backend.Services
             }
 
             // Delete session from database and cache
-            await _dynamoDBDataManager.DeleteItemAsync<Session>(sessionId);
+            await _dynamoDBManager.DeleteItemAsync<Session>(sessionId);
             _sessionCacheService.RemoveItem(sessionId);
             _logger.LogInformation($"Session with ID {sessionId} deleted from database. Cache invalidated.");
         }
@@ -121,7 +201,7 @@ namespace QuizBuzz.Backend.Services
                 {dynamoDBTableName , writeRequests }
             };
 
-            await _dynamoDBDataManager.BatchWriteItemAsync(requestItems);
+            await _dynamoDBManager.BatchWriteItemAsync(requestItems);
 
             foreach (var sessionId in sessionIds)
             {
@@ -140,7 +220,7 @@ namespace QuizBuzz.Backend.Services
             }
             // Save updated session in cache
             _sessionCacheService.CacheItem(updatedSession.SessionID, updatedSession);
-            await _dynamoDBDataManager.SaveItemAsync(updatedSession);
+            await _dynamoDBManager.SaveItemAsync(updatedSession);
         }
 
         public async Task<IEnumerable<string>> GetSessionParticipantsAsync(string sessionId)
@@ -194,7 +274,7 @@ namespace QuizBuzz.Backend.Services
             }
 
 
-            IEnumerable<Session> sessions = await _dynamoDBDataManager.QueryItemsByIndexAsync<Session>(hostUserIDIndexName, hostUserIDAttributeName, hostUserId);
+            IEnumerable<Session> sessions = await _dynamoDBManager.QueryItemsByIndexAsync<Session>(hostUserIDIndexName, hostUserIDAttributeName, hostUserId);
             _logger.LogInformation("sessions");
 
             foreach (var session in sessions)
@@ -223,7 +303,7 @@ namespace QuizBuzz.Backend.Services
                 UserResponses? currentResponses = await fetchSessionUserResponsesAsync(sessionId, answerDto.Nickname);
                 UserResponses sessionUserResponses = _sessionManager.AddUserResponse(currentResponses, response, answerDto);
                 // Save the SessionUserResponses object to the database
-                await _dynamoDBDataManager.SaveItemAsync(sessionUserResponses);
+                await _dynamoDBManager.SaveItemAsync(sessionUserResponses);
                 _logger.LogInformation($"response saved in database, isCorrect = {response.IsCorrect}");
 
                 await _sessionNotificationService.NotifyAdminUserAnswered(sessionId, answerDto.Nickname, answerDto.QuestionIndex, response);
@@ -254,7 +334,7 @@ namespace QuizBuzz.Backend.Services
                 }
 
                 // If session results are not cached, fetch them from the database
-                SessionResult sessionResult = await _dynamoDBDataManager.GetItemAsync<SessionResult>(sessionId);
+                SessionResult sessionResult = await _dynamoDBManager.GetItemAsync<SessionResult>(sessionId);
 
                 if (sessionResult == null)
                 {
@@ -278,7 +358,7 @@ namespace QuizBuzz.Backend.Services
 
                     Quiz? quiz = await _quizService.FetchQuizAsync(session.AssociatedQuizID);
                     sessionResult = _sessionManager.CreateSessionResult(session, participantsResponses, quiz);
-                    await _dynamoDBDataManager.SaveItemAsync(sessionResult);
+                    await _dynamoDBManager.SaveItemAsync(sessionResult);
                 }
 
                 _sessionResultCacheService.CacheItem(sessionId, sessionResult);
@@ -328,7 +408,7 @@ namespace QuizBuzz.Backend.Services
             // Fetch user responses from the database
             try
             {
-                UserResponses? userResponses = await _dynamoDBDataManager.GetItemAsync<UserResponses>(sessionId, nickname);
+                UserResponses? userResponses = await _dynamoDBManager.GetItemAsync<UserResponses>(sessionId, nickname);
                 Debug.WriteLine($"userResponses: {userResponses}.");
 
                 if (userResponses != null)
@@ -383,7 +463,7 @@ namespace QuizBuzz.Backend.Services
         public async Task<IEnumerable<UserResponses>> GetSessionResponsesAsync(string sessionId)
         {
             // Fetch the session from the database
-            Session session = await _dynamoDBDataManager.GetItemAsync<Session>(sessionId);
+            Session session = await _dynamoDBManager.GetItemAsync<Session>(sessionId);
 
             if (session == null)
             {
@@ -397,7 +477,7 @@ namespace QuizBuzz.Backend.Services
             foreach (string participant in session.Participants)
             {
                 // Fetch user responses for each participant
-                UserResponses userResponses = await _dynamoDBDataManager.GetItemAsync<UserResponses>(sessionId, participant);
+                UserResponses userResponses = await _dynamoDBManager.GetItemAsync<UserResponses>(sessionId, participant);
 
                 if (userResponses != null)
                 {
@@ -408,5 +488,32 @@ namespace QuizBuzz.Backend.Services
 
             return userResponsesList;
         }
+
+
+
+        //public async Task<IEnumerable<Session>> GetSessionsByStatusAsync(string status)
+        //{
+        //    try
+        //    {
+        //        _logger.LogInformation($"GetSessionsByStatusAsync : Status: {status}");
+        //        // Query the items using the GSI for Status
+
+        //        var sessions = await _dynamoDBManager.QueryItemsByIndexAsync<Session>(
+        //            indexName: statusIndexName,
+        //            partitionKey: statusAttributeName,
+        //            partitionValue: status
+        //        );
+        //        _logger.LogInformation($"Found {sessions.Count()} sessions with status {status}");
+
+        //        return sessions;
+
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred while querying sessions by status.");
+        //        throw;
+        //    }
+            
+        //}
     }
 }

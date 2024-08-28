@@ -52,6 +52,7 @@ namespace QuizBuzz.Backend
             services.AddSingleton<ISessionService, SessionService>();
             services.AddSingleton<ISessionNotificationService, SessionNotificationService>();
             services.AddSingleton<QuizCacheService>();
+            services.AddTransient<TimerService>();
 
 
             services.AddControllers();

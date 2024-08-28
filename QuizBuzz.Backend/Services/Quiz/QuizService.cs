@@ -3,8 +3,10 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using QuizBuzz.Backend.DataAccess;
+using QuizBuzz.Backend.DTOs;
 using QuizBuzz.Backend.Enums;
 using QuizBuzz.Backend.Models;
+using QuizBuzz.Backend.Mappers;
 using QuizBuzz.Backend.Services;
 using QuizBuzz.Backend.Services.Interfaces;
 using System;
@@ -16,8 +18,8 @@ namespace QuizBuzz.Backend.Services
 {
     public class QuizService : IQuizService
     {
-        private const string HostUserIDIndexName = "HostUserID-index";
-        private const string HostUserIDAttributeName = "HostUserID";
+        private const string hostUserIDIndexName = "HostUserID-index";
+        private const string hostUserIDAttributeName = "HostUserID";
 
         private readonly QuizManager _quizManager;
 
@@ -150,6 +152,12 @@ namespace QuizBuzz.Backend.Services
             }
         }
 
+        public async Task<List<QuizDto>> GetAllQuizzesAsync()
+        {
+            var quizzes = await _dbManager.GetAllItemsAsync<Quiz>();
+            return quizzes.Select(quiz => quiz.ToDto()).ToList();
+        }
+
         public async Task<IEnumerable<Quiz>> GetQuizzesByHostUserIdAsync(string hostUserId)
         {
             if (string.IsNullOrEmpty(hostUserId))
@@ -160,7 +168,7 @@ namespace QuizBuzz.Backend.Services
             Debug.WriteLine($"Quiz service -> Getting quizzes for host user with ID: {hostUserId}");
 
             //return await _dynamoDBDataManager.QueryItemsAsync<Quiz>(HostUserIDIndexName, filterConditions);
-            return await _dbManager.QueryItemsByIndexAsync<Quiz>(HostUserIDIndexName, HostUserIDAttributeName, hostUserId);
+            return await _dbManager.QueryItemsByIndexAsync<Quiz>(hostUserIDIndexName, hostUserIDAttributeName, hostUserId);
         }
 
         public async Task<IEnumerable<Question>> GetQuestionsAsync(string quizId)

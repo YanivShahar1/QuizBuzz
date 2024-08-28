@@ -12,11 +12,10 @@ namespace QuizBuzz.Backend.Models
         public string HostUserID { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        public string UpdatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
         public List<Question> Questions { get; set; } = new List<Question>();
 
-        // Category should be replace to Enum later.
         public string Category { get; set; } = string.Empty;
 
     }

@@ -5,9 +5,9 @@ const useSessionUpdatedListener = (connection, callback) => {
     useEffect(() => {
         if (!connection) return;
 
-        const handleSessionUpdated = () => {
-            console.log(`Session has been updated:`);
-            callback();
+        const handleSessionUpdated = (sessionID) => {
+            console.log(`Session ${sessionID} has been updated:`);
+            callback(sessionID);
         };
 
         connection.on("SessionUpdated", handleSessionUpdated);

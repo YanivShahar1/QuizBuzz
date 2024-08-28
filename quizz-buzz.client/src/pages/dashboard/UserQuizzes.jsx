@@ -28,7 +28,7 @@ const UserQuizzes = ({ userName }) => {
         const fetchUserQuizzes = async () => {
             try {
                 setIsLoading(true);
-                const userQuizzes = await QuizService.fetchUserQuizzes(userName);
+                const userQuizzes = await QuizService.FetchUserQuizzes(userName);
                 sortUserQuizzes(userQuizzes);
                 await setQuizzes(userQuizzes);
                 setIsLoading(false);

@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 namespace QuizBuzz.Backend.DataAccess
 {
@@ -227,6 +228,165 @@ namespace QuizBuzz.Backend.DataAccess
             if (unprocessedItems.Count > 0)
             {
                 _logger.LogError("Some items could not be processed after multiple retries.");
+            }
+        }
+
+
+        public async Task<(IEnumerable<T> Items, Dictionary<string, AttributeValue> LastEvaluatedKey)> ScanItemsAsync<T>(
+                            List<ScanCondition>? conditions = null,
+                            int limit = 100,
+                            Dictionary<string, AttributeValue>? lastEvaluatedKey = null)
+                            where T : class
+        {
+            try
+            {
+                // Handle null conditions and initialize default values
+                conditions ??= new List<ScanCondition>();
+                lastEvaluatedKey ??= new Dictionary<string, AttributeValue>();
+
+                var (filterExpression, expressionAttributeValues) = BuildFilterExpression(conditions);
+
+                var scanRequest = new ScanRequest
+                {
+                    TableName = typeof(T).Name,
+                    FilterExpression = filterExpression,
+                    ExpressionAttributeValues = expressionAttributeValues.Count > 0 ? expressionAttributeValues : null,
+                    ExclusiveStartKey = lastEvaluatedKey.Count > 0 ? lastEvaluatedKey : null,
+                    Limit = limit
+                };
+
+                var response = await _dynamoDbClient.ScanAsync(scanRequest);
+
+                // Convert response items to List<T>
+                var items = new List<T>();
+                foreach (var item in response.Items)
+                {
+                    var deserializedItem = Document.FromAttributeMap(item);
+                    var itemObject = _dbContext.FromDocument<T>(deserializedItem);
+                    items.Add(itemObject);
+                }
+
+                // Ensure LastEvaluatedKey is non-null
+                var lastKey = response.LastEvaluatedKey ?? new Dictionary<string, AttributeValue>();
+
+                _logger.LogInformation($"Scanned items of type '{typeof(T).Name}' successfully with limit {limit}");
+
+                return (items, lastKey);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error scanning items of type '{typeof(T).Name}' from DynamoDB");
+                throw;
+            }
+        }
+
+        private (string FilterExpression, Dictionary<string, AttributeValue> ExpressionAttributeValues) BuildFilterExpression(List<ScanCondition> conditions)
+        {
+            var expression = new StringBuilder();
+            var attributeValues = new Dictionary<string, AttributeValue>();
+
+            foreach (var condition in conditions)
+            {
+                var attributeName = condition.PropertyName;
+                var placeholder = $":{attributeName}";
+                expression.Append($"{attributeName} {GetDynamoDBOperator(condition.Operator)} {placeholder} AND ");
+
+                // Handle different value types
+                var value = condition.Values.FirstOrDefault();
+                if (value != null)
+                {
+                    attributeValues.Add(placeholder, ConvertToAttributeValue(value));
+                }
+            }
+
+            if (expression.Length > 0)
+                expression.Length -= 5; // Remove the trailing " AND "
+
+            return (expression.ToString(), attributeValues);
+        }
+
+        private string GetDynamoDBOperator(ScanOperator scanOperator)
+        {
+            return scanOperator switch
+            {
+                ScanOperator.Equal => "=",
+                ScanOperator.NotEqual => "<>",
+                ScanOperator.LessThan => "<",
+                ScanOperator.LessThanOrEqual => "<=",
+                ScanOperator.GreaterThan => ">",
+                ScanOperator.GreaterThanOrEqual => ">=",
+                ScanOperator.BeginsWith => "begins_with",
+                ScanOperator.Contains => "contains",
+                _ => throw new NotSupportedException($"Scan operator '{scanOperator}' is not supported")
+            };
+        }
+
+        public async Task<List<T>> FetchFilteredItemsAsync<T>(
+            string tableName,
+            string indexName,
+            Dictionary<string, AttributeValue> keyConditions,
+            Dictionary<string, AttributeValue> attributeValues,
+            Func<Dictionary<string, AttributeValue>, T> mapper) where T : class, new()
+        {
+            _logger.LogInformation($"Fetching FilteredItemsAsync ");
+
+            var queryRequest = new QueryRequest
+            {
+                TableName = tableName,
+                IndexName = indexName
+            };
+
+            queryRequest.KeyConditionExpression = string.Join(" and ", keyConditions.Keys);
+            queryRequest.ExpressionAttributeValues = attributeValues;
+            _logger.LogInformation($"queryRequest : {queryRequest}");
+            var queryResponse = await _dynamoDbClient.QueryAsync(queryRequest);
+            _logger.LogInformation($"queryResponse : {queryResponse}");
+
+
+            var items = new List<T>();
+            foreach (var item in queryResponse.Items)
+            {
+                items.Add(mapper(item));
+            }
+
+            return items;
+        }
+
+        private AttributeValue ConvertToAttributeValue(object value)
+        {
+            return value switch
+            {
+                string str => new AttributeValue { S = str },
+                int num => new AttributeValue { N = num.ToString() },
+                long num => new AttributeValue { N = num.ToString() },
+                bool boolValue => new AttributeValue { BOOL = boolValue },
+                _ => throw new NotSupportedException($"Value type '{value.GetType()}' is not supported")
+            };
+        }
+
+        async Task<QueryResponse> IDynamoDBManager.QueryAsync(QueryRequest queryRequest)
+        {
+            return await _dynamoDbClient.QueryAsync(queryRequest);
+        }
+
+        public async Task<AsyncSearch<T>> FromQueryAsync<T>(QueryOperationConfig queryRequest)
+        {
+            try
+            {
+                // Execute the query operation with the provided configuration.
+                var search = _dbContext.FromQueryAsync<T>(queryRequest);
+
+                // Log the successful execution.
+                _logger.LogInformation($"Query executed successfully for type '{typeof(T).Name}' with configuration: {JsonConvert.SerializeObject(queryRequest)}");
+
+                // Return the async search object.
+                return await Task.FromResult(search);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception in case of failure.
+                _logger.LogError(ex, $"Error executing query for type '{typeof(T).Name}' with configuration: {JsonConvert.SerializeObject(queryRequest)}");
+                throw;
             }
         }
 

@@ -5,12 +5,19 @@ import './Header.css';
 import AuthService from '../../services/AuthService';
 
 function Header() {
-    const [username, setUsername] = useState(AuthService.getSessionUsername());
+    const [username, setUsername] = useState(AuthService.getCurrentLogedInUsername());
+
+    useEffect(() => {
+        console.log(`Header: user name changed to : ${username}`)
+
+    }, [username])
 
     useEffect(() => {
         const loginStatusChangeListener = () => {
-            const loggedInUsername = AuthService.getSessionUsername();
-            setUsername(loggedInUsername);
+            const loggedInUsername = AuthService.getCurrentLogedInUsername();
+            if(loggedInUsername != null){
+                setUsername(loggedInUsername);
+            }
         };
 
         loginStatusChangeListener(); // Initial check
@@ -41,6 +48,9 @@ function Header() {
                                 <Link className="nav-link" to="/dashboard">Dashboard</Link>
                             </li>
                             <li className="nav-item">
+                                <Link className="nav-link" to="/sessions">Sessions</Link>
+                            </li>
+                            <li className="nav-item">
                                 <Link className="nav-link" to="/settings">Settings</Link>
                             </li>
                         </ul>
@@ -48,7 +58,7 @@ function Header() {
                             <li className="nav-item">
                                 {username ? (
                                     <>
-                                        <span className="nav-link">Hello, {username}</span>
+                                        <span className="nav-link">{username}</span>
                                         <Link className="nav-link" to="/logout" onClick={handleLogout}>Logout</Link>
                                     </>
                                 ) : (

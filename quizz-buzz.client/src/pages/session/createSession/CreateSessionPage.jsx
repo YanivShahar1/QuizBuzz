@@ -7,23 +7,26 @@ import CreateQuizButton from '../../../components/Quiz/CreateQuizButton/CreateQu
 import { Form, Button, Row, Col, Alert, Container, Accordion } from 'react-bootstrap';
 
 const CreateSessionPage = () => {
-    const [userName, setUserName] = useState(AuthService.getSessionUsername());
+    const [userName, setUserName] = useState(AuthService.getCurrentLogedInUsername());
     const [loading, setLoading] = useState(false);
+    const [showOnlyUserQuizzes, setShowOnlyUserQuizzes] = useState(false);
     const [sessionInfo, setSessionInfo] = useState({
-        hostUserId: AuthService.getSessionUsername(),
+        hostUserId: AuthService.getCurrentLogedInUsername(),
         name: '',
+        description: '',
         associatedQuizID: '',
         maxTimePerQuestion: '60',
         maxParticipants: '20',
     });
     const [userQuizzes, setUserQuizzes] = useState([]);
+    const [allQuizzes, setAllQuizzesAvailable] = useState([]);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserQuizzes = async () => {
             try {
-                const quizzes = await QuizService.fetchUserQuizzes(userName);
+                const quizzes = await QuizService.FetchUserQuizzes(userName);
                 setUserQuizzes(quizzes);
             } catch (error) {
                 console.error('Error fetching user quizzes:', error);
@@ -33,11 +36,27 @@ const CreateSessionPage = () => {
         fetchUserQuizzes();
     }, [userName]);
 
+    useEffect(() => {
+        const fetchAllQuizzes = async () => {
+            try {
+                console.log("fetching all quizzes");
+                const quizzes = await QuizService.FetchAllQuizzes();
+                console.log(`found ${quizzes.length} quizzes`);
+                setAllQuizzesAvailable(quizzes);
+            } catch (error) {
+                console.error(`Error while fetching all quizzes !`);
+            }
+        };
+
+        fetchAllQuizzes();
+
+    },[]);
+
     const handleSubmitSession = async (e) => {
         e.preventDefault();
         try {
             setLoading(true);
-            if (!sessionInfo.name || !sessionInfo.associatedQuizID || !sessionInfo.maxTimePerQuestion || !sessionInfo.maxParticipants) {
+            if (!sessionInfo.name || !sessionInfo.description || !sessionInfo.associatedQuizID || !sessionInfo.maxTimePerQuestion || !sessionInfo.maxParticipants) {
                 setError('Please fill in all fields.');
                 return;
             }
@@ -56,6 +75,12 @@ const CreateSessionPage = () => {
         return sessionInfo.name && sessionInfo.associatedQuizID && sessionInfo.maxTimePerQuestion && sessionInfo.maxParticipants;
     };
 
+
+    const handleOnlyUserQuizzesCheckboxChange = () => {
+        setShowOnlyUserQuizzes(!showOnlyUserQuizzes);
+    };
+
+
     return (
         <Container>
             <Row className="justify-content-center">
@@ -72,6 +97,26 @@ const CreateSessionPage = () => {
                                 required
                             />
                         </Form.Group>
+
+                        <Form.Group as={Col} controlId="formDescription">
+                        <Form.Label>Description</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            placeholder="Enter description"
+                            maxLength={400}
+                            value={sessionInfo.description}
+                            onChange={(e) => setSessionInfo({ ...sessionInfo, description: e.target.value })}
+                        />
+                        </Form.Group>
+                        <Form.Group controlId="showOnlyUserQuizzes">
+                            <Form.Check
+                                type="checkbox"
+                                label="Show only my quizzes"
+                                checked={showOnlyUserQuizzes}
+                                onChange={handleOnlyUserQuizzesCheckboxChange}
+                            />
+                        </Form.Group>
                         <Form.Group controlId="selectQuiz">
                             <Form.Label>Select Quiz:</Form.Label>
                             <Form.Control
@@ -81,11 +126,22 @@ const CreateSessionPage = () => {
                                 required
                             >
                                 <option value="">Select a Quiz</option>
-                                {userQuizzes.map((quiz) => (
-                                    <option key={quiz.quizID} value={quiz.quizID}>
-                                        {quiz.title}
-                                    </option>
-                                ))}
+                                {showOnlyUserQuizzes ?
+                                 (
+                                    userQuizzes.map((quiz, i) => (
+                                        <option key={i} value={quiz.quizID}>
+                                            {quiz.title}
+                                        </option>
+                                    ))
+                                )
+                                :(
+                                    allQuizzes.map((quiz, i) => (
+                                        <option key={i} value={quiz.quizID}>
+                                            {quiz.title}
+                                        </option>
+                                    ))
+                                )}
+                               
                             </Form.Control>
                             <CreateQuizButton></CreateQuizButton>
                         </Form.Group>

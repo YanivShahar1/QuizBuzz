@@ -80,6 +80,7 @@ const UserSessions = ({ userName }) => {
             setSessions(prevSessions => prevSessions.filter(session => !selectedSessions.includes(session.sessionID)));
             setSelectedSessions([]);
             alert("Selected sessions deleted successfully.");
+            
         } catch (error) {
             console.error('Error deleting sessions:', error);
             alert("An error occurred while deleting the selected sessions. Please try again later.");

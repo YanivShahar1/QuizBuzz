@@ -1,10 +1,12 @@
-﻿using QuizBuzz.Backend.Models;
+﻿using QuizBuzz.Backend.DTOs;
+using QuizBuzz.Backend.Models;
 
 namespace QuizBuzz.Backend.Services
 {
     public interface IQuizService
     {
         Task<Quiz> FetchQuizAsync(string quizId);
+        Task<List<QuizDto>> GetAllQuizzesAsync();
         Task<string> SubmitQuizAsync(Quiz newQuiz);
         Task DeleteQuizAsync(string quizId);
 

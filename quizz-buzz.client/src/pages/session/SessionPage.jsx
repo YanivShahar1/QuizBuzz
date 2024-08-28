@@ -13,21 +13,23 @@ import useSessionFinishedListener from '../../hooks/signalR/useSessionFinishedLi
 import useNextQuestionListener from '../../hooks/signalR/useNextQuestionListener'
 import useSessionUpdatedListener from '../../hooks/signalR/useSessionUpdatedListener'
 import useUserResponseSubmittedListener from '../../hooks/signalR/useUserResponseListener';
-
+import useRequireAuth from '../../hooks/useRequireAuth';
 
 const SessionPage = () => {
+    useRequireAuth();
     const { sessionId } = useParams();
+    const username = AuthService.getCurrentLogedInUsername();
     const [session, setSession] = useState(null);
     const [isSessionStarted, setSessionStarted] = useState(false);
     const [isSessionFinished, setSessionFinished] = useState(false);
     const [userAnswer, setUserAnswer] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [quiz, setQuiz] = useState(null);
-    const [nickname, setNickname] = useState(null);
     const [responses, setResponses] = useState([]);
     const [startTime, setStartTime] = useState(null);
     const [leaderboardData, setLeaderboardData] = useState([]); 
     const connection = useSessionHub();
+
     
     const subscribeToSessionGroup = () => {
         if(connection!=null){
@@ -41,7 +43,7 @@ const SessionPage = () => {
     const subscribeToAdminGroup = () => {
         if(connection!=null){
             console.log("connection is not null, invoke JoinAdminGroup");
-            connection.invoke("JoinAdminGroup",sessionId, AuthService.getSessionUsername());
+            connection.invoke("JoinAdminGroup",sessionId, AuthService.getCurrentLogedInUsername());
             return true;
         }else{
             console.log(`connection is null`);
@@ -49,13 +51,6 @@ const SessionPage = () => {
         }
     }
 
-    useEffect(() => {
-        const storedNickname = JSON.parse(window.sessionStorage.getItem("nickname"));
-        if (storedNickname !== null) {
-            console.log(`found nickname in sessionstorage: ${storedNickname}`);
-            setNickname(storedNickname);
-        }
-    },[]);
     
     useEffect(() => {
         fetchSessionData();
@@ -228,12 +223,12 @@ const SessionPage = () => {
         });
     };
 
-    const handleNewResponseSubmited = (nickname, questionIndex, response) => {
+    const handleNewResponseSubmited = (username, questionIndex, response) => {
         const newResponse = {
             ...response,
             questionIndex,
         };
-        console.log(`user ${nickname} response for question: ${questionIndex}, : ${JSON.stringify(newResponse)}`)
+        console.log(`user ${username} response for question: ${questionIndex}, : ${JSON.stringify(newResponse)}`)
         setResponses(prevResponses => [...prevResponses, newResponse]);
     };
 
@@ -242,12 +237,10 @@ const SessionPage = () => {
     useSessionStartedListener(connection, handleSessionStarted);
     useSessionFinishedListener(connection, handleSessionFinished);
 
-    const joinSession = async (nickname) => {
+    const joinSession = async (username) => {
         try{
-            console.log(`JoinSession: user nickname is ${nickname}, want to join : ${session.sessionID}`)
-            await SessionService.joinSession(session.sessionID, nickname);
-            setNickname(nickname);
-
+            console.log(`JoinSession: user ${username}, want to join : ${session.sessionID}`)
+            await SessionService.joinSession(session.sessionID, username);
         }catch(e){
             console.log(e);
         }
@@ -268,7 +261,7 @@ const SessionPage = () => {
             // Copy existing fields from userResponse
             // Add or update fields specific to the current question
             sessionId: session.sessionID,
-            nickname: nickname,
+            nickname: AuthService.getCurrentLogedInUsername(),
             questionIndex: currentQuestionIndex,
             selectedOptions: userAnswer,
             timeTaken:timeTaken
@@ -326,8 +319,7 @@ const SessionPage = () => {
                     isHost={SessionService.isCurrentUserSessionHost(session)}
                     onStartSession={startSession}
                     onJoinSession={joinSession}
-                    nickname={nickname}
-                    setNickname={setNickname}
+                    username={username}
                 />
             </div>
 
@@ -342,7 +334,7 @@ const SessionPage = () => {
         return (
             <div>
                 <h1>Session {session.name}</h1>
-                <p>Welcome, {AuthService.getSessionUsername()}</p>
+                <p>Welcome, {AuthService.getCurrentLogedInUsername()}</p>
                 <SessionAdminStatistics 
                     responses={responses}
                 />
@@ -366,7 +358,7 @@ const SessionPage = () => {
     return (
         <div>
             <h1>Session {session.name}</h1>
-            <p>Welcome, {nickname}</p>
+            <p>Welcome, {AuthService.getCurrentLogedInUsername()}</p>
             <p>Question {currentQuestionIndex + 1} / {quiz.questions.length }</p>
             {quiz.questions?(
                 <QuestionDisplay

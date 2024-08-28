@@ -1,27 +1,25 @@
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Custom hook for authentication check
 const useRequireAuth = () => {
-    console.log("useRequireAuth")
     const navigate = useNavigate();
-    // Check if user is authenticated
-    const sessionUserName = AuthService.getSessionUsername();
-    useEffect(()=>{
-        console.log(`sessionUserName = ${sessionUserName}`);
-        // Redirect to login page if not authenticated
-        if (!sessionUserName) {
-            console.log("null");
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        const username = AuthService.getCurrentLogedInUsername();
+        console.log(`user name = ${username}`);
+        
+        if (!username) {
+            console.log("no logged in user");
             navigate('/login'); // Redirect to login page
-            return false;
+        } else {
+            setIsAuthenticated(true);
         }
-        console.log("ddd");
+    }, [navigate]);
 
-    },sessionUserName)
-    
-
-    return true; // Return authentication status
+    return isAuthenticated; // Return the actual authentication status
 };
 
 export default useRequireAuth;

@@ -12,28 +12,20 @@ const SignupPage = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [verificationCode, setVerificationCode] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [showVerificationUI, setShowVerificationUI] = useState(false);
-
     const [passwordConditions, setPasswordConditions] = useState({
         hasUpperCase: false,
         hasLowerCase: false,
         hasDigit: false,
+        minLenOf6: false
     });
 
     const [isUsernameValid, setIsUsernameValid] = useState(false);
-    const [isEmailValid, setIsEmailValid] = useState(false);
     const [isPasswordValid, setIsPasswordValid] = useState(false);
     const [isFormValid, setIsFormValid] = useState(false);
 
     const validateUsername = (username) => {
         return username.length > 0; // Add more conditions if needed
-    };
-
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
     };
 
     const handlePasswordChange = (newPassword) => {
@@ -42,30 +34,23 @@ const SignupPage = () => {
         const hasUpperCase = /[A-Z]/.test(newPassword);
         const hasLowerCase = /[a-z]/.test(newPassword);
         const hasDigit = /\d/.test(newPassword);
+        const hasMinLenOf6 = newPassword.length >= 6;
 
         setPasswordConditions({
             hasUpperCase,
             hasLowerCase,
             hasDigit,
+            hasMinLenOf6,
         });
 
-        setIsPasswordValid(hasUpperCase && hasLowerCase && hasDigit);
+        setIsPasswordValid(hasUpperCase && hasLowerCase && hasDigit && hasMinLenOf6);
     };
 
     const handleSignup = async () => {
         try {
-            await AuthService.signup(username, email, password);
+            await AuthService.signupSimple(username, password);
             setErrorMessage('');
-            setShowVerificationUI(true);
-        } catch (error) {
-            setErrorMessage(error.message);
-        }
-    };
-
-    const handleVerification = async () => {
-        try {
-            await AuthService.verifyEmail(username, verificationCode);
-            navigate('/');
+            navigate(`/sessions`);
         } catch (error) {
             setErrorMessage(error.message);
         }
@@ -76,31 +61,12 @@ const SignupPage = () => {
     }, [username]);
 
     useEffect(() => {
-        setIsEmailValid(validateEmail(email));
-    }, [email]);
-
-    useEffect(() => {
-        setIsFormValid(isUsernameValid && isEmailValid && isPasswordValid);
-    }, [isUsernameValid, isEmailValid, isPasswordValid]);
+        setIsFormValid(isUsernameValid && isPasswordValid);
+    }, [isUsernameValid, isPasswordValid]);
 
     return (
         <div className="signup-container">
             <h2 className="mb-4">Signup</h2>
-            {showVerificationUI ? (
-                <Form>
-                    <Form.Group as={Row} controlId="formVerificationCode">
-                        <Form.Label column sm={3} className="text-sm-end">Verification Code</Form.Label>
-                        <Col sm={9}>
-                            <Form.Control 
-                                type="text" 
-                                value={verificationCode} 
-                                onChange={(e) => setVerificationCode(e.target.value)} 
-                            />
-                        </Col>
-                    </Form.Group>
-                    <Button onClick={handleVerification} className="mt-4">Verify</Button>
-                </Form>
-            ) : (
                 <Form>
                     <Form.Group as={Row} controlId="formUsername" className="mb-3">
                         <Form.Label column sm={3} className="text-sm-end">Username</Form.Label>
@@ -114,21 +80,8 @@ const SignupPage = () => {
                             <Form.Control.Feedback type="invalid">
                                 Username is required.
                             </Form.Control.Feedback>
-                        </Col>
-                    </Form.Group>
+                            <p className='error-message'>{errorMessage}</p>
 
-                    <Form.Group as={Row} controlId="formEmail" className="mb-3">
-                        <Form.Label column sm={3} className="text-sm-end">Email</Form.Label>
-                        <Col sm={9}>
-                            <Form.Control 
-                                type="email" 
-                                value={email} 
-                                onChange={(e) => setEmail(e.target.value)} 
-                                isInvalid={!isEmailValid && email.length > 0} 
-                            />
-                            <Form.Control.Feedback type="invalid">
-                                Email is invalid.
-                            </Form.Control.Feedback>
                         </Col>
                     </Form.Group>
 
@@ -151,6 +104,9 @@ const SignupPage = () => {
                                         <Alert variant={passwordConditions.hasDigit ? 'success' : 'danger'}>
                                             Password {passwordConditions.hasDigit ? 'contains' : 'should contain'} at least one digit.
                                         </Alert>
+                                        <Alert variant={passwordConditions.hasMinLenOf6 ? 'success' : 'danger'}>
+                                            Password length {passwordConditions.hasMinLenOf6 ? 'is' : 'should be'} greater or equal to 6 .
+                                        </Alert>
                                     </>
                                 )}
                             </div>
@@ -158,11 +114,9 @@ const SignupPage = () => {
                     </Form.Group>
 
                     <div className="text-center">
-                        <Button onClick={handleSignup()} disabled={!isFormValid} className="mt-4">Signup</Button>
+                        <Button onClick={handleSignup} disabled={!isFormValid} className="mt-4">Signup</Button>
                     </div>
                 </Form>
-            )}
-
         </div>
     );
 };

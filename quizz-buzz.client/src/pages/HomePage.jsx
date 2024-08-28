@@ -10,7 +10,7 @@ import CreateSessionButton from '../components/Session/Buttons/CreateSessionButt
 import SessionService from '../services/SessionService';
 
 const HomePage = () => {
-    const [username, setUsername] = useState(AuthService.getSessionUsername());
+    const [username, setUsername] = useState(AuthService.getCurrentLogedInUsername());
    
 
     const [sessionId, setSessionId] = useState('');
@@ -53,7 +53,7 @@ const HomePage = () => {
 
     useEffect(() => {
         const loginStatusChangeListener = () => {
-            const loggedInUsername = AuthService.getSessionUsername();
+            const loggedInUsername = AuthService.getCurrentLogedInUsername();
             setUsername(loggedInUsername);
         };
 

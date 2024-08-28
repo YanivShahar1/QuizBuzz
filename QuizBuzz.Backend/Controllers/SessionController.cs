@@ -10,6 +10,9 @@ using Newtonsoft.Json;
 using Amazon.Runtime.Internal.Util;
 using QuizBuzz.Backend.Services;
 using QuizBuzz.Backend.DTOs;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2;
 
 
 namespace QuizBuzz.Backend.Controllers
@@ -48,7 +51,7 @@ namespace QuizBuzz.Backend.Controllers
         }
 
         [HttpGet("{sessionId}", Name = "GetSessionById")]
-        public async Task<IActionResult> GetSessionByIdAsync(string sessionId)
+        public async Task<IActionResult> GetSessionByIdAsync([FromRoute] string sessionId)
         {
             try
             {
@@ -56,7 +59,7 @@ namespace QuizBuzz.Backend.Controllers
                 if (session == null)
                 {
                     _logger.LogInformation($"no sessions foud for id : {sessionId}");
-
+                    
                     return NotFound();
                 }
                 _logger.LogInformation($"found session : {sessionId} with name : {session.Name}");
@@ -71,7 +74,7 @@ namespace QuizBuzz.Backend.Controllers
         }
 
         [HttpDelete("{sessionId}")]
-        public async Task<IActionResult> DeleteSessionAsync(string sessionId)
+        public async Task<IActionResult> DeleteSessionAsync([FromRoute] string sessionId)
         {
             try
             {
@@ -112,7 +115,7 @@ namespace QuizBuzz.Backend.Controllers
 
 
         [HttpGet("{sessionId}/participants", Name = "GetSessionParticipants")]
-        public async Task<IActionResult> GetSessionParticipants(string sessionId)
+        public async Task<IActionResult> GetSessionParticipants([FromRoute] string sessionId)
         {
             try
             {
@@ -132,7 +135,7 @@ namespace QuizBuzz.Backend.Controllers
         }
 
         [HttpPost("{sessionId}/join")]
-        public async Task<IActionResult> JoinSession(string sessionId, [FromBody] string nickname)
+        public async Task<IActionResult> JoinSession([FromRoute] string sessionId, [FromBody] string nickname)
         {
             try
             {
@@ -156,6 +159,62 @@ namespace QuizBuzz.Backend.Controllers
                 return BadRequest($"Error joining session: {ex.Message}");
             }
         }
+
+
+        [HttpGet("by-date-status")]
+        public async Task<IActionResult> GetSessionsByDateAndStatus([FromQuery] string? sessionStatus, [FromQuery] string? startDate, [FromQuery] string? endDate)
+        {
+            try
+            {
+                _logger.LogInformation($"Fetching sessions with status {sessionStatus} from {startDate} to {endDate}");
+
+                var sessions = await _sessionService.FetchByDateAndStatusAsync(sessionStatus, startDate, endDate);
+                if (sessions == null || !sessions.Any())
+                {
+                    _logger.LogInformation($"No sessions found with status {sessionStatus} between {startDate} and {endDate}");
+                    return NotFound($"No sessions found with status {sessionStatus} between {startDate} and {endDate}");
+                }
+
+                _logger.LogInformation($"Found {sessions.Count()} sessions with status {sessionStatus} between {startDate} and {endDate}");
+
+                return Ok(sessions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error fetching sessions with status {sessionStatus} between {startDate} and {endDate}: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+       /* [HttpGet("by-status/{sessionStatus}")]
+        public async Task<IActionResult> GetSessionsByStatus([FromRoute] string sessionStatus)
+        {
+
+            try
+            {
+                _logger.LogInformation($"Fetching sessions with status : {sessionStatus}");
+
+                var sessions = await _sessionService.GetSessionsByStatusAsync(sessionStatus);
+                if (sessions == null || !sessions.Any())
+                {
+                    _logger.LogInformation($"No sessions found with status {sessionStatus}");
+                    return NotFound($"No sessions found with status {sessionStatus}");
+                }
+                _logger.LogInformation($"found ${sessions.Count()} sessions ");
+
+                _logger.LogInformation($"Successfully retrieved sessions with status {sessionStatus}.");
+
+                return Ok(sessions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while retrieving sessions with status {sessionStatus}.");
+                return StatusCode(500, $"An error occurred while retrieving sessions with status {sessionStatus}.");
+            }
+        }
+
+*/
 
         [HttpGet("all/{userId}")]
         public async Task<IActionResult> GetSessionsByUserId(string userId)

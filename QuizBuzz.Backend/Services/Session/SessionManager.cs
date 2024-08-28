@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using QuizBuzz.Backend.DataAccess;
 using QuizBuzz.Backend.DTOs;
+using QuizBuzz.Backend.Enums;
 using QuizBuzz.Backend.Models;
 using static System.Collections.Specialized.BitVector32;
 
@@ -18,10 +19,13 @@ namespace QuizBuzz.Backend.Services
     public class SessionManager
     {
         private Dictionary<string, SessionProgress> _runningSessionsProgressById;
+        private readonly ISessionNotificationService _sessionNotificationService;
 
-        public SessionManager()
+
+        public SessionManager(ISessionNotificationService sessionNotificationService)
         {
             _runningSessionsProgressById = new Dictionary<string, SessionProgress>();
+            _sessionNotificationService = sessionNotificationService ?? throw new ArgumentNullException(nameof(sessionNotificationService));
         }
 
         public void InitializeSessionWithId(Session newSession)
@@ -142,7 +146,7 @@ namespace QuizBuzz.Backend.Services
 
         public void FinishSession(Session session)
         {
-            if (session.EndedAt <= DateTime.Now)
+            if (session.SessionStatus == eSessionStatus.Finished.ToString())
             {
                 // Session is already finished, so no need to finish it again
                 Debug.WriteLine($"Session with ID {session.SessionID} is already finished, the time is {session.EndedAt}.");
@@ -150,17 +154,20 @@ namespace QuizBuzz.Backend.Services
             }
 
             // Update the session end time
-            session.EndedAt = DateTime.UtcNow;
+            session.EndedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            session.SessionStatus = eSessionStatus.Finished.ToString();
+
         }
 
         public void StartSession(Session session)
         {
-            if (session.StartedAt < DateTime.UtcNow)
+            if (session.SessionStatus != eSessionStatus.Waiting.ToString())
             {
                 throw new InvalidOperationException($"Session has already started at {session.StartedAt} and current time is {DateTime.UtcNow}");
 
             }
-            session.StartedAt = DateTime.UtcNow;
+            session.StartedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            session.SessionStatus = eSessionStatus.Running.ToString();
 
             // create new session
             int numParticipants = session.Participants.Count;
